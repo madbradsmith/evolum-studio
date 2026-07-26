@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+
+{% block title %}Script Analyzer — EVOLUM{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); min-height: 100vh; }
+.sa { max-width: 920px; margin: 0 auto; padding: 48px 32px 80px; }
+.sa-crumb {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-mute); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+}
+.sa-crumb a { color: var(--text-mute); text-decoration: none; }
+.sa-crumb a:hover { color: var(--gold); }
+.sa-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 14px; }
+.sa-h1 { font-family: var(--serif); font-style: italic; font-size: clamp(40px, 6vw, 64px);
+    font-weight: 700; letter-spacing: -1.8px; line-height: 0.95; color: var(--cream); margin-bottom: 14px; }
+.sa-h1 em { font-style: normal; color: var(--gold); }
+.sa-lede { color: var(--muted); font-size: 16px; line-height: 1.65; max-width: 640px; margin-bottom: 40px; }
+
+.sa-card { background: var(--bg-card); border: 1px solid var(--border); padding: 28px 32px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+    margin-bottom: 20px;
+}
+.sa-card-label { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-mute); margin-bottom: 10px; }
+.sa-card-title { font-family: var(--serif); font-style: italic; font-size: 22px;
+    color: var(--cream); margin-bottom: 8px; }
+.sa-card-pills { font-family: var(--mono); font-size: 10px; letter-spacing: 1px;
+    color: var(--text-dim); display: flex; gap: 14px; flex-wrap: wrap; }
+.sa-card-pills span.ok { color: var(--gold); }
+
+.sa-run { margin-top: 14px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.sa-btn { background: var(--gold); border: 1px solid var(--gold); color: var(--bg-card);
+    padding: 13px 26px; font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 1.4px; text-transform: uppercase; cursor: pointer; transition: all 0.15s;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.sa-btn:hover { background: var(--gold-bright); }
+.sa-btn.ghost { background: var(--bg-card); color: var(--text-dim); border-color: var(--border); }
+.sa-btn.ghost:hover { color: var(--gold); border-color: var(--gold-border); }
+.sa-status { font-family: var(--mono); font-size: 11px; color: var(--text-mute); min-height: 18px; }
+
+.sa-empty { background: var(--bg-card); border: 1px dashed var(--border); padding: 40px;
+    text-align: center; font-family: var(--serif); font-style: italic; font-size: 15px;
+    color: var(--text-mute); }
+.sa-empty a { color: var(--gold); text-decoration: none; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_user_topbar.html" %}
+<div class="sa">
+
+    {% if project %}
+    <div class="sa-crumb">
+        <a href="/filmmaker-workspace">← Workspace</a>
+        <span style="opacity:0.4;">/</span>
+        <a href="/project/{{ project.id }}">{{ project.title }}</a>
+        <span style="opacity:0.4;">/</span>
+        <span style="color:var(--text);">Script Analyzer</span>
+    </div>
+    {% else %}
+    <div class="sa-crumb">
+        <a href="/filmmaker-workspace">← Workspace</a>
+        <span style="opacity:0.4;">/</span>
+        <span style="color:var(--text);">Script Analyzer</span>
+    </div>
+    {% endif %}
+
+    <div class="sa-eyebrow">EVOLUM · Script Analyzer</div>
+    <h1 class="sa-h1">Read the <em>script</em>.</h1>
+    <p class="sa-lede">A deterministic, end-to-end read of your script: logline, synopsis, story engine, character analysis, market positioning, comp films, strengths, risks. Composed by the local engine — no AI cloud calls.</p>
+
+    {% if project %}
+    <div class="sa-card">
+        <div class="sa-card-label">Source · Project</div>
+        <div class="sa-card-title">{{ project.title }}</div>
+        <div class="sa-card-pills">
+            {% if project.has_script %}<span class="ok">Script ✓</span>{% else %}<span>No script yet</span>{% endif %}
+            {% if project.idea_text %}<span class="ok">Idea ✓</span>{% else %}<span>No idea yet</span>{% endif %}
+            {% if project.has_analysis %}<span class="ok">Analysis ✓</span>{% endif %}
+        </div>
+    </div>
+
+    {% include "_genre_picker.html" %}
+
+    <div class="sa-card" style="margin-top:20px;">
+        <div class="sa-run">
+            <button class="sa-btn" id="analyzeBtn">Generate analysis →</button>
+            {% if project.has_analysis %}
+            <a class="sa-btn ghost" href="/project/{{ project.id }}/asset/analysis">Download existing PDF</a>
+            {% endif %}
+        </div>
+        <div class="sa-status" id="analyzeStatus" style="margin-top:14px;"></div>
+    </div>
+    {% else %}
+    <div class="sa-empty">
+        Script Analyzer runs against a project. <a href="/new-project">Start a project →</a> then come back.
+    </div>
+    {% endif %}
+
+</div>
+
+<script>
+const PROJECT_ID = {{ project.id|tojson|safe if project else 'null' }};
+const btn = document.getElementById("analyzeBtn");
+if (btn) {
+    btn.addEventListener("click", async () => {
+        const status = document.getElementById("analyzeStatus");
+        btn.disabled = true;
+        const orig = btn.textContent;
+        btn.textContent = "Analyzing...";
+        status.textContent = "Reading the script — this takes about a minute.";
+        try {
+            const r = await fetch("/api/build-script-analysis", {
+                method: "POST", credentials: "same-origin",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({ project_id: PROJECT_ID }),
+            });
+            if (r.ok) {
+                const d = await r.json();
+                status.innerHTML = '✓ ' + (d.message || 'Analysis ready.') +
+                    ' <a href="' + d.download_url + '" style="color:var(--gold);font-weight:700;">Download PDF →</a>' +
+                    ' &nbsp;·&nbsp; <a href="/project/' + PROJECT_ID + '" style="color:var(--gold);">Open project</a>';
+                status.style.color = "oklch(0.72 0.18 145)";
+                btn.textContent = "✓ Analyzed";
+            } else {
+                const d = await r.json().catch(() => ({}));
+                status.textContent = d.error || "Analysis failed.";
+                status.style.color = "oklch(0.62 0.20 24)";
+                btn.textContent = orig; btn.disabled = false;
+            }
+        } catch (e) {
+            status.textContent = e.message || "Network error.";
+            status.style.color = "oklch(0.62 0.20 24)";
+            btn.textContent = orig; btn.disabled = false;
+        }
+    });
+}
+</script>
+{% endblock %}

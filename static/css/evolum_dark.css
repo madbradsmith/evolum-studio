@@ -1,0 +1,189 @@
+/* =============================================================
+   EVOLUM_DARK.CSS
+   Canonical "new evolum" design tokens (System B — Home page).
+   Layered AFTER main.css / portal.css so its :root values win.
+   Maps every legacy token name (--bg, --gold, --text, --font,
+   --serif, --mono, --gold-border, etc.) to the dark/Cormorant
+   palette used by the Home front door.
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+
+:root, html, body {
+    /* Backgrounds + surfaces — dark navy/black */
+    --bg:           #07070f !important;
+    --surface:      #0d0d18 !important;
+    --s2:           #111120 !important;
+    --s3:           #16162a !important;
+    --bg-card:      #0d0d18 !important;
+    --bg-panel:     #0d0d18 !important;  /* portal-foot, secondary panels */
+    --bg-hover:     #111120 !important;  /* card hover backgrounds */
+    --bg-elevated:  #16162a !important;
+
+    /* Borders */
+    --border:       #1e1e2e !important;
+    --bhi:          #2e2e48 !important;
+    --dim:          #363450 !important;
+    --gold-border:  oklch(0.78 0.16 75 / 0.32) !important;
+
+    /* Text */
+    --text:         #ede9e0 !important;
+    --text-mute:    #6a6778 !important;
+    --text-muted:   #6a6778 !important;
+    --text-dim:     #363450 !important;
+    --muted:        #6a6778 !important;
+    --cream:        oklch(0.93 0.03 90) !important;
+
+    /* Accents */
+    --gold:         oklch(0.78 0.16 75) !important;
+    --gg:           oklch(0.78 0.16 75 / 0.10) !important;
+    --gm:           oklch(0.78 0.16 75 / 0.32) !important;
+    --ember:        oklch(0.78 0.16 75) !important;
+    --orange:       oklch(0.78 0.16 75) !important;
+    /* Per-tool / per-door accents collapsed into the canonical gold
+       per PI 2026-06-30: "solid look across ALL pages." */
+    --olive:        oklch(0.78 0.16 75) !important;
+    --mauve:        oklch(0.78 0.16 75) !important;
+    --mustard:      oklch(0.78 0.16 75) !important;
+    --gold-bright:  oklch(0.84 0.16 75) !important;
+    --gold-dim:     oklch(0.78 0.16 75 / 0.15) !important;
+    --green:        #3a8a5c !important;
+    --red:          #b84040 !important;
+    --lime:         #9dff4b !important;
+    --lime-g:       rgba(157,255,75,0.09) !important;
+
+    /* Typography */
+    --font:   'Space Grotesk', system-ui, sans-serif !important;
+    --serif:  'Cormorant', 'Georgia', serif !important;
+    --mono:   'Space Mono', 'JetBrains Mono', monospace !important;
+
+    /* Radii (keep existing names, slight tightening) */
+    --radius:    4px;
+    --radius-lg: 8px;
+}
+
+/* Body baseline — match Home's atmosphere */
+body {
+    background: #07070f !important;
+    color: #ede9e0 !important;
+    font-family: 'Space Grotesk', system-ui, sans-serif !important;
+    line-height: 1.5;
+}
+
+/* Headings get the Cormorant treatment */
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Cormorant', 'Georgia', serif;
+    color: var(--cream);
+    font-weight: 600;
+}
+
+/* Reset cream-themed link colors so they read on dark */
+a {
+    color: var(--gold);
+}
+
+/* Force light text everywhere main.css/portal.css hardcoded dark */
+.bg, .surface, [class*="bg-"] {
+    color: var(--text);
+}
+
+/* ===== HARDCODED CREAM OVERRIDES =====
+   portal.css + several canonical templates hardcode rgba(239,231,215,X)
+   (the cream #efe7d7) directly into nav backgrounds, footers, marquee
+   shades, etc. Flip them to dark navy at the same alpha. */
+
+.portal-nav, .lot-nav, .fest-nav,
+[class*="-nav"]:not(.nav-cta):not(.nav-logo):not(.nav-links):not(.nav-link) {
+    background: rgba(7,7,15,0.92) !important;
+    border-bottom: 1px solid #1e1e2e !important;
+}
+
+/* Brand text in nav → cream */
+.portal-brand-name, .lot-brand-name {
+    color: var(--cream) !important;
+}
+.portal-brand-name span, .lot-brand-name span {
+    color: var(--gold) !important;
+}
+.portal-brand-sub, .lot-brand-sub {
+    color: var(--muted) !important;
+}
+
+/* Nav links → muted, hover/active → gold */
+.portal-nav-link, .lot-nav-link {
+    color: var(--muted) !important;
+}
+.portal-nav-link:hover, .lot-nav-link:hover,
+.portal-nav-link.active, .lot-nav-link.active {
+    color: var(--gold) !important;
+}
+
+/* Member-count chips, top-of-page badges that used cream surfaces */
+.lot-members, .fest-member-bar {
+    background: var(--surface) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text) !important;
+}
+.lot-members strong { color: var(--cream) !important; }
+
+/* Marquee/poster shades on the-lot.html went cream — flip to dark */
+.marquee-poster-shade {
+    background: linear-gradient(to right, transparent 60%, rgba(7,7,15,0.96) 100%),
+                linear-gradient(to top, rgba(7,7,15,0.6) 0%, transparent 50%) !important;
+}
+.marquee-meta {
+    background: var(--surface) !important;
+    border-left: 1px solid var(--border) !important;
+}
+
+/* Festival cards / panels that used --bg-card cream */
+.fest-card, .fest-card-actions {
+    background: var(--surface) !important;
+    border-color: var(--border) !important;
+}
+
+/* Generic cream-background utility classes */
+[style*="rgba(239,231,215"] {
+    background-color: var(--surface) !important;
+}
+
+/* ===== RAISE TICKER (top bar above portal-nav) =====
+   portal.css set: background: var(--text); color: var(--bg-card);
+   That worked on cream theme but inverts to cream-on-dark with the flip.
+   Force navy bg + cream text. */
+.raise-ticker {
+    background: var(--surface) !important;
+    color: var(--text) !important;
+    border-bottom: 1px solid var(--border) !important;
+}
+.raise-ticker .lead strong { color: var(--text) !important; }
+.raise-ticker .stream { color: var(--muted) !important; }
+
+/* ===== SIGN-IN CINEMATIC PANEL =====
+   The left "Welcome back" poster used var(--bg-card) as TEXT color —
+   originally a cream-on-dark trick, now invisible on dark theme. */
+.auth-poster-brand .nm { color: var(--cream) !important; }
+.auth-poster-brand .sub { color: var(--muted) !important; }
+.auth-poster h2 { color: var(--cream) !important; }
+.auth-poster p { color: rgba(237,233,224,0.7) !important; }
+.auth-poster-foot { color: rgba(237,233,224,0.55) !important; }
+
+/* ===== PROJECT ROOM HERO =====
+   .room-hero used `background: var(--text)` — flipped to cream on theme
+   inversion (same bug shape as raise-ticker). Force dark surface. */
+.room-hero, .room-hero-vignette {
+    background: var(--surface) !important;
+}
+.room-hero-img { background: var(--surface); }
+
+/* ===== PORTAL FOOTER =====
+   uses var(--bg-panel) which we now flipped to dark, but force it
+   explicitly in case anything else overrides. */
+.portal-foot, .portal-foot-link, .lot-foot {
+    background: var(--bg-panel) !important;
+}
+.portal-foot, .portal-foot-link, .portal-foot-engine, .lot-foot {
+    color: var(--muted) !important;
+}
+.portal-foot-engine strong { color: var(--text) !important; }
+.portal-foot-link:hover { color: var(--gold) !important; }

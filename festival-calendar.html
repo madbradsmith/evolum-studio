@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOLUM — Festival Calendar</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/css/main.css">
+<link rel="stylesheet" href="static/css/portal.css">
+<link rel="stylesheet" href="static/css/evolum_dark.css">
+<style>
+/* ============================================================
+   FESTIVAL CALENDAR — filmmaker tool + public window.
+   Submission deadlines, submit links, track & filter.
+   ============================================================ */
+body { background: var(--bg); }
+.fest { min-height: 100vh; display: flex; flex-direction: column; }
+.fest-wrap { max-width: 1160px; width: 100%; margin: 0 auto; padding: 0 28px; }
+
+.fest-head { padding: 38px 0 10px; }
+.fest-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gold); display: inline-flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+.fest-eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--gold); }
+.fest-head h1 { font-family: var(--serif); font-style: italic; font-size: clamp(36px, 6vw, 64px); font-weight: 700; letter-spacing: -2px; line-height: 0.92; color: var(--text); }
+.fest-head h1 em { font-style: normal; color: var(--gold); }
+.fest-head .sub { font-family: var(--mono); font-size: 11px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--text-mute); margin-top: 12px; }
+.fest-disclaimer { font-family: var(--mono); font-size: 10px; color: var(--text-mute); letter-spacing: 0.8px; margin-top: 8px; display: inline-flex; align-items: center; gap: 7px; }
+.fest-disclaimer::before { content: '⚠'; color: var(--mustard); }
+
+/* Filter bar */
+.fest-filters {
+    display: flex; align-items: center; gap: 8px;
+    padding: 22px 0 8px;
+    flex-wrap: wrap;
+}
+.fest-filter {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-dim); background: var(--bg-card); border: 1px solid var(--border);
+    padding: 8px 14px; cursor: pointer; transition: all 0.14s; white-space: nowrap;
+    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.fest-filter:hover { border-color: var(--gold-border); color: var(--text); }
+.fest-filter.on { background: var(--gold); color: var(--bg-card); border-color: var(--gold); }
+.fest-count { margin-left: auto; font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); }
+
+/* Member tools row */
+.fest-member-bar {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    padding: 12px 16px; margin-bottom: 22px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+.fest-member-bar .t { font-size: 13px; font-weight: 700; color: var(--text); }
+.fest-member-bar .d { font-size: 12px; color: var(--text-dim); }
+.fest-member-bar .lock { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold-border); padding: 5px 9px; cursor: pointer; white-space: nowrap; margin-left: auto; }
+
+/* Festival card */
+.fest-grid { display: flex; flex-direction: column; gap: 12px; padding-bottom: 72px; }
+
+.fest-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    display: grid; grid-template-columns: 8px 1fr auto;
+    overflow: hidden; transition: box-shadow 0.18s;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+.fest-card:hover { box-shadow: 0 6px 22px rgba(29,22,16,0.12); }
+.fest-card.hidden { display: none; }
+.fest-card-accent { width: 8px; flex-shrink: 0; }
+.fest-card-accent.open   { background: var(--green); }
+.fest-card-accent.soon   { background: var(--mustard); }
+.fest-card-accent.closed { background: rgba(29,22,16,0.15); }
+.fest-card-accent.rolling{ background: var(--olive); }
+
+.fest-card-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 8px; }
+.fest-card-top { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fest-name { font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: -0.3px; }
+.fest-status {
+    font-family: var(--mono); font-size: 9px; font-weight: 500; letter-spacing: 1.3px; text-transform: uppercase;
+    padding: 4px 8px;
+}
+.fest-status.open   { background: rgba(58,138,92,0.12);  color: var(--green); }
+.fest-status.soon   { background: var(--mustard-dim); color: var(--mustard); }
+.fest-status.closed { background: rgba(29,22,16,0.06); color: var(--text-mute); }
+.fest-status.rolling{ background: var(--olive-dim); color: var(--olive); }
+.fest-tier { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); border: 1px solid var(--border); padding: 3px 7px; }
+
+.fest-meta { display: flex; gap: 20px; flex-wrap: wrap; align-items: center; }
+.fest-meta-item { display: flex; flex-direction: column; gap: 2px; }
+.fest-meta-key { font-family: var(--mono); font-size: 8px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute); }
+.fest-meta-val { font-size: 13px; font-weight: 600; color: var(--text); }
+.fest-meta-val.warn { color: var(--mustard); }
+.fest-meta-val.open { color: var(--green); }
+
+.fest-genres { display: flex; gap: 5px; flex-wrap: wrap; }
+.fest-genre { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-dim); background: var(--bg-hover); border: 1px solid var(--border); padding: 3px 7px; }
+
+.fest-note { font-size: 12px; color: var(--text-mute); line-height: 1.5; font-style: italic; }
+
+.fest-card-actions {
+    padding: 18px 20px; display: flex; flex-direction: column; gap: 8px;
+    align-items: flex-end; justify-content: center; border-left: 1px solid var(--border);
+    min-width: 180px;
+}
+.fest-submit-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    background: var(--gold); color: var(--bg-card);
+    font-family: var(--mono); font-size: 10px; font-weight: 600; letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 10px 16px; text-decoration: none; transition: background 0.15s; white-space: nowrap;
+    clip-path: polygon(7px 0, 100% 0, 100% 100%, 0 100%, 0 7px);
+    width: 100%; text-align: center;
+}
+.fest-submit-btn:hover { background: var(--gold-bright); }
+.fest-submit-btn.disabled { background: var(--bg-hover); color: var(--text-mute); cursor: not-allowed; }
+.fest-track-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 9px 16px; cursor: pointer; transition: all 0.15s; white-space: nowrap; width: 100%;
+}
+.fest-track-btn:hover { border-color: var(--gold-border); color: var(--gold); }
+.fest-track-btn.tracking { background: var(--gold-dim); border-color: var(--gold-border); color: var(--gold); }
+.fest-platform { font-family: var(--mono); font-size: 9px; color: var(--text-mute); letter-spacing: 0.8px; text-align: center; }
+
+/* Section divider */
+.fest-section-label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: var(--text-mute); padding: 20px 0 8px;
+    display: flex; align-items: center; gap: 12px;
+}
+.fest-section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+@media (max-width: 860px) {
+    .fest-card { grid-template-columns: 8px 1fr; }
+    .fest-card-actions { border-left: none; border-top: 1px solid var(--border); padding: 12px 20px; flex-direction: row; min-width: 0; align-items: center; }
+    .fest-submit-btn, .fest-track-btn { width: auto; }
+}
+@media (max-width: 640px) {
+    .fest-wrap { padding: 0 16px; }
+    .fest-head { padding: 24px 0 8px; }
+    .fest-filters { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; }
+    .fest-filters::-webkit-scrollbar { display: none; }
+    .fest-filter { flex-shrink: 0; padding: 7px 11px; font-size: 9px; }
+    .fest-count { display: none; }
+    .fest-card-actions { flex-direction: column; }
+    .fest-submit-btn, .fest-track-btn { width: 100%; text-align: center; }
+    .fest-meta { gap: 12px; }
+    .fest-name { font-size: 15px; }
+}
+</style>
+</head>
+<body>
+
+<div class="fest" data-screen-label="Festival Calendar">
+
+    <div class="raise-ticker">
+        <span class="lead"><span class="raise-pulse"></span><strong>Festival Calendar</strong></span>
+        <div class="stream">
+            <span>Curated for independent filmmakers</span>
+            <span>Submit direct · Track deadlines</span>
+            <span><em>No Hollywood required</em></span>
+        </div>
+    </div>
+
+    <nav class="portal-nav">
+        <a class="portal-brand" href="/the-lot">
+            <div class="portal-brand-mark">E</div>
+            <div>
+                <div class="portal-brand-name">Evolum<span>.</span></div>
+                <div class="portal-brand-sub">Festival Calendar</div>
+            </div>
+        </a>
+        <div class="portal-nav-links">
+            <a class="portal-nav-link" href="/the-lot">The Lot</a>
+            <a class="portal-nav-link" href="/catalog">Catalog</a>
+            <span class="portal-nav-link active">Festival</span>
+            <a class="portal-nav-link" href="/actor-casting">Casting</a>
+        </div>
+        <div class="portal-nav-right">
+            <div data-lang-mount></div>
+            {% if current_user.is_authenticated %}
+            <a class="btn-notch btn-notch-ghost btn-notch-sm" href="/logout">Sign Out</a>
+            {% else %}
+            <a class="btn-notch btn-notch-ghost btn-notch-sm" href="/sign-in">Sign In</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <div class="fest-wrap">
+
+        <div class="fest-head">
+            <div class="fest-eyebrow">For filmmakers &amp; producers</div>
+            <h1>The festival <em>circuit</em>.</h1>
+            <div class="sub">Curated for independent film · Submit direct · No gatekeeping</div>
+            <div class="fest-disclaimer">Deadlines shift year to year. Always verify at the official site before submitting.</div>
+        </div>
+
+        <!-- Member tool bar -->
+        <div class="fest-member-bar" style="margin-top:20px;">
+            <div>
+                <div class="t">Track your submissions</div>
+                <div class="d">Sign in to add festivals to your tracking list and set deadline reminders.</div>
+            </div>
+            {% if current_user.is_authenticated %}
+            <span class="fest-lock" style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-border);padding:7px 12px;white-space:nowrap;margin-left:auto;">Tracking ✓</span>
+            {% else %}
+            <a class="fest-lock" href="/sign-in" style="font-family:var(--mono);font-size:9px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gold);border:1px solid var(--gold-border);padding:7px 12px;text-decoration:none;white-space:nowrap;margin-left:auto;">Sign in to track →</a>
+            {% endif %}
+        </div>
+
+        <!-- Filters -->
+        <div class="fest-filters">
+            <button class="fest-filter on" data-filter="all">All</button>
+            <button class="fest-filter" data-filter="open">Open Now</button>
+            <button class="fest-filter" data-filter="soon">Closing Soon</button>
+            <button class="fest-filter" data-filter="major">Major</button>
+            <button class="fest-filter" data-filter="diverse">Diverse Focus</button>
+            <button class="fest-filter" data-filter="animated">Animated</button>
+            <button class="fest-filter" data-filter="series">Series / TV</button>
+            <span class="fest-count" id="festCount"></span>
+        </div>
+
+        <div class="fest-grid" id="festGrid">
+
+            <!-- MAJOR TIER -->
+            <div class="fest-section-label">Major Festivals</div>
+
+            <!-- Sundance -->
+            <div class="fest-card" data-tier="major" data-tags="drama,feature,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">Sundance Film Festival</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Major</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">Park City, UT</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$75–$95</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Drama</span><span class="fest-genre">Documentary</span><span class="fest-genre">World Cinema</span><span class="fest-genre">Shorts</span>
+                    </div>
+                    <div class="fest-note">The flagship indie festival. Highly competitive. Strong track record for character-driven drama and films with distinct voices.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/SundanceFilmFestival" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+            <!-- SXSW -->
+            <div class="fest-card" data-tier="major" data-tags="drama,feature,series,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">SXSW Film &amp; TV Festival</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Major</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">Austin, TX</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$50–$85</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Narrative Feature</span><span class="fest-genre">Series Pilot</span><span class="fest-genre">Comedy</span><span class="fest-genre">Sci-Fi</span>
+                    </div>
+                    <div class="fest-note">Strong platform for genre films, series pilots, and emerging filmmakers. Accepts both features and episodic content — excellent for SOLITAIRE and Truth or Dare.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/SXSW" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+            <!-- Tribeca -->
+            <div class="fest-card" data-tier="major" data-tags="drama,feature,soon">
+                <div class="fest-card-accent soon"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">Tribeca Film Festival</span>
+                        <span class="fest-status soon">Closing Soon</span>
+                        <span class="fest-tier">Major</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val warn">Verify at Official Site</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">New York, NY</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$65–$90</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Drama</span><span class="fest-genre">Documentary</span><span class="fest-genre">Animation</span><span class="fest-genre">Crime</span>
+                    </div>
+                    <div class="fest-note">New York's premier indie festival. Strong animation and narrative tracks. The Understudy and SOLITAIRE are natural fits.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/TribecaFilmFestival" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+            <!-- DIVERSE FOCUS TIER -->
+            <div class="fest-section-label">Diverse &amp; Multicultural Focus</div>
+
+            <!-- ABFF -->
+            <div class="fest-card" data-tier="diverse" data-tags="drama,feature,diverse,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">American Black Film Festival (ABFF)</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Diverse Focus</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">Miami, FL</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$45–$65</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Drama</span><span class="fest-genre">Comedy</span><span class="fest-genre">Documentary</span><span class="fest-genre">Series</span>
+                    </div>
+                    <div class="fest-note">Premier showcase for Black cinema and TV. The Long Way Home, Night Freight, Backyard and Family Reunion are strong candidates.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/ABFF" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+            <!-- Urban World -->
+            <div class="fest-card" data-tier="diverse" data-tags="drama,feature,diverse,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">Urban World Film Festival</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Diverse Focus</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">New York, NY</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$35–$55</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Drama</span><span class="fest-genre">Comedy</span><span class="fest-genre">Crime</span><span class="fest-genre">Animation</span>
+                    </div>
+                    <div class="fest-note">Largest multicultural film festival in the US. Celebrates stories from diverse communities globally.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/UrbanWorldFilmFestival" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+            <!-- Pan African -->
+            <div class="fest-card" data-tier="diverse" data-tags="drama,feature,diverse,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">Pan African Film Festival (PAFF)</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Diverse Focus</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">Los Angeles, CA</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$45–$60</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Drama</span><span class="fest-genre">Documentary</span><span class="fest-genre">Comedy</span>
+                    </div>
+                    <div class="fest-note">Presented by NAACP. Largest Black film festival in the US. Screens films from Africa and the diaspora.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/PanAfricanFilmFestival" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+            <!-- REGIONAL TIER -->
+            <div class="fest-section-label">Regional &amp; Independent</div>
+
+            <!-- Atlanta -->
+            <div class="fest-card" data-tier="regional" data-tags="drama,feature,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">Atlanta Film Festival</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Regional</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">Atlanta, GA</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$45–$75</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Drama</span><span class="fest-genre">Documentary</span><span class="fest-genre">Comedy</span><span class="fest-genre">All Genres</span>
+                    </div>
+                    <div class="fest-note">Southeast's largest film festival. Inclusive and accessible. Good for first-time festival submissions.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/AtlantaFilmFestival" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+            <!-- Chicago -->
+            <div class="fest-card" data-tier="regional" data-tags="drama,feature,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">Chicago International Film Festival</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Regional</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">Chicago, IL</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$55–$80</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Drama</span><span class="fest-genre">Crime</span><span class="fest-genre">Documentary</span><span class="fest-genre">World Cinema</span>
+                    </div>
+                    <div class="fest-note">Oldest competitive film festival in North America. Night Freight and Food Truck have natural Chicago connections to lean into.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/ChicagoInternationalFilmFestival" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+            <!-- ANIMATION / SPECIALTY TIER -->
+            <div class="fest-section-label">Animation &amp; Genre</div>
+
+            <!-- Annecy -->
+            <div class="fest-card" data-tier="animated" data-tags="animated,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">Annecy International Animation Festival</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Animation</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">Annecy, France</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">Official Site</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">€40–€80</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Feature Animation</span><span class="fest-genre">Short</span><span class="fest-genre">Series</span><span class="fest-genre">VR</span>
+                    </div>
+                    <div class="fest-note">The world's premier animation festival. The Understudy, Uninvited, Small Talk and Truth or Dare should all be submitted here.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://www.annecy.org/participate/submit-a-film" target="_blank" rel="noopener">Submit Official Site ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via Official Site</div>
+                </div>
+            </div>
+
+            <!-- Dances With Films -->
+            <div class="fest-card" data-tier="regional" data-tags="drama,feature,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">Dances With Films</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Independent</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">Los Angeles, CA</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$45–$65</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Drama</span><span class="fest-genre">Comedy</span><span class="fest-genre">All Genres</span>
+                    </div>
+                    <div class="fest-note">No-name, no-studio policy. Your film must speak for itself. Ideal for every project on the EVOLUM slate.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/DancesWithFilms" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+            <!-- TV / SERIES TIER -->
+            <div class="fest-section-label">Series &amp; Television</div>
+
+            <!-- SeriesFest -->
+            <div class="fest-card" data-tier="series" data-tags="series,open">
+                <div class="fest-card-accent open"></div>
+                <div class="fest-card-body">
+                    <div class="fest-card-top">
+                        <span class="fest-name">SeriesFest</span>
+                        <span class="fest-status open">Open</span>
+                        <span class="fest-tier">Series / TV</span>
+                    </div>
+                    <div class="fest-meta">
+                        <div class="fest-meta-item"><div class="fest-meta-key">Submission Window</div><div class="fest-meta-val open">Currently Open</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Location</div><div class="fest-meta-val">Denver, CO</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Platform</div><div class="fest-meta-val">FilmFreeway</div></div>
+                        <div class="fest-meta-item"><div class="fest-meta-key">Entry Fee</div><div class="fest-meta-val">$45–$75</div></div>
+                    </div>
+                    <div class="fest-genres">
+                        <span class="fest-genre">Drama Series</span><span class="fest-genre">Comedy Series</span><span class="fest-genre">Limited Series</span><span class="fest-genre">Animated Series</span>
+                    </div>
+                    <div class="fest-note">The only festival exclusively dedicated to episodic content. Backyard, Paper Trail, Vermilion Hour, Clean Sweep, Truth or Dare, Small Talk and Month to Month all belong here.</div>
+                </div>
+                <div class="fest-card-actions">
+                    <a class="fest-submit-btn" href="https://filmfreeway.com/SeriesFest" target="_blank" rel="noopener">Submit on FilmFreeway ↗</a>
+                    <button class="fest-track-btn" onclick="toggleTrack(this)">+ Track deadline</button>
+                    <div class="fest-platform">via FilmFreeway</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer class="portal-foot">
+        <div class="portal-foot-left">
+            <span class="portal-foot-engine">Powered by <strong>Developum AI Engine</strong></span>
+            <div class="portal-foot-links">
+                <a class="portal-foot-link" href="/the-lot">The Lot</a>
+                <a class="portal-foot-link" href="/catalog">Catalog</a>
+                <a class="portal-foot-link" href="/actor-casting">Casting</a>
+                <span class="portal-foot-link">House Rules</span>
+            </div>
+        </div>
+        <div class="portal-foot-links"><span class="portal-foot-link">© EVOLUM Studio</span></div>
+    </footer>
+
+</div>
+
+<script src="static/js/i18n-strings.js"></script>
+<script src="static/js/i18n.js"></script>
+<script>
+(function(){
+    // Filters
+    const cards = Array.from(document.querySelectorAll('.fest-card[data-tags]'));
+    const countEl = document.getElementById('festCount');
+    function applyFilter(f) {
+        let n = 0;
+        cards.forEach(c => {
+            const tags = (c.dataset.tags || '').split(',');
+            const tier = c.dataset.tier || '';
+            let show = f === 'all'
+                || (f === 'open' && tags.includes('open'))
+                || (f === 'soon' && tags.includes('soon'))
+                || (f === 'major' && tier === 'major')
+                || (f === 'diverse' && tier === 'diverse')
+                || (f === 'animated' && (tier === 'animated' || tags.includes('animated')))
+                || (f === 'series' && (tier === 'series' || tags.includes('series')));
+            c.classList.toggle('hidden', !show);
+            if (show) n++;
+        });
+        countEl.textContent = n + ' of ' + cards.length + ' shown';
+    }
+    document.querySelectorAll('.fest-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.fest-filter').forEach(b => b.classList.remove('on'));
+            btn.classList.add('on');
+            applyFilter(btn.dataset.filter);
+        });
+    });
+    applyFilter('all');
+
+    // Track button toggle
+    window.toggleTrack = function(btn) {
+        const on = btn.classList.toggle('tracking');
+        btn.textContent = on ? '✓ Tracking' : '+ Track deadline';
+    };
+})();
+</script>
+
+
+{% include "_compliance_bar.html" %}
+</body>
+</html>

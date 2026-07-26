@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOLUM — The Lot</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/css/main.css">
+<link rel="stylesheet" href="static/css/portal.css">
+<link rel="stylesheet" href="static/css/evolum_dark.css">
+<style>
+/* ============================================================
+   THE LOT — the public commons.
+   Where the life of the platform is visible before you join.
+   Honest emptiness. Two makers. Fifteen projects. Be first.
+   ============================================================ */
+body { background: var(--bg); }
+.lot { min-height: 100vh; display: flex; flex-direction: column; position: relative; overflow-x: hidden; }
+.lot::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+        radial-gradient(ellipse 80% 50% at 50% -10%, rgba(197,86,42,0.07) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 90% 95%, rgba(154,94,114,0.04) 0%, transparent 60%);
+}
+.lot > * { position: relative; z-index: 1; }
+
+/* ── NAV ── */
+.lot-nav {
+    display: flex; align-items: center; gap: 26px;
+    padding: 0 36px; height: 64px;
+    background: rgba(7, 7, 15,0.92); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+}
+.lot-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+.lot-brand-mark { width: 28px; height: 28px; background: var(--gold); color: var(--bg-card); font-size: 13px; font-weight: 900; clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px)); display: flex; align-items: center; justify-content: center; }
+.lot-brand-name { font-family: var(--serif); font-style: italic; font-size: 20px; font-weight: 700; letter-spacing: -0.02em; color: var(--text); line-height: 1; }
+.lot-brand-name span { color: var(--gold); }
+.lot-brand-sub { font-family: var(--mono); font-size: 8px; color: var(--text-mute); letter-spacing: 1.6px; text-transform: uppercase; margin-top: 2px; }
+.lot-nav-links { display: flex; gap: 22px; }
+.lot-nav-link { font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); transition: color 0.15s; cursor: pointer; text-decoration: none; }
+.lot-nav-link:hover, .lot-nav-link.active { color: var(--text); }
+.lot-nav-link.active { color: var(--gold); }
+.lot-nav-right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+
+/* Live member count chip */
+.lot-members {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-mute); border: 1px solid var(--border); background: var(--bg-card);
+    padding: 6px 11px;
+    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.lot-members .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: portalPulse 2s ease infinite; }
+.lot-members strong { color: var(--text); }
+
+/* ── THE MARQUEE (featured project) ── */
+.marquee {
+    display: grid; grid-template-columns: 1fr 1.2fr;
+    min-height: 560px; overflow: hidden; position: relative;
+    margin: 0;
+}
+.marquee-poster { position: relative; background: var(--text); overflow: hidden; }
+.marquee-poster-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.marquee-poster-shade { position: absolute; inset: 0; background: linear-gradient(to right, transparent 60%, rgba(7, 7, 15,0.96) 100%), linear-gradient(to top, rgba(15,10,6,0.4) 0%, transparent 50%); }
+.marquee-poster-stamp {
+    position: absolute; top: 22px; left: 22px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: rgba(255,236,206,0.68); background: rgba(15,10,6,0.46); padding: 4px 9px;
+    border: 1px solid rgba(255,236,206,0.18); backdrop-filter: blur(6px);
+}
+.marquee-badge {
+    position: absolute; top: 22px; right: 22px;
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(255,236,206,0.88); background: rgba(15,10,6,0.55); padding: 5px 10px;
+    border: 1px solid rgba(255,236,206,0.2);
+}
+.marquee-badge .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--gold); animation: portalPulse 2s ease infinite; }
+
+.marquee-meta {
+    padding: 52px 40px 52px;
+    display: flex; flex-direction: column; justify-content: center; gap: 20px;
+    background: var(--bg-card);
+    border-left: 1px solid var(--border);
+    position: relative;
+}
+.marquee-meta::before {
+    content: ''; position: absolute; top: 52px; left: 0; width: 4px; height: 52px;
+    background: var(--gold);
+}
+.marquee-tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.marquee-title {
+    font-family: var(--serif); font-style: italic;
+    font-size: clamp(38px, 4vw, 62px); font-weight: 700;
+    letter-spacing: -2px; line-height: 0.95; color: var(--text);
+}
+.marquee-spec {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-mute); display: flex; gap: 14px; flex-wrap: wrap;
+}
+.marquee-spec span::after { content: '·'; margin-left: 14px; color: var(--border-hi); }
+.marquee-spec span:last-child::after { content: ''; }
+.marquee-logline {
+    font-family: var(--serif); font-style: italic; font-size: 17px; font-weight: 300;
+    line-height: 1.55; letter-spacing: -0.2px; color: var(--text-dim);
+    max-width: 520px;
+}
+.marquee-theme {
+    font-family: var(--mono); font-size: 11px; color: var(--text-mute); letter-spacing: 0.8px;
+    line-height: 1.5; border-left: 2px solid var(--gold); padding-left: 12px;
+    font-style: italic; max-width: 460px;
+}
+.marquee-actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.marquee-social { display: flex; gap: 8px; margin-left: auto; }
+.social-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 1.3px; text-transform: uppercase;
+    border: 1px solid var(--border-hi); background: transparent; color: var(--text-dim);
+    padding: 8px 12px; cursor: pointer; transition: all 0.15s;
+    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.social-btn:hover { border-color: var(--gold-border); color: var(--gold); }
+.social-btn.followed { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+.social-btn.cheered { background: rgba(58,138,92,0.08); border-color: rgba(58,138,92,0.3); color: var(--green); }
+.social-btn .ic { font-size: 12px; }
+.social-btn .ct { opacity: 0.7; }
+
+/* ── SECTION HEADERS ── */
+.lot-sec {
+    max-width: 1320px; margin: 0 auto; width: 100%; padding: 54px 36px 14px;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; flex-wrap: wrap;
+}
+.lot-sec-left { display: flex; flex-direction: column; gap: 6px; }
+.lot-sec-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--text-mute); display: inline-flex; align-items: center; gap: 8px; }
+.lot-sec-eyebrow::before { content: ''; width: 14px; height: 1px; background: var(--text-mute); }
+.lot-sec-h { font-family: var(--serif); font-style: italic; font-size: 36px; font-weight: 700; letter-spacing: -1.2px; line-height: 1; color: var(--text); }
+.lot-sec-h em { font-style: normal; color: var(--gold); }
+.lot-sec-right { display: flex; gap: 14px; align-items: center; }
+.lot-link { font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); cursor: pointer; text-decoration: none; transition: color 0.15s; }
+.lot-link:hover { color: var(--gold); }
+
+/* ── THE PULSE (activity feed) ── */
+.lot-pulse-wrap { max-width: 1320px; margin: 0 auto; width: 100%; padding: 0 36px; }
+.lot-pulse {
+    background: var(--bg-card); border: 1px solid var(--border);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+    overflow: hidden;
+}
+.lot-pulse-bar { height: 4px; background: linear-gradient(90deg, var(--gold) 0%, var(--olive) 33%, var(--mauve) 66%, var(--mustard) 100%); }
+.lot-pulse-empty {
+    padding: 48px 40px; text-align: center;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.lot-pulse-empty .icon {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--bg-hover); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; color: var(--text-mute);
+}
+.lot-pulse-empty .t { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--text); letter-spacing: -0.4px; }
+.lot-pulse-empty .d { font-size: 13px; color: var(--text-dim); max-width: 420px; line-height: 1.6; }
+.lot-pulse-empty .d em { font-style: normal; color: var(--gold); font-weight: 600; }
+.lot-pulse-empty .hint {
+    font-family: var(--mono); font-size: 10px; color: var(--text-mute); letter-spacing: 1.2px; text-transform: uppercase;
+    border: 1px dashed var(--border-hi); padding: 8px 16px; margin-top: 6px;
+}
+
+/* ── THE SLATE (poster grid, social objects) ── */
+.lot-slate-wrap { max-width: 1320px; margin: 0 auto; width: 100%; padding: 0 36px 0; }
+.lot-slate {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px;
+}
+.lot-slate .slate-card { text-decoration: none; } /* links to project room */
+
+/* ── THE PEOPLE ── */
+.lot-people-wrap { max-width: 1320px; margin: 0 auto; width: 100%; padding: 0 36px; }
+.lot-people {
+    background: var(--bg-card); border: 1px solid var(--border); padding: 36px 40px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+.lot-people-copy { display: flex; flex-direction: column; gap: 12px; }
+.lot-people-count {
+    font-family: var(--serif); font-style: italic; font-size: 52px; font-weight: 700;
+    letter-spacing: -2px; line-height: 0.9; color: var(--text);
+}
+.lot-people-count em { font-style: normal; color: var(--gold); }
+.lot-people-label { font-family: var(--mono); font-size: 11px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute); }
+.lot-people-desc { font-size: 14px; color: var(--text-dim); line-height: 1.6; max-width: 360px; }
+.lot-people-visual { display: flex; flex-direction: column; gap: 14px; align-items: flex-end; }
+.lot-people-avatars { display: flex; gap: -6px; }
+.lot-avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: var(--bg-hover); border: 3px solid var(--bg-card);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-mute); margin-left: -10px;
+}
+.lot-avatar:first-child { margin-left: 0; }
+.lot-avatar svg { opacity: 0.5; }
+.lot-first-tag {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase;
+    color: var(--gold); border: 1px solid var(--gold-border); background: var(--gold-dim);
+    padding: 7px 13px;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+/* ── THE DOORS (join section) ── */
+.lot-doors-wrap { max-width: 1320px; margin: 0 auto; width: 100%; padding: 0 36px; }
+.lot-doors {
+    background: var(--bg-panel); border: 1px solid var(--border);
+    padding: 32px 36px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+.lot-doors-headline { font-family: var(--serif); font-style: italic; font-size: 28px; font-weight: 700; letter-spacing: -0.8px; color: var(--text); margin-bottom: 22px; line-height: 1; }
+.lot-doors-headline em { font-style: normal; color: var(--gold); }
+.lot-doors-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.lot-door-mini {
+    display: flex; flex-direction: column; gap: 10px; padding: 16px 16px;
+    border: 1px solid var(--border); background: var(--bg-card); text-decoration: none; color: inherit;
+    cursor: pointer; transition: all 0.18s;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+.lot-door-mini:hover { border-color: var(--acc, var(--gold-border)); background: var(--bg-hover); transform: translateY(-1px); }
+.lot-door-mini.acc-filmmaker { --acc: var(--gold-border); border-top: 2px solid var(--gold); }
+.lot-door-mini.acc-producer { --acc: oklch(0.72 0.15 60 / 0.5); border-top: 2px solid oklch(0.72 0.15 60); }
+.lot-door-mini.acc-actor { --acc: rgba(111,112,64,0.4); border-top: 2px solid var(--olive); }
+.lot-door-mini.acc-investor { --acc: rgba(154,94,114,0.4); border-top: 2px solid var(--mauve); }
+.lot-door-mini.acc-supporter { --acc: rgba(196,155,40,0.4); border-top: 2px solid var(--mustard); }
+.lot-door-mini-role { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; letter-spacing: -0.5px; color: var(--text); line-height: 1; }
+.lot-door-mini-verb { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+.lot-door-mini-cta { margin-top: auto; font-family: var(--mono); font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--text-mute); display: flex; align-items: center; gap: 6px; padding-top: 10px; border-top: 1px solid var(--border); transition: color 0.15s; }
+.lot-door-mini:hover .lot-door-mini-cta { color: var(--gold); }
+
+/* Share modal */
+.share-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(15,10,6,0.7); backdrop-filter: blur(8px);
+    z-index: 999; align-items: center; justify-content: center;
+}
+.share-overlay.show { display: flex; }
+.share-box {
+    background: var(--bg-card); border: 1px solid var(--gold-border);
+    max-width: 520px; width: calc(100% - 48px);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+    overflow: hidden;
+}
+.share-box-top { padding: 22px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.share-box-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.share-close { background: none; border: none; color: var(--text-mute); font-size: 20px; cursor: pointer; padding: 2px 6px; }
+.share-close:hover { color: var(--text); }
+.share-card {
+    margin: 20px 24px; background: var(--bg-panel); border: 1px solid var(--border);
+    padding: 18px 20px; display: grid; grid-template-columns: 70px 1fr; gap: 16px; align-items: start;
+}
+.share-card-poster { aspect-ratio: 2/3; background: var(--text); position: relative; overflow: hidden; }
+.share-card-poster img { width: 100%; height: 100%; object-fit: cover; }
+.share-card-title { font-family: var(--serif); font-style: italic; font-size: 20px; font-weight: 700; letter-spacing: -0.4px; color: var(--text); }
+.share-card-kind { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); margin-top: 4px; }
+.share-card-logline { font-size: 12px; color: var(--text-dim); line-height: 1.5; margin-top: 8px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.share-card-link { font-family: var(--mono); font-size: 10px; color: var(--gold); letter-spacing: 0.5px; margin-top: 8px; }
+.share-actions { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 8px; }
+.share-copy {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    padding: 10px 12px;
+}
+.share-copy-url { flex: 1; font-family: var(--mono); font-size: 11px; color: var(--text-mute); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.share-copy-btn {
+    font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 1px; text-transform: uppercase;
+    background: var(--text); color: var(--bg-card); border: none; padding: 7px 12px; cursor: pointer;
+    clip-path: polygon(5px 0, 100% 0, 100% 100%, 0 100%, 0 5px); transition: background 0.15s;
+}
+.share-copy-btn:hover { background: var(--gold); }
+.share-platforms { display: flex; gap: 8px; }
+.share-platform {
+    flex: 1; padding: 10px; border: 1px solid var(--border); background: transparent;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-dim); cursor: pointer; text-align: center; transition: all 0.15s; text-decoration: none; display: block;
+}
+.share-platform:hover { border-color: var(--gold-border); color: var(--gold); }
+
+/* ── MOBILE ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .lot-nav { padding: 0 16px; gap: 10px; }
+    .lot-members { display: none; }
+    .lang-btn { padding: 6px 8px; }
+    .lang-cur { display: none; }
+
+    .lot-sec { padding: 36px 16px 10px; }
+    .lot-slate-wrap, .lot-pulse-wrap, .lot-people-wrap, .lot-doors-wrap { padding: 0 16px; }
+
+    .marquee { min-height: auto; }
+    .marquee-meta { padding: 26px 18px 30px; }
+    .marquee-meta::before { height: 28px; top: 26px; }
+    .marquee-title { font-size: clamp(32px, 9vw, 56px); letter-spacing: -1.5px; }
+    .marquee-logline { font-size: 15px; }
+    .marquee-theme { font-size: 10px; }
+    .marquee-actions { flex-wrap: wrap; gap: 10px; }
+    .marquee-social { margin-left: 0; width: 100%; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+    .social-btn { justify-content: center; padding: 10px 8px; font-size: 9px; }
+
+    .lot-sec-h { font-size: 28px; letter-spacing: -0.8px; }
+    .lot-pulse-empty { padding: 32px 20px; }
+
+    .lot-slate { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .lot-people { padding: 24px 20px; }
+    .lot-people-count { font-size: 40px; letter-spacing: -1.5px; }
+    .lot-people-visual { align-items: flex-start; }
+    .lot-doors { padding: 22px 18px; }
+    .lot-doors-headline { font-size: 22px; margin-bottom: 16px; }
+    .lot-doors-grid { grid-template-columns: 1fr; gap: 10px; }
+    .lot-door-mini { padding: 14px 14px; }
+    .lot-door-mini-role { font-size: 18px; }
+    .lot-door-mini-verb { font-size: 12px; }
+
+    .share-box { width: calc(100% - 24px); }
+    .share-card { grid-template-columns: 56px 1fr; gap: 10px; }
+    .share-platforms { flex-direction: column; gap: 6px; }
+}
+
+@media (max-width: 1100px) { .lot-slate { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 900px) {
+    .marquee { grid-template-columns: 1fr; }
+    .marquee-poster { aspect-ratio: 16/9; }
+    .lot-slate { grid-template-columns: repeat(3, 1fr); }
+    .lot-doors-grid { grid-template-columns: repeat(2, 1fr); }
+    .lot-people { grid-template-columns: 1fr; }
+    .lot-nav-links { display: none; }
+}
+@media (max-width: 560px) {
+    .lot-slate { grid-template-columns: repeat(2, 1fr); }
+    .lot-doors-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="lot" data-screen-label="The Lot — Public Commons">
+
+    <!-- Ticker -->
+    <div class="raise-ticker">
+        <span class="lead"><span class="raise-pulse"></span><strong>The Lot</strong></span>
+        <div class="stream" id="lotTicker"></div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="lot-nav">
+        <a class="lot-brand" href="/the-lot">
+            <div class="lot-brand-mark">E</div>
+            <div>
+                <div class="lot-brand-name">Evolum<span>.</span></div>
+                <div class="lot-brand-sub">The Lot</div>
+            </div>
+        </a>
+        <div class="lot-nav-links">
+            <a class="lot-nav-link active" href="/the-lot">The Lot</a>
+            <a class="lot-nav-link" href="/catalog">Catalog</a>
+            <a class="lot-nav-link" href="/festival-calendar">Festival</a>
+            <a class="lot-nav-link" href="/pricing">Pricing</a>
+        </div>
+        <div class="lot-nav-right">
+            <div class="lot-members"><span class="dot"></span><strong>2</strong>&nbsp;makers</div>
+            <div data-lang-mount></div>
+            {% if current_user.is_authenticated %}
+            <a class="btn-notch btn-notch-ghost btn-notch-sm" href="/logout">Sign Out</a>
+            {% else %}
+            <a class="btn-notch btn-notch-ghost btn-notch-sm" href="/sign-in">Sign In</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- THE MARQUEE (featured project — first live project) -->
+    <section class="marquee" id="marqueeSection" data-screen-label="The Marquee">
+        <!-- populated by JS -->
+    </section>
+
+    <!-- THE PULSE -->
+    <div class="lot-sec">
+        <div class="lot-sec-left">
+            <span class="lot-sec-eyebrow">What's happening</span>
+            <div class="lot-sec-h">The <em>pulse</em>.</div>
+        </div>
+    </div>
+    <div class="lot-pulse-wrap">
+        <div class="lot-pulse">
+            <div class="lot-pulse-bar"></div>
+            <div class="lot-pulse-empty">
+                <div class="icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+                <div class="t">The pulse is quiet — for now.</div>
+                <div class="d">
+                    When filmmakers post updates, actors book work, and supporters back projects — it all surfaces here, in real time. The <em>first post lands here</em>.
+                </div>
+                <div class="hint">No filler. No fabricated activity. Only what's real.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- THE SLATE -->
+    <div class="lot-sec">
+        <div class="lot-sec-left">
+            <span class="lot-sec-eyebrow">Fifteen projects in development</span>
+            <div class="lot-sec-h">The <em>slate</em>.</div>
+        </div>
+        <div class="lot-sec-right">
+            <a class="lot-link" href="/catalog">Full catalog →</a>
+        </div>
+    </div>
+    <div class="lot-slate-wrap">
+        <div class="lot-slate" id="lotSlate"></div>
+    </div>
+
+    <!-- THE PEOPLE -->
+    <div class="lot-sec">
+        <div class="lot-sec-left">
+            <span class="lot-sec-eyebrow">Who's here</span>
+            <div class="lot-sec-h">The <em>people</em>.</div>
+        </div>
+    </div>
+    <div class="lot-people-wrap">
+        <div class="lot-people">
+            <div class="lot-people-copy">
+                <div class="lot-people-count"><em>2</em> makers.</div>
+                <div class="lot-people-label">On the lot right now</div>
+                <p class="lot-people-desc">This place is just starting. There are two of us here so far — building, developing, figuring out what this becomes. The lot is yours to shape.</p>
+            </div>
+            <div class="lot-people-visual">
+                <div class="lot-people-avatars">
+                    <div class="lot-avatar">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="9" r="3.4"/><path d="M5.5 19c1-3.4 4-5.2 6.5-5.2s5.5 1.8 6.5 5.2"/></svg>
+                    </div>
+                    <div class="lot-avatar" style="background:var(--bg-deep);">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="9" r="3.4"/><path d="M5.5 19c1-3.4 4-5.2 6.5-5.2s5.5 1.8 6.5 5.2"/></svg>
+                    </div>
+                </div>
+                <span class="lot-first-tag">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 2 7h7l-5.5 4 2 7L12 16l-5.5 4 2-7L3 9h7z"/></svg>
+                    You're among the first
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- THE DOORS -->
+    <div class="lot-sec">
+        <div class="lot-sec-left">
+            <span class="lot-sec-eyebrow">Find your place here</span>
+            <div class="lot-sec-h">The <em>doors</em>.</div>
+        </div>
+    </div>
+    <div class="lot-doors-wrap" style="padding-bottom: 72px;">
+        <div class="lot-doors">
+            <div class="lot-doors-headline">Five ways to be <em>part of it</em>.</div>
+            <div class="lot-doors-grid">
+                <a class="lot-door-mini acc-filmmaker" href="{% if current_user.is_authenticated %}/filmmaker-workspace{% else %}/sign-in{% endif %}">
+                    <div class="lot-door-mini-role">Filmmaker</div>
+                    <div class="lot-door-mini-verb">Develop your project from idea to investor-ready in the editor.</div>
+                    <div class="lot-door-mini-cta">Enter the Workspace →</div>
+                </a>
+                <a class="lot-door-mini acc-producer" href="{% if current_user.is_authenticated %}/filmmaker-workspace{% else %}/sign-in{% endif %}">
+                    <div class="lot-door-mini-role">Above the Line</div>
+                    <div class="lot-door-mini-verb">Producer, DP, director — own the pipeline, run the deliverables room.</div>
+                    <div class="lot-door-mini-cta">Enter the Workspace →</div>
+                </a>
+                <a class="lot-door-mini acc-actor" href="{% if current_user.is_authenticated %}/actor-casting{% else %}/sign-in{% endif %}">
+                    <div class="lot-door-mini-role">Actor</div>
+                    <div class="lot-door-mini-verb">Find open roles, self-tape with marked sides, book work.</div>
+                    <div class="lot-door-mini-cta">Enter the Casting Room →</div>
+                </a>
+                <a class="lot-door-mini acc-investor" href="{% if current_user.is_authenticated %}/investor-deal-room{% else %}/sign-in{% endif %}">
+                    <div class="lot-door-mini-role">Investor</div>
+                    <div class="lot-door-mini-verb">Vetted deal rooms with real raise numbers and equity docs.</div>
+                    <div class="lot-door-mini-cta">Enter the Deal Rooms →</div>
+                </a>
+                <a class="lot-door-mini acc-supporter" href="{% if current_user.is_authenticated %}/supporter-feed{% else %}/sign-in{% endif %}">
+                    <div class="lot-door-mini-role">Supporter</div>
+                    <div class="lot-door-mini-verb">Back the films you believe in. Free to join.</div>
+                    <div class="lot-door-mini-cta">Enter the Feed →</div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="portal-foot">
+        <div class="portal-foot-left">
+            <span class="portal-foot-engine">Powered by <strong>Developum AI Engine</strong></span>
+            <div class="portal-foot-links">
+                <a class="portal-foot-link" href="/catalog">Catalog</a>
+                <a class="portal-foot-link" href="/festival-calendar">Festival</a>
+                <a class="portal-foot-link" href="/pricing">Pricing</a>
+                <a class="portal-foot-link" href="/house-rules">House Rules</a>
+            </div>
+        </div>
+        <div class="portal-foot-links"><span class="portal-foot-link">© EVOLUM Studio</span></div>
+    </footer>
+
+</div>
+
+<!-- Share modal -->
+<div class="share-overlay" id="shareOverlay" onclick="if(event.target===this) closeShare()">
+    <div class="share-box">
+        <div class="share-box-top">
+            <div class="share-title">Share this project</div>
+            <button class="share-close" onclick="closeShare()">×</button>
+        </div>
+        <div class="share-card">
+            <div class="share-card-poster" id="shareCardPoster"></div>
+            <div>
+                <div class="share-card-title" id="shareTitle"></div>
+                <div class="share-card-kind" id="shareKind"></div>
+                <div class="share-card-logline" id="shareLogline"></div>
+                <div class="share-card-link" id="shareCardLink"></div>
+            </div>
+        </div>
+        <div class="share-actions">
+            <div class="share-copy">
+                <div class="share-copy-url" id="shareUrl"></div>
+                <button class="share-copy-btn" id="shareCopyBtn" onclick="copyShareLink()">Copy link</button>
+            </div>
+            <div class="share-platforms">
+                <a class="share-platform" id="shareX" href="#" target="_blank" rel="noopener">Post to X / Twitter</a>
+                <a class="share-platform" id="shareIG" href="#" target="_blank" rel="noopener">Instagram</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="static/js/i18n-strings.js"></script>
+<script src="static/js/i18n.js"></script>
+<script src="static/js/projects.js"></script>
+<script src="static/js/slate-render.js"></script>
+<script>
+(function () {
+    const projects = EVOLUM.projects();
+
+    // ── Ticker ──
+    document.getElementById('lotTicker').innerHTML =
+        '<span>' + projects.length + ' projects in development</span>' +
+        '<span>2 makers on the lot</span>' +
+        projects.slice(0, 6).map(p => '<span>' + EVOLUM.esc(p.title) + '</span>').join('');
+
+    // ── Find featured project (first with live status, fallback first) ──
+    const featured = projects.find(p => p.statusLabel === 'Seeking Support') || projects[0];
+
+    // ── Marquee ──
+    const marquee = document.getElementById('marqueeSection');
+    const accentClass = featured.accent;
+    marquee.innerHTML = `
+        <div class="marquee-poster">
+            ${featured.poster
+                ? `<img class="marquee-poster-img" src="${EVOLUM.esc(featured.poster)}" alt="${EVOLUM.esc(featured.title)}">`
+                : `<div class="ev-pa ev-pa-${EVOLUM.esc(featured.tone || 'ember')}"></div>`}
+            <div class="marquee-poster-shade"></div>
+            <div class="marquee-poster-stamp">EV / ${EVOLUM.esc(featured.num)} · On the Marquee</div>
+            <div class="marquee-badge"><span class="dot"></span>${EVOLUM.esc(featured.statusLabel)}</div>
+        </div>
+        <div class="marquee-meta">
+            <div class="marquee-tags">
+                <span class="mono-tag mono-tag-ember">${EVOLUM.esc(featured.statusLabel)}</span>
+                <span class="mono-tag mono-tag-ghost">${EVOLUM.esc(featured.kind)}</span>
+                ${featured.genre ? '<span class="mono-tag mono-tag-ghost">' + EVOLUM.esc(featured.genre) + '</span>' : ''}
+            </div>
+            <div class="marquee-title">${EVOLUM.esc(featured.title)}</div>
+            ${featured.genre || featured.kind ? `<div class="marquee-spec">
+                <span>${EVOLUM.esc(featured.kind)}</span>
+                ${featured.genre ? '<span>' + EVOLUM.esc(featured.genre) + '</span>' : ''}
+                ${featured.pages ? '<span>' + featured.pages + ' pages</span>' : ''}
+            </div>` : ''}
+            ${featured.logline ? '<p class="marquee-logline">' + EVOLUM.esc(featured.logline) + '</p>' : ''}
+            ${featured.theme ? '<div class="marquee-theme">' + EVOLUM.esc(featured.theme) + '</div>' : ''}
+            <div class="marquee-actions">
+                <a class="btn-notch" href="/project-room?id=${EVOLUM.esc(featured.id)}">Open the project room →</a>
+                <div class="marquee-social">
+                    <button class="social-btn" id="marqueeFollow" onclick="toggleFollow(this)">
+                        <span class="ic">+</span> Follow <span class="ct" id="marqueeFollowCt">0</span>
+                    </button>
+                    <button class="social-btn" id="marqueeCheer" onclick="toggleCheer(this)">
+                        <span class="ic">✦</span> Cheer <span class="ct" id="marqueeCheerCt">0</span>
+                    </button>
+                    <button class="social-btn" onclick="openShare('${EVOLUM.esc(featured.id)}')">
+                        <span class="ic">↗</span> Share
+                    </button>
+                </div>
+            </div>
+        </div>`;
+
+    // ── Slate ──
+    const slateEl = document.getElementById('lotSlate');
+    slateEl.innerHTML = projects.map(p =>
+        `<a class="slate-card acc-${EVOLUM.esc(p.accent)}" href="/project-room?id=${EVOLUM.esc(p.id)}">
+            <div class="slate-poster">${EVOLUM.posterInner(p)}</div>
+            <div class="slate-card-body">
+                <div class="slate-card-title">${EVOLUM.esc(p.title)}</div>
+                <div class="slate-card-meta">${EVOLUM.esc(p.kind)}${p.genre ? ' · ' + EVOLUM.esc(p.genre) : ''}</div>
+            </div>
+        </a>`
+    ).join('');
+
+    if (window.I18N) I18N.apply(document);
+    window.addEventListener('evolum:langchange', () => { if (window.I18N) I18N.apply(document); });
+
+    // ── Social: Follow / Cheer ──
+    window.toggleFollow = function(btn) {
+        const on = btn.classList.toggle('followed');
+        const ct = document.getElementById('marqueeFollowCt');
+        ct.textContent = on ? '1' : '0';
+        btn.querySelector('.ic').textContent = on ? '✓' : '+';
+    };
+    window.toggleCheer = function(btn) {
+        const on = btn.classList.toggle('cheered');
+        const ct = document.getElementById('marqueeCheerCt');
+        ct.textContent = on ? '1' : '0';
+        btn.querySelector('.ic').textContent = on ? '✦' : '✦';
+    };
+
+    // ── Share modal ──
+    window.openShare = function(id) {
+        const p = projects.find(x => x.id === id) || projects[0];
+        const url = window.location.origin + '/project/' + p.id;
+        const shortUrl = window.location.host + '/project/' + p.id.slice(0, 8);
+        document.getElementById('shareTitle').textContent = p.title;
+        document.getElementById('shareKind').textContent = p.kind + (p.genre ? ' · ' + p.genre : '');
+        document.getElementById('shareLogline').textContent = p.logline || '';
+        document.getElementById('shareCardLink').textContent = shortUrl;
+        document.getElementById('shareUrl').textContent = shortUrl;
+        document.getElementById('shareCardPoster').innerHTML = p.poster
+            ? `<img src="${EVOLUM.esc(p.poster)}" style="width:100%;height:100%;object-fit:cover;">`
+            : `<div class="ev-pa ev-pa-${p.tone || 'ember'}" style="position:absolute;inset:0;"></div>`;
+        const text = encodeURIComponent('"' + p.title + '" is in development on EVOLUM. ' + (p.logline ? p.logline.slice(0, 100) + '…' : ''));
+        document.getElementById('shareX').href = 'https://twitter.com/intent/tweet?text=' + text + '&url=' + encodeURIComponent(shortUrl);
+        document.getElementById('shareOverlay').classList.add('show');
+    };
+    window.closeShare = function() {
+        document.getElementById('shareOverlay').classList.remove('show');
+    };
+    window.copyShareLink = function() {
+        const url = document.getElementById('shareUrl').textContent;
+        navigator.clipboard && navigator.clipboard.writeText(url);
+        const btn = document.getElementById('shareCopyBtn');
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => { btn.textContent = 'Copy link'; }, 2000);
+    };
+})();
+</script>
+
+
+{% include "_compliance_bar.html" %}
+</body>
+</html>

@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOLUM — Deal Room · Duty of Care</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#07070f;--surface:#0d0d18;--s2:#111120;--s3:#16162a;
+  --border:#1e1e2e;--bhi:#2e2e48;--dim:#363450;
+  --text:#ede9e0;--muted:#6a6778;--cream:oklch(0.93 0.03 90);
+  --gold:oklch(0.78 0.16 75);
+  --gg:oklch(0.78 0.16 75/0.10);
+  --gm:oklch(0.78 0.16 75/0.32);
+  --green:oklch(0.72 0.18 145);
+  --green-g:oklch(0.72 0.18 145/0.10);
+  --green-m:oklch(0.72 0.18 145/0.30);
+  --red:oklch(0.62 0.20 24);
+}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;line-height:1.5;
+  background-image:radial-gradient(circle,rgba(255,255,255,0.032) 1px,transparent 1px);background-size:28px 28px}
+a{text-decoration:none;color:inherit}
+
+/* grain */
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");opacity:.5}
+
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+@keyframes blink-step{50%{opacity:0}}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 40px;height:60px;background:rgba(7,7,15,0.95);border-bottom:1px solid var(--border);backdrop-filter:blur(16px)}
+.nav-left{display:flex;align-items:center;gap:20px}
+.nav-logo{font-family:'Cormorant',serif;font-size:18px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--cream)}
+.nav-logo em{font-style:italic;color:var(--gold)}
+.nav-sep{width:1px;height:20px;background:var(--bhi)}
+.nav-room{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted)}
+.nav-right{display:flex;align-items:center;gap:14px}
+.nav-nda{display:flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;padding:6px 14px;border:1px solid var(--green-m);color:var(--green);background:var(--green-g)}
+.nav-nda-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:blink 2s ease-in-out infinite}
+.nav-back{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px}
+.nav-back:hover{color:var(--text)}
+
+/* ── CONFIDENTIAL WATERMARK ── */
+.confid{position:fixed;bottom:40px;right:40px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.3em;text-transform:uppercase;color:rgba(255,255,255,0.04);transform:rotate(-90deg);transform-origin:right bottom;pointer-events:none;z-index:0;user-select:none}
+
+/* ── LAYOUT ── */
+.page{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:80px 40px 80px}
+
+/* ── NDA GATE ── */
+#nda-gate{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 60px);padding:40px}
+.gate-card{max-width:520px;width:100%;background:var(--surface);border:1px solid var(--border);padding:48px;text-align:center}
+.gate-icon{width:56px;height:56px;border:1px solid var(--gm);background:var(--gg);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;color:var(--gold)}
+.gate-title{font-family:'Cormorant',serif;font-size:36px;font-weight:600;color:var(--cream);margin-bottom:8px}
+.gate-sub{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.gate-body{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:32px}
+.gate-checks{display:flex;flex-direction:column;gap:10px;text-align:left;margin-bottom:32px;padding:20px;background:var(--s2);border:1px solid var(--border)}
+.gate-check{display:flex;align-items:center;gap:12px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.08em;color:var(--muted)}
+.gate-check-box{width:16px;height:16px;border:1px solid var(--gold);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold)}
+.gate-btn{display:block;width:100%;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;padding:16px;background:var(--gold);color:#07070f;border:none;cursor:pointer;transition:all .2s}
+.gate-btn:hover{background:oklch(0.84 0.16 75)}
+.gate-legal{margin-top:16px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.06em;color:var(--dim);line-height:1.6}
+
+/* ── DEAL ROOM CONTENT ── */
+#deal-room{display:none}
+
+/* ── PROJECT HEADER ── */
+.dr-header{display:grid;grid-template-columns:220px 1fr;gap:0;background:var(--surface);border:1px solid var(--border);margin-bottom:1px}
+.dr-poster{background:var(--s2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:28px;min-height:280px;position:relative;overflow:hidden}
+.dr-poster-bg{position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(255,255,255,0.012) 0,rgba(255,255,255,0.012) 1px,transparent 1px,transparent 12px)}
+.dr-poster-frame{width:100%;aspect-ratio:2/3;border:1px dashed var(--bhi);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;position:relative;z-index:1;max-width:140px}
+.dr-poster-label{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.18em;color:var(--dim);text-transform:uppercase;text-align:center}
+.dr-meta{padding:36px 40px;display:flex;flex-direction:column;justify-content:space-between}
+.dr-access{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.dr-access-badge{display:flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.16em;text-transform:uppercase;color:var(--green);border:1px solid var(--green-m);padding:4px 12px;background:var(--green-g)}
+.dr-access-dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 4px var(--green);animation:blink 2s ease-in-out infinite}
+.dr-ref{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim)}
+.dr-title{font-family:'Cormorant',serif;font-size:clamp(32px,4vw,56px);font-weight:600;color:var(--cream);letter-spacing:0.01em;margin-bottom:6px;line-height:1}
+.dr-format{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.dr-logline{font-family:'Cormorant',serif;font-style:italic;font-size:17px;color:var(--muted);line-height:1.6;border-left:2px solid var(--gm);padding-left:16px;max-width:540px;margin-bottom:24px}
+.dr-logline.ph{font-style:normal;font-family:'Space Mono',monospace;font-size:11px;color:var(--dim);border-color:var(--border)}
+.dr-tags{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.dr-tag{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;padding:3px 10px;border:1px solid var(--bhi);color:var(--muted)}
+.dr-tag.done{color:var(--gold);border-color:var(--gm)}
+
+/* ── RAISE DASHBOARD ── */
+.raise-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);margin-bottom:1px}
+.raise-stat{background:var(--surface);padding:24px 28px}
+.rs-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.rs-value{font-family:'Cormorant',serif;font-size:clamp(24px,3vw,38px);font-weight:600;color:var(--cream);line-height:1;margin-bottom:4px}
+.rs-value.gold{color:var(--gold)}
+.rs-value.green{color:var(--green)}
+.rs-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--dim)}
+
+/* Progress bar */
+.raise-progress{background:var(--surface);border:1px solid var(--border);padding:24px 32px;margin-bottom:1px}
+.rp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.rp-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.16em;text-transform:uppercase;color:var(--muted)}
+.rp-pct{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--gold)}
+.rp-bar{height:4px;background:var(--s2);border:1px solid var(--border);position:relative;margin-bottom:12px}
+.rp-fill{height:100%;background:var(--gold);box-shadow:0 0 8px var(--gm);width:42%}
+.rp-foot{display:flex;align-items:center;justify-content:space-between;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--dim)}
+.rp-foot strong{color:var(--text)}
+
+/* ── 2-COL LAYOUT ── */
+.dr-two{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);margin-bottom:1px}
+.dr-panel{background:var(--surface);padding:32px}
+.dp-title{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:20px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+
+/* Use of funds */
+.fund-rows{display:flex;flex-direction:column;gap:12px}
+.fund-row{display:flex;flex-direction:column;gap:6px}
+.fund-head{display:flex;align-items:center;justify-content:space-between}
+.fund-name{font-size:13px;color:var(--text)}
+.fund-pct{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--gold)}
+.fund-bar-bg{height:3px;background:var(--s2)}
+.fund-bar{height:3px;background:var(--gold)}
+.fund-amt{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)}
+
+/* Comps */
+.comp-rows{display:flex;flex-direction:column;gap:0}
+.comp-row{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:16px;padding:10px 0;border-bottom:1px solid var(--border)}
+.comp-row:last-child{border-bottom:none}
+.comp-title{font-size:13px;font-weight:600;color:var(--text)}
+.comp-type{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase}
+.comp-gross{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--green)}
+.comp-budget{font-family:'Space Mono',monospace;font-size:9px;color:var(--dim)}
+
+/* ── MATERIALS ── */
+.materials-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:1px}
+.mat-card{background:var(--surface);padding:24px;display:flex;flex-direction:column;gap:0;transition:background .2s;cursor:pointer}
+.mat-card:hover{background:var(--s2)}
+.mat-icon{width:36px;height:36px;border:1px solid var(--gm);background:var(--gg);display:flex;align-items:center;justify-content:center;color:var(--gold);margin-bottom:14px}
+.mat-name{font-size:15px;font-weight:700;color:var(--cream);margin-bottom:4px;letter-spacing:-0.01em}
+.mat-desc{font-size:12px;color:var(--muted);line-height:1.5;flex:1}
+.mat-dl{margin-top:16px;font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px}
+
+/* ── INVESTMENT TIERS ── */
+.tiers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:1px}
+.tier-card{background:var(--surface);padding:32px 28px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.tier-card.featured{background:var(--s2)}
+.tier-card.featured::after{content:'RECOMMENDED';position:absolute;top:0;right:0;font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.18em;background:var(--gold);color:#07070f;padding:4px 12px;font-weight:700}
+.tier-level{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.tier-title{font-family:'Cormorant',serif;font-size:28px;font-weight:600;color:var(--cream);margin-bottom:4px}
+.tier-range{font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--gold);margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+.tier-perks{list-style:none;display:flex;flex-direction:column;gap:8px;flex:1;margin-bottom:24px}
+.tier-perks li{font-size:13px;color:var(--muted);display:flex;align-items:flex-start;gap:10px;line-height:1.4}
+.tier-perks li::before{content:'→';color:var(--gold);font-family:'Space Mono',monospace;font-size:11px;flex-shrink:0;margin-top:1px}
+.tier-btn{display:block;text-align:center;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:13px;border:1px solid var(--bhi);color:var(--text);background:none;cursor:pointer;transition:all .2s}
+.tier-btn:hover{border-color:var(--gold);color:var(--gold)}
+.tier-card.featured .tier-btn{background:var(--gold);border-color:var(--gold);color:#07070f}
+.tier-card.featured .tier-btn:hover{background:oklch(0.84 0.16 75)}
+
+/* ── PLEDGE FORM ── */
+.pledge-wrap{background:var(--surface);border:1px solid var(--border);padding:40px;margin-bottom:1px}
+.pledge-title{font-family:'Cormorant',serif;font-size:32px;font-weight:600;color:var(--cream);margin-bottom:4px}
+.pledge-sub{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:28px}
+.pledge-form{display:grid;grid-template-columns:1fr 1fr auto;gap:14px;align-items:end}
+.pf-field label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+input,select{width:100%;background:var(--s2);border:1px solid var(--border);color:var(--text);font-family:'Space Mono',monospace;font-size:13px;padding:12px 14px;outline:none;transition:border-color .2s;appearance:none}
+input:focus,select:focus{border-color:var(--gold)}
+::placeholder{color:var(--dim)}
+.pledge-btn{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:13px 28px;background:var(--gold);color:#07070f;border:none;cursor:pointer;white-space:nowrap;transition:all .2s}
+.pledge-btn:hover{background:oklch(0.84 0.16 75)}
+.pledge-legal{margin-top:14px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.06em;color:var(--dim);line-height:1.65}
+
+/* Pledge confirmed state */
+#pledge-confirm{display:none;padding:32px;background:var(--green-g);border:1px solid var(--green-m);text-align:center}
+.pc-icon{font-size:32px;margin-bottom:12px}
+.pc-title{font-family:'Cormorant',serif;font-size:28px;font-weight:600;color:var(--cream);margin-bottom:6px}
+.pc-body{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;color:var(--green)}
+
+/* ── TEAM ── */
+.team-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);margin-bottom:1px}
+.team-card{background:var(--surface);padding:24px}
+.tc-role{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.tc-name{font-size:17px;font-weight:700;color:var(--cream);margin-bottom:4px}
+.tc-bio{font-size:12px;color:var(--muted);line-height:1.55}
+
+/* ── SECTION DIVIDER ── */
+.sec-div{display:flex;align-items:center;gap:14px;margin:32px 0 20px}
+.sd-rule{flex:1;height:1px;background:var(--border)}
+.sd-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.24em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .dr-header{grid-template-columns:1fr}
+  .dr-poster{display:none}
+  .raise-grid{grid-template-columns:repeat(2,1fr)}
+  .dr-two{grid-template-columns:1fr}
+  .materials-grid{grid-template-columns:repeat(2,1fr)}
+  .tiers-grid{grid-template-columns:1fr}
+  .pledge-form{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:1fr 1fr}
+  .nav{padding:0 20px}
+}
+@media(max-width:600px){
+  .page{padding:20px 16px 60px}
+  .raise-grid{grid-template-columns:1fr 1fr}
+  .materials-grid{grid-template-columns:1fr}
+  .team-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-left">
+    <a class="nav-logo" href="/">EV<em>O</em>LUM</a>
+    <div class="nav-sep"></div>
+    <span class="nav-room">Deal Room · Duty of Care</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-nda" id="nda-status" style="display:none">
+      <span class="nav-nda-dot"></span>NDA SIGNED · VERIFIED
+    </div>
+    <a href="/" class="nav-back">
+      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2L4 6l4 4"/></svg>
+      Back to Slate
+    </a>
+  </div>
+</nav>
+
+<div class="confid">CONFIDENTIAL · NDA REQUIRED · EVOLUM STUDIO</div>
+
+<!-- ═══════ NDA GATE ═══════ -->
+<div id="nda-gate">
+  <div class="gate-card">
+    <div class="gate-icon">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="4" y="12" width="20" height="14" rx="1"/><path d="M8 12V8a6 6 0 0112 0v4"/><circle cx="14" cy="19" r="2"/><line x1="14" y1="21" x2="14" y2="23"/></svg>
+    </div>
+    <div class="gate-title">Deal Room Access</div>
+    <div class="gate-sub">Duty of Care · Confidential</div>
+    <p class="gate-body">This deal room contains confidential financial information, production materials, and equity offering details. Access requires a signed Non-Disclosure Agreement and accredited investor verification.</p>
+    <div class="gate-checks">
+      <div class="gate-check">
+        <div class="gate-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></div>
+        I am an accredited investor as defined by the SEC
+      </div>
+      <div class="gate-check">
+        <div class="gate-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></div>
+        I agree not to disclose any materials from this deal room
+      </div>
+      <div class="gate-check">
+        <div class="gate-check-box"><svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></div>
+        I understand this is not a public offering
+      </div>
+    </div>
+    <button class="gate-btn" onclick="enterDealRoom()">Sign NDA &amp; Enter Deal Room →</button>
+    <p class="gate-legal">By clicking above, you electronically sign the Evolum Studio Non-Disclosure Agreement. Your identity, IP address, and timestamp are recorded. This is a private placement — not registered under the Securities Act.</p>
+  </div>
+</div>
+
+<!-- ═══════ DEAL ROOM ═══════ -->
+<div id="deal-room">
+<div class="page">
+
+  <!-- PROJECT HEADER -->
+  <div class="dr-header">
+    <div class="dr-poster">
+      <div class="dr-poster-bg"></div>
+      <div class="dr-poster-frame">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="color:var(--dim)"><rect x="3" y="3" width="18" height="18"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <div class="dr-poster-label">Drop poster<br>art here</div>
+      </div>
+    </div>
+    <div class="dr-meta">
+      <div>
+        <div class="dr-access" style="margin-bottom:16px">
+          <div class="dr-access-badge"><span class="dr-access-dot"></span>NDA VERIFIED · DEAL ROOM OPEN</div>
+          <span class="dr-ref">REF: EVL-DR-001-2026</span>
+        </div>
+        <div class="dr-title">Duty of Care</div>
+        <div class="dr-format">Feature Film · Drama · 2024 · Production Complete</div>
+        <div class="dr-logline ph">[ Your logline goes here. This card is investor-ready the moment you drop it in. ]</div>
+        <div class="dr-tags">
+          <span class="dr-tag done">Production Complete</span>
+          <span class="dr-tag">Feature Film</span>
+          <span class="dr-tag">Drama</span>
+          <span class="dr-tag">Seeking Distribution</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAISE DASHBOARD -->
+  <div class="raise-grid">
+    <div class="raise-stat">
+      <div class="rs-label">Total Budget</div>
+      <div class="rs-value">[ $ ]</div>
+      <div class="rs-sub">Full production budget</div>
+    </div>
+    <div class="raise-stat">
+      <div class="rs-label">Currently Seeking</div>
+      <div class="rs-value gold">[ $ ]</div>
+      <div class="rs-sub">P&amp;A + distribution round</div>
+    </div>
+    <div class="raise-stat">
+      <div class="rs-label">Equity Offered</div>
+      <div class="rs-value gold">[ % ]</div>
+      <div class="rs-sub">Net profits participation</div>
+    </div>
+    <div class="raise-stat">
+      <div class="rs-label">Minimum Investment</div>
+      <div class="rs-value">[ $ ]</div>
+      <div class="rs-sub">Associate Producer entry</div>
+    </div>
+  </div>
+
+  <!-- RAISE PROGRESS -->
+  <div class="raise-progress">
+    <div class="rp-head">
+      <span class="rp-label">Raise Progress · Current Round</span>
+      <span class="rp-pct">[ X ]% Committed</span>
+    </div>
+    <div class="rp-bar"><div class="rp-fill" id="raise-bar"></div></div>
+    <div class="rp-foot">
+      <span><strong>[ $ committed ]</strong> raised</span>
+      <span><strong>[ X days ]</strong> remaining in round</span>
+      <span><strong>[ # ]</strong> investors</span>
+    </div>
+  </div>
+
+  <!-- USE OF FUNDS + COMPS -->
+  <div class="dr-two">
+    <div class="dr-panel">
+      <div class="dp-title">Use of Funds</div>
+      <div class="fund-rows">
+        <div class="fund-row">
+          <div class="fund-head">
+            <span class="fund-name">Prints &amp; Advertising (P&amp;A)</span>
+            <span class="fund-pct">[ % ]</span>
+          </div>
+          <div class="fund-bar-bg"><div class="fund-bar" style="width:45%"></div></div>
+          <span class="fund-amt">[ $ amount ]</span>
+        </div>
+        <div class="fund-row">
+          <div class="fund-head">
+            <span class="fund-name">Festival Circuit &amp; Distribution Delivery</span>
+            <span class="fund-pct">[ % ]</span>
+          </div>
+          <div class="fund-bar-bg"><div class="fund-bar" style="width:25%"></div></div>
+          <span class="fund-amt">[ $ amount ]</span>
+        </div>
+        <div class="fund-row">
+          <div class="fund-head">
+            <span class="fund-name">Digital &amp; Streaming Delivery</span>
+            <span class="fund-pct">[ % ]</span>
+          </div>
+          <div class="fund-bar-bg"><div class="fund-bar" style="width:18%"></div></div>
+          <span class="fund-amt">[ $ amount ]</span>
+        </div>
+        <div class="fund-row">
+          <div class="fund-head">
+            <span class="fund-name">Legal, E&amp;O Insurance &amp; Contingency</span>
+            <span class="fund-pct">[ % ]</span>
+          </div>
+          <div class="fund-bar-bg"><div class="fund-bar" style="width:12%"></div></div>
+          <span class="fund-amt">[ $ amount ]</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dr-panel">
+      <div class="dp-title">Comparable Titles · Market Context</div>
+      <div class="comp-rows">
+        <div class="comp-row">
+          <div>
+            <div class="comp-title">[ Comp Title 1 ]</div>
+            <div class="comp-type">Feature · Drama · [ Year ]</div>
+          </div>
+          <div class="comp-gross">[ Box Office ]</div>
+          <div class="comp-budget">[ Budget ]</div>
+        </div>
+        <div class="comp-row">
+          <div>
+            <div class="comp-title">[ Comp Title 2 ]</div>
+            <div class="comp-type">Feature · Drama · [ Year ]</div>
+          </div>
+          <div class="comp-gross">[ Box Office ]</div>
+          <div class="comp-budget">[ Budget ]</div>
+        </div>
+        <div class="comp-row">
+          <div>
+            <div class="comp-title">[ Comp Title 3 ]</div>
+            <div class="comp-type">Limited Series · [ Year ]</div>
+          </div>
+          <div class="comp-gross">[ Streaming Deal ]</div>
+          <div class="comp-budget">[ Budget ]</div>
+        </div>
+        <div class="comp-row">
+          <div>
+            <div class="comp-title">[ Comp Title 4 ]</div>
+            <div class="comp-type">Feature · [ Year ]</div>
+          </div>
+          <div class="comp-gross">[ Box Office ]</div>
+          <div class="comp-budget">[ Budget ]</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MATERIALS -->
+  <div class="sec-div"><div class="sd-rule"></div><div class="sd-label">Confidential Materials</div><div class="sd-rule"></div></div>
+  <div class="materials-grid">
+    <div class="mat-card">
+      <div class="mat-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="2" width="14" height="14" rx="1"/><line x1="5" y1="6" x2="13" y2="6"/><line x1="5" y1="9" x2="13" y2="9"/><line x1="5" y1="12" x2="9" y2="12"/></svg>
+      </div>
+      <div class="mat-name">Full Pitch Deck</div>
+      <div class="mat-desc">Complete investor presentation — logline, synopsis, market analysis, financials, team, and distribution strategy.</div>
+      <div class="mat-dl">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 1v6M2 7l3 3 3-3"/><line x1="1" y1="9" x2="9" y2="9"/></svg>
+        Download PDF →
+      </div>
+    </div>
+    <div class="mat-card">
+      <div class="mat-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="14" height="10" rx="1"/><circle cx="9" cy="9" r="2.5"/><path d="M6 4V2M12 4V2"/></svg>
+      </div>
+      <div class="mat-name">Sizzle Reel</div>
+      <div class="mat-desc">Produced trailer and behind-the-scenes package showcasing tone, cast, and production quality.</div>
+      <div class="mat-dl">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="5" cy="5" r="4"/><polygon points="4,3 8,5 4,7" fill="currentColor" stroke="none"/></svg>
+        Watch Reel →
+      </div>
+    </div>
+    <div class="mat-card">
+      <div class="mat-icon">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2h10l2 2v12H4V2z"/><path d="M11 2v4h5"/><line x1="6" y1="9" x2="12" y2="9"/><line x1="6" y1="12" x2="10" y2="12"/></svg>
+      </div>
+      <div class="mat-name">Full Treatment</div>
+      <div class="mat-desc">Complete story treatment, character breakdowns, act structure, and thematic analysis.</div>
+      <div class="mat-dl">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 1v6M2 7l3 3 3-3"/><line x1="1" y1="9" x2="9" y2="9"/></svg>
+        Download PDF →
+      </div>
+    </div>
+  </div>
+
+  <!-- TEAM -->
+  <div class="sec-div"><div class="sd-rule"></div><div class="sd-label">The Team</div><div class="sd-rule"></div></div>
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="tc-role">Writer &amp; Producer</div>
+      <div class="tc-name">[ Your Name ]</div>
+      <div class="tc-bio">[ Your bio — credits, background, what makes you the right person to make this film. This is your credibility statement to the investor. ]</div>
+    </div>
+    <div class="team-card">
+      <div class="tc-role">Director</div>
+      <div class="tc-name">[ Director Name ]</div>
+      <div class="tc-bio">[ Director bio and relevant credits ]</div>
+    </div>
+    <div class="team-card">
+      <div class="tc-role">Key Cast</div>
+      <div class="tc-name">[ Cast Attachment ]</div>
+      <div class="tc-bio">[ Cast details, attachments, or talent interest. Name value = investor confidence. ]</div>
+    </div>
+  </div>
+
+  <!-- INVESTMENT TIERS -->
+  <div class="sec-div"><div class="sd-rule"></div><div class="sd-label">Investment Tiers</div><div class="sd-rule"></div></div>
+  <div class="tiers-grid">
+    <div class="tier-card">
+      <div class="tier-level">TIER 01</div>
+      <div class="tier-title">Associate Producer</div>
+      <div class="tier-range">[ $25K – $50K ]</div>
+      <ul class="tier-perks">
+        <li>On-screen Associate Producer credit</li>
+        <li>Pro-rata equity participation in net profits</li>
+        <li>Invitation to premiere and industry events</li>
+        <li>Quarterly distribution reports</li>
+      </ul>
+      <button class="tier-btn" onclick="selectTier('Associate Producer', '$25,000')">Select This Tier →</button>
+    </div>
+    <div class="tier-card featured">
+      <div class="tier-level">TIER 02</div>
+      <div class="tier-title">Executive Producer</div>
+      <div class="tier-range">[ $50K – $150K ]</div>
+      <ul class="tier-perks">
+        <li>Executive Producer screen credit</li>
+        <li>Enhanced equity participation</li>
+        <li>First position recoupment</li>
+        <li>Set visit + cast/crew access</li>
+        <li>All Tier 01 benefits</li>
+      </ul>
+      <button class="tier-btn" onclick="selectTier('Executive Producer', '$50,000')">Select This Tier →</button>
+    </div>
+    <div class="tier-card">
+      <div class="tier-level">TIER 03</div>
+      <div class="tier-title">Lead Investor</div>
+      <div class="tier-range">[ $150K+ ]</div>
+      <ul class="tier-perks">
+        <li>Lead Investor / Co-Producer credit</li>
+        <li>Preferred equity position + backend</li>
+        <li>Distribution strategy input</li>
+        <li>Co-branded marketing opportunities</li>
+        <li>All prior tier benefits</li>
+      </ul>
+      <button class="tier-btn" onclick="selectTier('Lead Investor', '$150,000')">Select This Tier →</button>
+    </div>
+  </div>
+
+  <!-- PLEDGE FORM -->
+  <div class="sec-div"><div class="sd-rule"></div><div class="sd-label">Submit Your Interest</div><div class="sd-rule"></div></div>
+  <div class="pledge-wrap" id="pledge-wrap">
+    <div class="pledge-title">Make Your Pledge</div>
+    <div class="pledge-sub">Non-binding expression of interest · Full e-sign via DocuSign follows</div>
+    <div class="pledge-form">
+      <div class="pf-field">
+        <label>Investment Amount</label>
+        <input type="text" id="pledge-amount" placeholder="e.g. $50,000">
+      </div>
+      <div class="pf-field">
+        <label>Investor Tier</label>
+        <select id="pledge-tier">
+          <option value="" disabled selected>Select a tier</option>
+          <option>Associate Producer · $25K–$50K</option>
+          <option>Executive Producer · $50K–$150K</option>
+          <option>Lead Investor · $150K+</option>
+        </select>
+      </div>
+      <button class="pledge-btn" onclick="submitPledge()">Submit Interest →</button>
+    </div>
+    <p class="pledge-legal">This is a non-binding expression of interest only. No funds will be transferred at this stage. A full subscription agreement and accreditation verification will be provided via DocuSign within 48 hours. This offering is made only to accredited investors under SEC Rule 506(c).</p>
+  </div>
+
+  <div id="pledge-confirm">
+    <div class="pc-icon">
+      <svg width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="1.5" style="color:var(--green)"><circle cx="20" cy="20" r="17"/><path d="M12 20l6 6 10-12"/></svg>
+    </div>
+    <div class="pc-title">Interest Received</div>
+    <div class="pc-body">YOUR PLEDGE HAS BEEN LOGGED · DOCUSIGN PACKAGE ARRIVING WITHIN 48 HOURS<br>REFERENCE: EVL-DR-001-<span id="pledge-ref"></span></div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function enterDealRoom() {
+  document.getElementById('nda-gate').style.display = 'none';
+  document.getElementById('deal-room').style.display = 'block';
+  document.getElementById('nda-status').style.display = 'flex';
+  window.scrollTo(0, 0);
+}
+
+function selectTier(tier, amount) {
+  document.getElementById('pledge-tier').value = tier + ' · ' + amount.replace('$', '$');
+  const sel = document.getElementById('pledge-tier');
+  for (let opt of sel.options) {
+    if (opt.text.startsWith(tier)) { sel.value = opt.value; break; }
+  }
+  document.getElementById('pledge-amount').value = amount;
+  document.getElementById('pledge-wrap').scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function submitPledge() {
+  const amount = document.getElementById('pledge-amount').value;
+  if (!amount) { document.getElementById('pledge-amount').focus(); return; }
+  document.getElementById('pledge-wrap').style.display = 'none';
+  const ref = Math.random().toString(36).substr(2,8).toUpperCase();
+  document.getElementById('pledge-ref').textContent = ref;
+  document.getElementById('pledge-confirm').style.display = 'block';
+}
+</script>
+
+{% include "_compliance_bar.html" %}
+</body>
+</html>

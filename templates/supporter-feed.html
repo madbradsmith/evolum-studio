@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOLUM — Supporter Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/css/main.css">
+<link rel="stylesheet" href="static/css/portal.css">
+<link rel="stylesheet" href="static/css/evolum_dark.css">
+<style>
+/* ============================================================
+   SUPPORTER — the feed. Mustard. Free, human, warm.
+   ============================================================ */
+body { background: var(--bg); }
+.sup { min-height: 100vh; display: flex; flex-direction: column; }
+.sup-wrap { max-width: 1120px; width: 100%; margin: 0 auto; padding: 0 28px; }
+
+.sup-head { padding: 36px 0 8px; }
+.sup-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--mustard); display: inline-flex; align-items: center; gap: 9px; margin-bottom: 12px; }
+.sup-eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--mustard); }
+.sup-head h1 { font-family: var(--serif); font-style: italic; font-size: clamp(36px, 5vw, 56px); font-weight: 700; letter-spacing: -1.6px; line-height: 0.95; color: var(--text); }
+.sup-head h1 em { font-style: normal; color: var(--mustard); }
+.sup-head .sub { font-family: var(--mono); font-size: 11px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--text-mute); margin-top: 10px; }
+
+/* layout: feed + rail */
+.sup-grid { display: grid; grid-template-columns: 1fr 300px; gap: 28px; margin-top: 28px; align-items: start; }
+
+/* feed column */
+.sup-sec { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 0 0 14px; }
+.sup-sec h2 { font-family: var(--serif); font-style: italic; font-size: 26px; font-weight: 700; letter-spacing: -0.8px; color: var(--text); line-height: 1; }
+.sup-sec h2 em { font-style: normal; color: var(--mustard); }
+.sup-sec .lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 6px; }
+
+.sup-empty {
+    border: 1px dashed var(--border-hi);
+    background: repeating-linear-gradient(135deg, rgba(237, 233, 224,0.015) 0 12px, transparent 12px 24px);
+    padding: 44px 30px; text-align: center;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+.sup-empty .ic { width: 48px; height: 48px; margin: 0 auto 14px; background: var(--mustard-dim); border: 1px solid rgba(196,155,40,0.3); color: var(--mustard); display: flex; align-items: center; justify-content: center; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+.sup-empty .t { font-family: var(--serif); font-style: italic; font-size: 23px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+.sup-empty .d { font-size: 13px; color: var(--text-dim); max-width: 380px; margin: 8px auto 0; line-height: 1.6; }
+.sup-empty .cta { margin-top: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* ghost feed posts */
+.sup-ghosts { margin-top: 26px; display: flex; flex-direction: column; gap: 12px; }
+.sup-ghost { display: grid; grid-template-columns: 44px 1fr; gap: 14px; align-items: start; border: 1px solid var(--border); padding: 16px; opacity: 0.5; }
+.sup-ghost .av { width: 44px; height: 44px; border-radius: 50%; background: rgba(237, 233, 224,0.05); border: 1px solid var(--border); }
+.sup-ghost .lines i { display: block; height: 9px; background: rgba(237, 233, 224,0.06); margin-bottom: 8px; }
+.sup-ghost .lines i:nth-child(1) { width: 30%; height: 7px; }
+.sup-ghost .lines i:nth-child(2) { width: 85%; }
+.sup-ghost .lines i:nth-child(3) { width: 70%; }
+
+/* browse-catalog empty (poster ghosts) */
+.sup-catalog { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 26px; }
+.sup-cat-ghost { aspect-ratio: 2/3; border: 1px solid var(--border); background: rgba(237, 233, 224,0.02); display: flex; align-items: center; justify-content: center; position: relative; }
+.sup-cat-ghost span { font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute); opacity: 0.5; }
+.sup-cat-ghost::after { content: ''; position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); width: 20px; height: 20px; border: 1px solid var(--border-hi); border-radius: 50%; }
+
+/* rail */
+.sup-rail { display: flex; flex-direction: column; gap: 14px; position: sticky; top: 84px; }
+.rail-card { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
+.rail-card .av {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--mustard-dim); border: 1px solid rgba(196,155,40,0.3); color: var(--mustard);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 12px;
+}
+.rail-card .t { font-size: 14px; font-weight: 700; color: var(--text); }
+.rail-card .d { font-size: 12px; color: var(--text-dim); line-height: 1.55; margin-top: 4px; }
+.rail-mini { display: flex; flex-direction: column; gap: 0; margin-top: 6px; }
+.rail-mini-row { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-top: 1px solid var(--border); }
+.rail-mini-row:last-child { border-bottom: 1px solid var(--border); }
+.rail-mini-row .k { font-size: 12px; color: var(--text-dim); display: flex; align-items: center; gap: 9px; }
+.rail-mini-row .k::before { content: ''; width: 6px; height: 6px; background: var(--mustard); flex-shrink: 0; }
+.rail-mini-row .v { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--text); }
+
+.rail-tiers { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.rail-tier { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; border: 1px solid var(--border); font-size: 12px; cursor: pointer; transition: all 0.15s; }
+.rail-tier:hover { border-color: rgba(196,155,40,0.4); background: var(--mustard-dim); }
+.rail-tier .nm { font-weight: 700; color: var(--text); }
+.rail-tier .amt { font-family: var(--mono); font-size: 11px; color: var(--text-mute); letter-spacing: 0.5px; }
+
+@media (max-width: 900px) {
+    .sup-grid { grid-template-columns: 1fr; }
+    .sup-rail { position: static; flex-direction: row; flex-wrap: wrap; }
+    .rail-card { flex: 1; min-width: 240px; }
+    .sup-catalog { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 560px) { .sup-catalog { grid-template-columns: repeat(2, 1fr); } }
+</style>
+</head>
+<body>
+
+<div class="sup" data-screen-label="Supporter — Feed">
+
+    <div class="raise-ticker">
+        <span class="lead"><span class="raise-pulse"></span><strong>Supporter Feed</strong></span>
+        <div class="stream">
+            <span>Free to join</span>
+            <span>Back films at any tier</span>
+            <span><em>Perks straight from the filmmakers</em></span>
+            <span>Follow progress in your feed</span>
+        </div>
+    </div>
+
+    <nav class="portal-nav">
+        <a class="portal-brand" href="/">
+            <div class="portal-brand-mark">E</div>
+            <div>
+                <div class="portal-brand-name">Evolum<span>.</span></div>
+                <div class="portal-brand-sub" data-i18n="sub.supporter">Supporter</div>
+            </div>
+        </a>
+        <div class="portal-nav-links">
+            <span class="portal-nav-link active">My Feed</span>
+            <a class="portal-nav-link" href="/catalog">Browse Catalog</a>
+            <span class="portal-nav-link">Backed</span>
+            <span class="portal-nav-link">Festival</span>
+        </div>
+        <div class="portal-nav-right">
+            <div data-lang-mount></div>
+            <a class="role-chip" href="/"><span class="dot" style="background:var(--mustard)"></span><span data-i18n="role.supporter">Supporter</span><span class="swap">⇄ <span data-i18n="role.switch">switch door</span></span></a>
+        </div>
+    </nav>
+
+    <div class="sup-wrap">
+
+        <div class="sup-head">
+            <div class="sup-eyebrow" data-i18n="sup.eyebrow">Your feed · Nothing followed yet</div>
+            <h1 data-i18n-html="sup.h1">Back the films you <em>believe</em> in.</h1>
+            <div class="sub" data-i18n="sup.sub">Free to join · Any amount · Updates straight from the makers</div>
+        </div>
+
+        <div class="sup-grid">
+
+            <!-- FEED COLUMN -->
+            <div>
+                <!-- Following feed empty -->
+                <div class="sup-sec">
+                    <div>
+                        <div class="lbl">Updates from projects you follow</div>
+                        <h2>Your <em>feed</em>.</h2>
+                    </div>
+                </div>
+                <div class="sup-empty">
+                    <div class="ic">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 20s-7-4.4-9.2-9C1.3 8 3 5 6 5c2 0 3.2 1.4 4 2.6C10.8 6.4 12 5 14 5c3 0 4.7 3 3.2 6-2.2 4.6-9.2 9-9.2 9z" transform="translate(2 0)"/></svg>
+                    </div>
+                    <div class="t">Your feed is quiet — for now.</div>
+                    <div class="d">Follow a project and its updates, behind-the-scenes and perk drops land right here. Start by browsing what's on the slate.</div>
+                    <div class="cta">
+                        <a class="btn-notch" href="/catalog" style="background:var(--mustard); color:var(--text); text-decoration:none;">Browse the catalog →</a>
+                    </div>
+                </div>
+
+                <!-- ghost feed posts -->
+                <div class="sup-ghosts">
+                    <div class="sup-ghost"><div class="av"></div><div class="lines"><i></i><i></i><i></i></div></div>
+                    <div class="sup-ghost"><div class="av"></div><div class="lines"><i></i><i></i><i></i></div></div>
+                </div>
+
+                <!-- Browse catalog — live -->
+                <div class="sup-sec" style="margin-top:48px;">
+                    <div>
+                        <div class="lbl">Everything published, open to all</div>
+                        <h2>On the <em>slate</em>.</h2>
+                    </div>
+                    <a class="portal-nav-link" href="/catalog">See all →</a>
+                </div>
+                <div class="sup-catalog" id="supCatalog"></div>
+            </div>
+
+            <!-- RAIL -->
+            <aside class="sup-rail">
+                <div class="rail-card">
+                    <div class="av">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="9" r="3.2"/><path d="M5.5 19c1-3.2 4-5 6.5-5s5.5 1.8 6.5 5"/></svg>
+                    </div>
+                    <div class="t">Welcome aboard</div>
+                    <div class="d">You're a free supporter. No project backed yet — your impact starts the moment you do.</div>
+                    <div class="rail-mini">
+                        <div class="rail-mini-row"><span class="k">Following</span><span class="v">0</span></div>
+                        <div class="rail-mini-row"><span class="k">Backed</span><span class="v">0</span></div>
+                        <div class="rail-mini-row"><span class="k">Contributed</span><span class="v">$0</span></div>
+                    </div>
+                </div>
+
+                <div class="rail-card">
+                    <div class="t">How backing works</div>
+                    <div class="d" style="margin-bottom:6px;">Pick any tier on a project you love — or name your own amount.</div>
+                    <div class="rail-tiers">
+                        <div class="rail-tier"><span class="nm">Follower</span><span class="amt">Free</span></div>
+                        <div class="rail-tier"><span class="nm">Backer</span><span class="amt">$25+</span></div>
+                        <div class="rail-tier"><span class="nm">Champion</span><span class="amt">$100+</span></div>
+                        <div class="rail-tier"><span class="nm">Name your own</span><span class="amt">Any</span></div>
+                    </div>
+                </div>
+            </aside>
+
+        </div>
+
+    </div>
+
+    <footer class="portal-foot" style="margin-top:56px;">
+        <div class="portal-foot-left">
+            <span class="portal-foot-engine" data-i18n="foot.powered">Powered by</span> <strong style="color:var(--gold);font-weight:500;">Developum AI Engine</strong>
+            <div class="portal-foot-links">
+                <span class="portal-foot-link">Catalog</span>
+                <span class="portal-foot-link">Festival</span>
+                <span class="portal-foot-link">House Rules</span>
+            </div>
+        </div>
+        <div class="portal-foot-links"><span class="portal-foot-link">© EVOLUM Studio</span></div>
+    </footer>
+
+</div>
+
+<script src="static/js/i18n-strings.js"></script>
+<script src="static/js/i18n.js"></script>
+<script src="static/js/projects.js"></script>
+<script src="static/js/slate-render.js"></script>
+<script>
+(function () {
+    // show the first 8 published projects in the supporter catalog grid
+    EVOLUM.renderPosters('#supCatalog', EVOLUM.projects().slice(0, 8));
+    if (window.I18N) I18N.apply(document);
+    window.addEventListener('evolum:langchange', function(){ if (window.I18N) I18N.apply(document); });
+})();
+</script>
+
+
+{% include "_compliance_bar.html" %}
+</body>
+</html>

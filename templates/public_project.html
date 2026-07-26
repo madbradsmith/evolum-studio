@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }} — EVOLUM{% endblock %}
+
+{% block extra_head %}
+<meta name="description" content="{{ project.public_blurb or project.logline or ('An EVOLUM project by ' ~ (filmmaker_name or 'a filmmaker')) }}">
+<meta property="og:title" content="{{ project.title }}">
+<meta property="og:description" content="{{ project.public_blurb or project.logline or '' }}">
+<meta property="og:type" content="video.movie">
+{% if project.poster_url %}<meta property="og:image" content="{{ project.poster_url }}">{% endif %}
+
+<style>
+body { background: var(--bg); min-height: 100vh; }
+
+/* Hero */
+.pp-hero { position: relative; min-height: 78vh; overflow: hidden;
+    display: flex; flex-direction: column; justify-content: flex-end; }
+.pp-hero-bg { position: absolute; inset: 0; z-index: 0; }
+.pp-hero-bg img { width: 100%; height: 100%; object-fit: cover; }
+.pp-hero-bg::after { content: ''; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(7,7,15,0.30) 0%, rgba(7,7,15,0.60) 55%, rgba(7,7,15,0.95) 100%); }
+.pp-hero-inner { position: relative; z-index: 2; padding: 60px 32px 44px; max-width: 1120px; margin: 0 auto; width: 100%; }
+
+.pp-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+.pp-title { font-family: var(--serif); font-style: italic; font-size: clamp(48px, 8vw, 96px); font-weight: 700; letter-spacing: -2px; line-height: 0.95; color: var(--cream); margin-bottom: 16px; }
+.pp-by { font-family: var(--mono); font-size: 11px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--muted); margin-bottom: 24px; }
+.pp-logline { font-family: var(--serif); font-style: italic; font-size: clamp(18px, 2.4vw, 24px); line-height: 1.5; color: var(--text); max-width: 780px; margin-bottom: 28px; }
+.pp-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+.pp-tag { font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); border: 1px solid var(--border); padding: 6px 12px; }
+
+/* Body */
+.pp-body { max-width: 1120px; margin: 0 auto; padding: 48px 32px 80px; }
+
+.pp-section { margin-bottom: 44px; }
+.pp-section-head { font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.pp-section-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Sizzle reel */
+.pp-sizzle-wrap { background: var(--bg-card); border: 1px solid var(--border); clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%); overflow: hidden; }
+.pp-sizzle-wrap video { width: 100%; display: block; }
+.pp-sizzle-iframe { width: 100%; aspect-ratio: 16/9; border: none; display: block; }
+
+/* Support panel */
+.pp-support { display: flex; align-items: center; gap: 20px; padding: 28px 32px; background: var(--bg-card); border: 1px solid var(--gold-border); flex-wrap: wrap;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%); }
+.pp-support-main { flex: 1; min-width: 240px; }
+.pp-support-lbl { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+.pp-support-h { font-family: var(--serif); font-style: italic; font-size: 24px; color: var(--cream); }
+.pp-support-p { font-size: 14px; color: var(--muted); margin-top: 8px; max-width: 520px; line-height: 1.5; }
+.pp-support-btn { font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase;
+    background: var(--gold); color: var(--bg-card); border: none; padding: 18px 32px; text-decoration: none; cursor: pointer; transition: background 0.15s;
+    clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px); }
+.pp-support-btn:hover { background: var(--gold-bright); }
+.pp-support-note { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; color: var(--text-mute); margin-top: 12px; text-transform: uppercase; }
+
+/* Pitch deck download */
+.pp-deck { display: flex; align-items: center; gap: 18px; padding: 22px 28px; background: var(--bg-card); border: 1px solid var(--border);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
+.pp-deck-main { flex: 1; }
+.pp-deck-h { font-size: 16px; font-weight: 700; color: var(--text); }
+.pp-deck-p { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.pp-deck-btn { font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text); border: 1px solid var(--border); padding: 12px 20px; text-decoration: none; transition: all 0.15s;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+.pp-deck-btn:hover { border-color: var(--gold-border); color: var(--gold); }
+
+.pp-empty-msg { color: var(--text-mute); font-style: italic; font-family: var(--serif); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="pp-hero">
+    <div class="pp-hero-bg">
+        {% if project.poster_url %}
+        <img src="{{ project.poster_url }}" alt="{{ project.title }} poster">
+        {% elif project.cover_image_url %}
+        <img src="{{ project.cover_image_url }}" alt="{{ project.title }}">
+        {% endif %}
+    </div>
+    <div class="pp-hero-inner">
+        <div class="pp-eyebrow">{{ project.project_type|capitalize }} · EVOLUM</div>
+        <h1 class="pp-title">{{ project.title }}</h1>
+        {% if filmmaker_name %}<div class="pp-by">By {{ filmmaker_name }}</div>{% endif %}
+        {% if project.logline %}<p class="pp-logline">{{ project.logline }}</p>{% endif %}
+        {% if project.public_blurb and project.public_blurb != project.logline %}
+        <p class="pp-logline" style="opacity:0.85; font-size: clamp(15px, 1.8vw, 18px);">{{ project.public_blurb }}</p>
+        {% endif %}
+        <div class="pp-tags">
+            {% if project.project_type %}<span class="pp-tag">{{ project.project_type }}</span>{% endif %}
+            {% set ad = project.analysis_data or {} %}
+            {% if ad.world %}<span class="pp-tag">{{ ad.world|replace('feature / ', '') }}</span>{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="pp-body">
+
+    {# Sizzle reel — autoplay muted if available #}
+    {% if project.sizzle_path or project.get('_docs', {}).get('sizzle_local_path') %}
+    <div class="pp-section">
+        <div class="pp-section-head">Sizzle Reel</div>
+        <div class="pp-sizzle-wrap">
+            <video src="/project/{{ project.id }}/sizzle" autoplay muted loop playsinline controls></video>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Pitch deck — public download (no NDA) per PI's voice-to-text #}
+    {% if project.deck_url %}
+    <div class="pp-section">
+        <div class="pp-section-head">Pitch Deck</div>
+        <div class="pp-deck">
+            <div class="pp-deck-main">
+                <div class="pp-deck-h">The full pitch — nothing held back</div>
+                <div class="pp-deck-p">The same deck the filmmaker walks into rooms with. Producers, streamers, financiers — this is what they see.</div>
+            </div>
+            <a class="pp-deck-btn" href="{{ project.deck_url }}" target="_blank" rel="noopener">Open Deck →</a>
+        </div>
+    </div>
+    {% endif %}
+
+    {# Support / pledge — filmmaker's own Stripe link, we don't touch the money #}
+    <div class="pp-section">
+        <div class="pp-section-head">Put Some Skin in the Game</div>
+        <div class="pp-support">
+            <div class="pp-support-main">
+                <div class="pp-support-lbl">Straight to the Filmmaker</div>
+                <div class="pp-support-h">Back {{ project.title }} — your pledge lands in the filmmaker's pocket, not ours.</div>
+                <p class="pp-support-p">EVOLUM is the workshop, not the middleman. Stripe carries the payment straight to the filmmaker's account — no cut, no clip, no handling fee taken by us.</p>
+                <div class="pp-support-note">Pledges over $4,999 confirm through Plaid before they clear — keeps everyone honest.</div>
+            </div>
+            {% if project.supporter_stripe_link %}
+            <a class="pp-support-btn" href="{{ project.supporter_stripe_link }}" target="_blank" rel="noopener">Pledge Now →</a>
+            {% else %}
+            <span class="pp-support-btn" style="background:var(--border); color:var(--text-mute); cursor:not-allowed;">Pledge link not set</span>
+            {% endif %}
+        </div>
+    </div>
+
+    {# ── "You could have this too" — quiet conversion nudge for non-users ── #}
+    {% if not current_user.is_authenticated %}
+    <div class="pp-section" style="margin-top:44px;">
+        <div style="display:grid; grid-template-columns:1fr auto; gap:28px; align-items:center; padding:34px 40px; background:linear-gradient(135deg, var(--bg-card), rgba(255,192,64,0.04)); border:1px solid var(--gold-border);
+            clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);">
+            <div>
+                <div style="font-family:var(--mono); font-size:10px; letter-spacing:1.8px; text-transform:uppercase; color:var(--gold); margin-bottom:10px;">Building your own project?</div>
+                <div style="font-family:var(--serif); font-style:italic; font-size:clamp(24px, 3vw, 34px); font-weight:700; color:var(--cream); line-height:1.15; margin-bottom:10px;">Your project could have a page like this — <em style="font-style:normal; color:var(--gold);">tomorrow.</em></div>
+                <div style="color:var(--muted); font-size:14px; line-height:1.6; max-width:520px;">Idea to pitch deck to sizzle reel to public page to pledge button. All in one house. Three days free — cancel anytime, keep your work.</div>
+            </div>
+            <a href="/signup" style="font-family:var(--mono); font-size:11px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; background:var(--gold); color:var(--bg-card); padding:16px 28px; text-decoration:none; white-space:nowrap; transition:background 0.15s;
+                clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);">Open your door →</a>
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

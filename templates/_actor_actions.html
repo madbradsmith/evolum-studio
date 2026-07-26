@@ -1,0 +1,153 @@
+{# Shared partial — wires "Complete profile" + "Notify me of new roles" buttons.
+   Included on /booked-role and /actor-casting. Auth-gated server-side. #}
+
+<!-- Profile Modal -->
+<div id="actorProfileOverlay" style="display:none; position:fixed; inset:0; background:rgba(7,7,15,0.78); backdrop-filter:blur(4px); z-index:9999; align-items:center; justify-content:center; padding:24px;">
+    <div style="background:#0d0d18; border:1px solid #2e2e48; border-radius:10px; width:100%; max-width:560px; padding:32px 36px; max-height:90vh; overflow-y:auto;">
+        <div style="font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:oklch(0.78 0.16 75); margin-bottom:8px;">EVOLUM · Actor Profile</div>
+        <h2 style="font-family:'Cormorant',serif; font-size:32px; font-weight:600; color:oklch(0.93 0.03 90); margin:0 0 22px; letter-spacing:-0.01em;">Complete your <em style="color:oklch(0.78 0.16 75);">profile</em>.</h2>
+
+        <form id="actorProfileForm" style="display:flex; flex-direction:column; gap:14px;">
+            <label style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#6a6778;">Stage name</span>
+                <input type="text" name="stage_name" placeholder="How you want to be credited" required style="background:#07070f; border:1px solid #1e1e2e; color:#ede9e0; padding:11px 14px; font-family:inherit; font-size:14px;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#6a6778;">Union status</span>
+                <select name="union" style="background:#07070f; border:1px solid #1e1e2e; color:#ede9e0; padding:11px 14px; font-family:inherit; font-size:14px;">
+                    <option value="non-union">Non-union</option>
+                    <option value="sag-eligible">SAG-eligible</option>
+                    <option value="sag-aftra">SAG-AFTRA</option>
+                </select>
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#6a6778;">Headshot URL</span>
+                <input type="url" name="headshot_url" placeholder="https://… (Imgur, Cloudinary, your site)" style="background:#07070f; border:1px solid #1e1e2e; color:#ede9e0; padding:11px 14px; font-family:inherit; font-size:14px;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#6a6778;">Reel URL</span>
+                <input type="url" name="reel_url" placeholder="https://vimeo.com/… or https://youtu.be/…" style="background:#07070f; border:1px solid #1e1e2e; color:#ede9e0; padding:11px 14px; font-family:inherit; font-size:14px;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#6a6778;">Agent / representation (optional)</span>
+                <input type="text" name="agent_contact" placeholder="Agency · contact · email" style="background:#07070f; border:1px solid #1e1e2e; color:#ede9e0; padding:11px 14px; font-family:inherit; font-size:14px;">
+            </label>
+            <label style="display:flex; flex-direction:column; gap:5px;">
+                <span style="font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.14em; text-transform:uppercase; color:#6a6778;">Bio (1–2 paragraphs)</span>
+                <textarea name="bio" rows="3" placeholder="Where you trained, what you've worked on, what you're looking for next." style="background:#07070f; border:1px solid #1e1e2e; color:#ede9e0; padding:11px 14px; font-family:inherit; font-size:14px; resize:vertical;"></textarea>
+            </label>
+
+            <div id="actorProfileStatus" style="font-family:'Space Mono',monospace; font-size:11px; min-height:18px; color:#6a6778;"></div>
+
+            <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:6px;">
+                <button type="button" id="actorProfileCancel" style="padding:11px 22px; border:1px solid #2e2e48; background:transparent; color:#6a6778; cursor:pointer; font-family:'Space Mono',monospace; font-size:11px; letter-spacing:0.12em; text-transform:uppercase;">Cancel</button>
+                <button type="submit" style="padding:11px 28px; border:1px solid oklch(0.78 0.16 75 / 0.32); background:oklch(0.78 0.16 75); color:#07070f; cursor:pointer; font-family:'Space Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.12em; text-transform:uppercase;">Save Profile →</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+(function(){
+    const overlay = document.getElementById('actorProfileOverlay');
+    const form = document.getElementById('actorProfileForm');
+    const status = document.getElementById('actorProfileStatus');
+    const cancelBtn = document.getElementById('actorProfileCancel');
+
+    function openProfile() { overlay.style.display = 'flex'; }
+    function closeProfile() { overlay.style.display = 'none'; status.textContent = ''; }
+
+    // Pre-fill from server if profile exists
+    fetch('/api/profile', { credentials: 'same-origin' })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (!data) return;
+            for (const [k, v] of Object.entries(data)) {
+                const el = form.elements[k];
+                if (el && v) el.value = v;
+            }
+        })
+        .catch(() => {});
+
+    // Wire all Complete profile buttons
+    document.querySelectorAll('[data-action="profile"]').forEach(btn => {
+        btn.addEventListener('click', openProfile);
+    });
+
+    // Cancel + click-outside dismiss
+    cancelBtn.addEventListener('click', closeProfile);
+    overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) closeProfile();
+    });
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && overlay.style.display === 'flex') closeProfile();
+    });
+
+    // Submit
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(form));
+        status.textContent = 'Saving…';
+        status.style.color = '#6a6778';
+        try {
+            const r = await fetch('/api/profile', {
+                method: 'POST',
+                credentials: 'same-origin',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(data)
+            });
+            if (r.ok) {
+                status.textContent = '✓ Saved.';
+                status.style.color = 'oklch(0.72 0.18 145)';
+                setTimeout(closeProfile, 1100);
+            } else {
+                const d = await r.json().catch(() => ({}));
+                status.textContent = d.error || 'Save failed — try again.';
+                status.style.color = 'oklch(0.62 0.20 24)';
+            }
+        } catch (err) {
+            status.textContent = 'Network error.';
+            status.style.color = 'oklch(0.62 0.20 24)';
+        }
+    });
+
+    // Notify me of new roles — toggle subscription flag
+    document.querySelectorAll('[data-action="notify"]').forEach(btn => {
+        const original = btn.textContent;
+        btn.addEventListener('click', async () => {
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
+            try {
+                const r = await fetch('/api/toggle-notify', {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                });
+                if (r.ok) {
+                    const data = await r.json();
+                    btn.textContent = data.notify_new_roles ? '✓ Notifications on' : 'Notify me of new roles';
+                } else {
+                    btn.textContent = 'Failed — try again';
+                    setTimeout(() => { btn.textContent = original; }, 2400);
+                }
+            } catch (e) {
+                btn.textContent = 'Network error';
+                setTimeout(() => { btn.textContent = original; }, 2400);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+    });
+
+    // On load, reflect current notify state on the buttons
+    fetch('/api/auth/me', { credentials: 'same-origin' })
+        .then(r => r.ok ? r.json() : null)
+        .then(data => {
+            if (data && data.notify_new_roles) {
+                document.querySelectorAll('[data-action="notify"]').forEach(btn => {
+                    btn.textContent = '✓ Notifications on';
+                });
+            }
+        })
+        .catch(() => {});
+})();
+</script>

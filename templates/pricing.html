@@ -1,0 +1,144 @@
+{% extends "_legal_layout.html" %}
+
+{% block title %}Pricing — EVOLUM{% endblock %}
+{% block eyebrow %}EVOLUM · Pricing{% endblock %}
+{% block heading %}Pick the room that <em>fits</em>.{% endblock %}
+{% block effective_date %}Five plans · 3-day trial on every one · Cancel anytime{% endblock %}
+
+{% block content %}
+
+<style>
+.price-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;margin:32px 0 28px}
+@media (min-width:920px){.price-grid{grid-template-columns:repeat(4,1fr)}}
+.price-card{
+  background:var(--surface);border:1px solid var(--border);
+  padding:28px 22px;display:flex;flex-direction:column;
+  transition:transform .15s, border-color .15s;
+}
+.price-card:hover{transform:translateY(-3px);border-color:var(--gm)}
+.price-card.featured{border-color:var(--gm);box-shadow:0 0 28px rgba(0,0,0,.4)}
+.price-name{font-family:'Cormorant',serif;font-size:24px;font-weight:600;color:var(--cream);margin-bottom:4px;letter-spacing:-0.01em}
+.price-tag{font-family:'Cormorant',serif;font-style:italic;font-size:14px;color:var(--muted);min-height:42px;margin-bottom:20px;line-height:1.4}
+.price-amount{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);margin-bottom:20px}
+.price-list{list-style:none;padding:0;margin:0 0 22px;flex-grow:1}
+.price-list li{font-size:14px;color:var(--text);padding:5px 0 5px 18px;position:relative;margin:0;line-height:1.5}
+.price-list li::before{content:'→';color:var(--gold);position:absolute;left:0;font-family:'Space Mono',monospace}
+.price-cta{
+  display:block;width:100%;text-align:center;
+  padding:11px;background:transparent;color:var(--gold);
+  border:1px solid var(--gm);font-family:'Space Mono',monospace;
+  font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;
+  transition:all .15s;
+}
+.price-cta:hover{background:var(--gg);border-color:var(--gold)}
+.price-foot{text-align:center;margin-top:20px;color:var(--muted);font-size:13px;font-family:'Cormorant',serif;font-style:italic}
+.price-faq{margin-top:64px}
+</style>
+
+<p>EVOLUM is built for independent filmmakers who want to actually finish projects — not study them. Pick the tier that matches the room you're working in. Every plan includes a three-day free trial, and you can cancel from the billing page at any time. Subscriptions are billed monthly through Stripe.</p>
+
+<div class="price-grid">
+
+  <div class="price-card">
+    <div class="price-name">Solo</div>
+    <div class="price-tag">You, a script, and everything you need to sell it.</div>
+    <div class="price-amount">Subscription</div>
+    <ul class="price-list">
+      <li>Script analyzer</li>
+      <li>Pitch deck generator</li>
+      <li>Self-tape prep</li>
+      <li>Booked-role packet</li>
+      <li>Project Room (1 active project)</li>
+    </ul>
+    <a class="price-cta" href="/billing">Start Solo →</a>
+  </div>
+
+  <div class="price-card featured">
+    <div class="price-name">Studio</div>
+    <div class="price-tag">A slate of your own — run three, five, ten at once.</div>
+    <div class="price-amount">Subscription</div>
+    <ul class="price-list">
+      <li>Everything in Solo</li>
+      <li>Multiple active projects</li>
+      <li>Higher image generation cap</li>
+      <li>Priority compute on long runs</li>
+    </ul>
+    <a class="price-cta" href="/billing">Start Studio →</a>
+  </div>
+
+  <div class="price-card">
+    <div class="price-name">Writer's Room</div>
+    <div class="price-tag">Pull in your co-writers, your producer, your partner in crime.</div>
+    <div class="price-amount">Subscription</div>
+    <ul class="price-list">
+      <li>Everything in Studio</li>
+      <li>Shared workspace</li>
+      <li>Collaborator seats</li>
+      <li>Project handoff tools</li>
+    </ul>
+    <a class="price-cta" href="/billing">Start Writer's Room →</a>
+  </div>
+
+  <div class="price-card">
+    <div class="price-name">Production Co.</div>
+    <div class="price-tag">A whole shingle running on this. No cap, no ceiling.</div>
+    <div class="price-amount">Subscription</div>
+    <ul class="price-list">
+      <li>Everything in Writer's Room</li>
+      <li>Unlimited active projects</li>
+      <li>Highest image generation cap</li>
+      <li>Direct support channel</li>
+    </ul>
+    <a class="price-cta" href="/billing">Start Production Co. →</a>
+  </div>
+
+  <div class="price-card">
+    <div class="price-name">Above the Line</div>
+    <div class="price-tag">Producer · DP · Director. Built for the folks running the room.</div>
+    <div class="price-amount">$49/mo · Subscription</div>
+    <ul class="price-list">
+      <li>Craft-picker workspace</li>
+      <li>Full project pipeline</li>
+      <li>Team collaborator seats</li>
+      <li>Deliverables room</li>
+    </ul>
+    <a class="price-cta" href="/billing">Start Above the Line →</a>
+  </div>
+
+</div>
+
+<p class="price-foot">Exact monthly prices appear at checkout. Secure payment by Stripe — your card details never touch our servers.</p>
+
+<div class="price-faq">
+  <h2>The basics</h2>
+
+  <h3>How the trial works</h3>
+  <p>Every plan starts with a three-day trial. You enter your card at signup so the subscription can roll over automatically when the trial ends. <strong>Cancel before the trial closes</strong> from the billing page and you won't be charged.</p>
+
+  <h3>Changing plans</h3>
+  <p>Upgrades take effect immediately and are pro-rated. Downgrades take effect at the next billing cycle. You can change plans as many times as you want from the <a href="/billing">Billing</a> page.</p>
+
+  <h3>Cancellation</h3>
+  <p>Cancel anytime from the billing page. Your tools stay active until the end of the current billing period — you don't lose access mid-cycle, and you can reactivate the same account if you come back.</p>
+
+  <h3>Refunds</h3>
+  <p>Subscriptions are non-refundable for a billing period once a charge has succeeded. If you believe a charge was made in error or you were charged after canceling, contact <a href="mailto:madbradsmith@gmail.com">madbradsmith@gmail.com</a> and we'll review it.</p>
+
+  <h3>What's NOT included</h3>
+  <p>EVOLUM doesn't take a cut of pledges, investments, or supporter contributions. Those funds move between filmmakers and their backers directly — we are the workshop, not the broker. We also don't sell your data or train external AI models on your screenplays. See the <a href="/privacy">Privacy Policy</a> for what we do and don't do with what you upload.</p>
+
+  <h3>Have a question we missed?</h3>
+  <p>Read the <a href="/faq">FAQ</a> or email <a href="mailto:madbradsmith@gmail.com">madbradsmith@gmail.com</a>.</p>
+</div>
+
+{# ── Bottom conversion CTA — someone who scrolled the whole pricing page is a warm lead ── #}
+<div style="margin:64px 0 32px; padding:44px 40px; background:linear-gradient(135deg, var(--surface), rgba(255,192,64,0.06)); border:1px solid var(--gm); text-align:center;">
+  <div style="font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold); margin-bottom:14px;">Three days · No credit charge · Cancel anytime</div>
+  <div style="font-family:'Cormorant',serif; font-style:italic; font-size:clamp(30px,4vw,44px); font-weight:600; color:var(--cream); letter-spacing:-0.01em; margin-bottom:12px;">Stop reading. <em style="color:var(--gold);">Start building.</em></div>
+  <p style="color:var(--muted); font-size:15px; line-height:1.6; max-width:560px; margin:0 auto 26px;">Every day you spend deciding is a day you're not developing. Open your door, pick your plan on the other side, and put the workshop to work.</p>
+  <a href="/signup" style="display:inline-block; font-family:'Space Mono',monospace; font-size:11px; font-weight:700; letter-spacing:0.14em; text-transform:uppercase; background:var(--gold); color:#07070f; padding:16px 34px; text-decoration:none; transition:background 0.15s;">Start your 3-day trial →</a>
+</div>
+
+<p style="margin-top:48px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">© 2026 EVOLUM · A division of Developum AI Engine</p>
+
+{% endblock %}

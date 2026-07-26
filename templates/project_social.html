@@ -1,0 +1,486 @@
+{% extends "base.html" %}
+
+{% block title %}EVOLUM — Project{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ============================================================
+   PROJECT ROOM — the social hub for each project.
+   Follow · cheer · comment · back · share.
+   ============================================================ */
+body { background: var(--bg); }
+.room { min-height: 100vh; display: flex; flex-direction: column; }
+
+/* ── Nav ── */
+.room-nav {
+    display: flex; align-items: center; gap: 18px;
+    padding: 0 28px; height: 56px;
+    background: rgba(7, 7, 15,0.92); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+}
+.room-back { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--text-mute); text-decoration: none; transition: color 0.15s; }
+.room-back:hover { color: var(--gold); }
+.room-nav-sep { width: 1px; height: 20px; background: var(--border); }
+.room-nav-title { font-family: var(--serif); font-style: italic; font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 320px; }
+.room-nav-right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+/* ── HERO ── */
+.room-hero { position: relative; min-height: 420px; overflow: hidden; background: var(--text); }
+.room-hero-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%; }
+.room-hero-vignette {
+    position: absolute; inset: 0;
+    background:
+        linear-gradient(to bottom, rgba(15,10,6,0.24) 0%, transparent 30%, rgba(15,10,6,0.85) 75%, rgba(15,10,6,0.97) 100%),
+        linear-gradient(to right, rgba(15,10,6,0.55) 0%, transparent 60%);
+}
+.room-hero-content {
+    position: relative; z-index: 2;
+    padding: 32px 44px 36px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    min-height: 420px;
+}
+.room-hero-stamp {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: rgba(255,236,206,0.6); margin-bottom: 16px;
+}
+.room-hero-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+.room-hero-title {
+    font-family: var(--serif); font-style: italic; font-weight: 700;
+    font-size: clamp(40px, 6vw, 80px); letter-spacing: -2.4px; line-height: 0.92;
+    color: rgba(255,236,206,0.98); max-width: 800px;
+}
+.room-hero-spec {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: rgba(255,236,206,0.55); margin-top: 14px; display: flex; gap: 16px; flex-wrap: wrap;
+}
+.room-hero-spec span::after { content: '·'; margin-left: 16px; opacity: 0.4; }
+.room-hero-spec span:last-child::after { content: ''; }
+
+/* ── SOCIAL BAR ── */
+.room-social-bar {
+    background: var(--bg-panel); border-bottom: 1px solid var(--border);
+    padding: 0 44px;
+    display: flex; align-items: center; gap: 6px;
+    overflow-x: auto; scrollbar-width: none;
+}
+.room-social-bar::-webkit-scrollbar { display: none; }
+.room-soc-btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--mono); font-size: 10px; font-weight: 500; letter-spacing: 1.3px; text-transform: uppercase;
+    color: var(--text-dim); background: transparent; border: none;
+    padding: 14px 16px; cursor: pointer; transition: color 0.15s;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    flex-shrink: 0;
+}
+.room-soc-btn:hover { color: var(--text); }
+.room-soc-btn.on { color: var(--gold); border-bottom-color: var(--gold); }
+.room-soc-btn.cheer-on { color: var(--green); border-bottom-color: var(--green); }
+.room-soc-btn .ic { font-size: 13px; line-height: 1; }
+.room-soc-btn .ct { color: var(--text-mute); margin-left: 1px; }
+.room-soc-bar-right { margin-left: auto; display: flex; gap: 0; }
+
+/* ── BODY ── */
+.room-body { max-width: 1100px; margin: 0 auto; width: 100%; padding: 40px 28px 80px; display: grid; grid-template-columns: 1fr 320px; gap: 40px; align-items: start; }
+
+/* main */
+.room-logline {
+    font-family: var(--serif); font-style: italic; font-size: 21px; font-weight: 300;
+    line-height: 1.55; color: var(--text); letter-spacing: -0.2px;
+    border-left: 4px solid var(--gold); padding-left: 18px; margin-bottom: 32px;
+}
+.room-theme {
+    font-family: var(--mono); font-size: 11px; color: var(--text-mute); letter-spacing: 0.8px;
+    line-height: 1.6; border: 1px solid var(--border); padding: 14px 16px; margin-bottom: 36px;
+    background: var(--bg-card); font-style: italic;
+}
+.room-theme::before { content: '"'; color: var(--gold); font-size: 20px; font-style: normal; line-height: 0.5; vertical-align: -6px; margin-right: 4px; }
+.room-theme::after  { content: '"'; color: var(--gold); font-size: 20px; font-style: normal; line-height: 0.5; vertical-align: -6px; margin-left: 4px; }
+
+.room-section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+.room-section-title { font-family: var(--serif); font-style: italic; font-size: 26px; font-weight: 700; letter-spacing: -0.6px; color: var(--text); line-height: 1; }
+.room-section-title em { font-style: normal; color: var(--gold); }
+.room-section-lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 6px; }
+
+/* Updates wall */
+.room-updates-empty {
+    border: 1px dashed var(--border-hi); padding: 40px 28px; text-align: center;
+    background: repeating-linear-gradient(135deg, rgba(237, 233, 224,0.015) 0 12px, transparent 12px 24px);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}
+.room-updates-empty .t { font-family: var(--serif); font-style: italic; font-size: 20px; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; }
+.room-updates-empty .d { font-size: 13px; color: var(--text-mute); max-width: 360px; margin: 0 auto; line-height: 1.6; }
+
+/* Comments */
+.comment-input-row {
+    display: flex; gap: 10px; align-items: flex-start; margin-bottom: 20px;
+}
+.comment-avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--bg-hover); border: 1px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--text-mute); }
+.comment-input {
+    flex: 1; background: var(--bg-card); border: 1px solid var(--border-hi);
+    padding: 10px 14px; font-size: 13px; color: var(--text); font-family: var(--font);
+    border-radius: 0; resize: none; height: 44px; transition: all 0.15s;
+}
+.comment-input::placeholder { color: var(--text-mute); font-style: italic; }
+.comment-input:focus { border-color: var(--gold-border); height: 80px; outline: none; }
+.comment-send { padding: 10px 16px; background: var(--gold); color: var(--bg-card); border: none; font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; font-weight: 600; cursor: pointer; clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%, 0 6px); transition: background 0.15s; align-self: flex-end; }
+.comment-send:hover { background: var(--gold-bright); }
+.comment-thread-empty { font-family: var(--serif); font-style: italic; font-size: 14px; color: var(--text-mute); padding: 16px 0; }
+.comment-post {
+    display: flex; gap: 12px; padding: 14px 0; border-top: 1px solid var(--border); align-items: flex-start;
+}
+.comment-post-meta { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 6px; }
+.comment-post-text { font-size: 14px; color: var(--text); line-height: 1.55; }
+
+/* ── SIDEBAR ── */
+.room-sidebar { display: flex; flex-direction: column; gap: 16px; position: sticky; top: 80px; }
+.room-stat-card { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
+.room-stat-card-title { font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 12px; }
+.room-stat-row { display: flex; align-items: baseline; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.room-stat-row:last-child { border-bottom: none; }
+.room-stat-k { font-size: 13px; color: var(--text-dim); }
+.room-stat-v { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+
+/* Back/pledge CTA */
+.room-back-cta { background: var(--bg-card); border: 1px solid var(--border); padding: 20px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
+.room-back-cta .h { font-family: var(--serif); font-style: italic; font-size: 20px; font-weight: 700; letter-spacing: -0.4px; color: var(--text); margin-bottom: 8px; }
+.room-back-cta .d { font-size: 12px; color: var(--text-dim); line-height: 1.55; margin-bottom: 16px; }
+.room-back-tiers { display: flex; flex-direction: column; gap: 6px; }
+.room-back-tier { display: flex; align-items: center; justify-content: space-between; padding: 9px 10px; border: 1px solid var(--border); cursor: pointer; transition: all 0.15s; font-size: 13px; }
+.room-back-tier:hover { border-color: var(--gold-border); background: var(--gold-dim); }
+.room-back-tier .nm { font-weight: 600; color: var(--text); }
+.room-back-tier .amt { font-family: var(--mono); font-size: 11px; color: var(--text-mute); }
+
+/* supporters empty */
+.supporters-empty { text-align: center; padding: 24px 0; }
+.supporters-empty .t { font-family: var(--serif); font-style: italic; font-size: 16px; color: var(--text-dim); margin-bottom: 6px; }
+.supporters-empty .d { font-size: 12px; color: var(--text-mute); line-height: 1.55; }
+
+/* maker card */
+.maker-card { background: var(--bg-card); border: 1px solid var(--border); padding: 18px; display: flex; align-items: center; gap: 14px; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); }
+.maker-av { width: 44px; height: 44px; border-radius: 50%; background: var(--bg-hover); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; color: var(--text-mute); flex-shrink: 0; }
+.maker-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.maker-role { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); margin-top: 3px; }
+
+@media (max-width: 860px) {
+    .room-body { grid-template-columns: 1fr; }
+    .room-sidebar { position: static; }
+    .room-hero-content { padding: 24px 20px 28px; min-height: 300px; }
+    .room-social-bar { padding: 0 20px; }
+}
+
+/* ── MOBILE ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .room-nav { padding: 0 16px; height: 50px; }
+    .room-nav-title { max-width: 140px; font-size: 14px; }
+    .room-hero { min-height: 280px; }
+    .room-hero-content { padding: 18px 16px 22px; min-height: 280px; }
+    .room-hero-title { font-size: clamp(28px, 9vw, 50px); letter-spacing: -1.2px; }
+    .room-hero-spec { font-size: 9px; letter-spacing: 1px; gap: 10px; }
+    .room-hero-stamp { font-size: 8px; margin-bottom: 10px; }
+    .room-hero-tags { gap: 4px; }
+
+    .room-social-bar { padding: 0 10px; }
+    .room-soc-btn { padding: 12px 10px; font-size: 9px; letter-spacing: 0.8px; gap: 5px; }
+
+    .room-body { padding: 22px 16px 56px; gap: 24px; }
+    .room-logline { font-size: 16px; line-height: 1.5; padding-left: 12px; margin-bottom: 20px; }
+    .room-theme { font-size: 10px; padding: 11px 12px; }
+    .room-section-title { font-size: 22px; letter-spacing: -0.4px; }
+    .room-updates-empty { padding: 28px 16px; }
+    .room-updates-empty .t { font-size: 17px; }
+
+    .comment-input-row { flex-wrap: wrap; gap: 8px; }
+    .comment-input { width: 100%; }
+    .comment-send { width: 100%; padding: 12px; clip-path: none; justify-content: center; display: flex; }
+
+    .room-back-cta .h { font-size: 17px; }
+    .room-back-tier { padding: 12px 10px; min-height: 44px; }
+    .share-box { width: calc(100% - 24px); }
+    .share-card { grid-template-columns: 52px 1fr; gap: 10px; }
+    .share-platforms { flex-direction: column; gap: 6px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="room" data-screen-label="Project Room">
+
+    <!-- Nav -->
+    <nav class="room-nav">
+        <a class="room-back" href="/the-lot">← The Lot</a>
+        <div class="room-nav-sep"></div>
+        <div class="room-nav-title" id="navTitle">Loading…</div>
+        <div class="room-nav-right">
+            <div data-lang-mount></div>
+            {% if current_user.is_authenticated %}
+            <a class="btn-notch btn-notch-ghost btn-notch-sm" href="/logout">Sign Out</a>
+            {% else %}
+            <a class="btn-notch btn-notch-ghost btn-notch-sm" href="/sign-in">Sign In</a>
+            {% endif %}
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <div class="room-hero" id="roomHero"></div>
+
+    <!-- Social bar -->
+    <div class="room-social-bar" id="socialBar"></div>
+
+    <!-- Body -->
+    <div class="room-body">
+        <div class="room-main" id="roomMain"></div>
+        <aside class="room-sidebar" id="roomSidebar"></aside>
+    </div>
+
+    <!-- Footer -->
+    <footer class="portal-foot">
+        <div class="portal-foot-left">
+            <span class="portal-foot-engine">Powered by <strong>Developum AI Engine</strong></span>
+        </div>
+        <div class="portal-foot-links">
+            <a class="portal-foot-link" href="/the-lot">The Lot</a>
+            <a class="portal-foot-link" href="/catalog">Catalog</a>
+            <span class="portal-foot-link">© EVOLUM Studio</span>
+        </div>
+    </footer>
+
+</div>
+
+<!-- Share modal -->
+<div class="share-overlay" id="shareOverlay" onclick="if(event.target===this)closeShare()">
+    <div class="share-box">
+        <div class="share-box-top">
+            <div class="share-title">Share this project</div>
+            <button class="share-close" onclick="closeShare()">×</button>
+        </div>
+        <div class="share-card">
+            <div class="share-card-poster" id="shareCardPoster"></div>
+            <div>
+                <div class="share-card-title" id="shareCardTitle"></div>
+                <div class="share-card-kind" id="shareCardKind"></div>
+                <div class="share-card-logline" id="shareCardLogline"></div>
+                <div class="share-card-link" id="shareCardLink"></div>
+            </div>
+        </div>
+        <div class="share-actions">
+            <div class="share-copy">
+                <div class="share-copy-url" id="shareUrl"></div>
+                <button class="share-copy-btn" id="shareCopyBtn" onclick="copyLink()">Copy link</button>
+            </div>
+            <div class="share-platforms">
+                <a class="share-platform" id="shareX" href="#" target="_blank" rel="noopener">Post to X / Twitter</a>
+                <a class="share-platform" id="shareIG" href="#" target="_blank" rel="noopener">Instagram caption</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+<script>
+(function () {
+    const e = EVOLUM.esc;
+    const projects = EVOLUM.projects();
+
+    // resolve project from URL param ?id=
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    const p = (id && projects.find(x => x.id === id)) || projects.find(x => x.statusLabel === 'Seeking Support') || projects[0];
+    if (!p) return;
+
+    document.title = 'EVOLUM — ' + p.title;
+    document.getElementById('navTitle').textContent = p.title;
+
+    // ── HERO ──
+    const hero = document.getElementById('roomHero');
+    hero.innerHTML = `
+        ${p.poster ? `<img class="room-hero-img" src="${e(p.poster)}" alt="${e(p.title)}">` :
+          `<div class="ev-pa ev-pa-${e(p.tone||'ember')}" style="position:absolute;inset:0;"></div>`}
+        <div class="room-hero-vignette"></div>
+        <div class="room-hero-content">
+            <div class="room-hero-stamp">EV / ${e(p.num)} · EVOLUM Portal</div>
+            <div class="room-hero-tags">
+                <span class="mono-tag mono-tag-ember">${e(p.statusLabel)}</span>
+                <span class="mono-tag mono-tag-ghost">${e(p.kind)}</span>
+                ${p.genre ? `<span class="mono-tag mono-tag-ghost">${e(p.genre)}</span>` : ''}
+            </div>
+            <div class="room-hero-title">${e(p.title)}</div>
+            <div class="room-hero-spec">
+                <span>${e(p.kind)}</span>
+                ${p.genre ? `<span>${e(p.genre)}</span>` : ''}
+                ${p.pages ? `<span>${p.pages} pages</span>` : ''}
+                ${p.protagonist ? `<span>Lead: ${e(p.protagonist)}</span>` : ''}
+            </div>
+        </div>`;
+
+    // ── SOCIAL BAR ──
+    const bar = document.getElementById('socialBar');
+    bar.innerHTML = `
+        <button class="room-soc-btn" id="btnFollow" onclick="toggle(this,'on','followed','+ Follow','✓ Following')">
+            <span class="ic">+</span> Follow <span class="ct" id="ctFollow">0</span>
+        </button>
+        <button class="room-soc-btn" id="btnCheer" onclick="toggle(this,'cheer-on','cheered','✦ Cheer','✦ Cheered')">
+            <span class="ic">✦</span> Cheer <span class="ct" id="ctCheer">0</span>
+        </button>
+        <button class="room-soc-btn" onclick="document.getElementById('commentInput').focus(); document.getElementById('commentInput').scrollIntoView({block:'center'})">
+            <span class="ic">💬</span> Comment
+        </button>
+        <div class="room-soc-bar-right">
+            <button class="room-soc-btn" onclick="openShare()"><span class="ic">↗</span> Share</button>
+        </div>`;
+
+    // ── MAIN ──
+    const main = document.getElementById('roomMain');
+    main.innerHTML = `
+        ${p.logline ? `<div class="room-logline">${e(p.logline)}</div>` : ''}
+        ${p.theme ? `<div class="room-theme">${e(p.theme)}</div>` : ''}
+
+        <div style="margin-bottom:40px;">
+            <div class="room-section-head">
+                <div>
+                    <div class="room-section-lbl">From the filmmaker</div>
+                    <div class="room-section-title">Updates.</div>
+                </div>
+            </div>
+            <div class="room-updates-empty">
+                <div class="t">Nothing posted yet.</div>
+                <div class="d">When the filmmaker shares an update — a milestone, a table read, a casting note, a photo from the set — it lands here.</div>
+            </div>
+        </div>
+
+        <div>
+            <div class="room-section-head">
+                <div>
+                    <div class="room-section-lbl">Everyone watching this project</div>
+                    <div class="room-section-title">Comments.</div>
+                </div>
+            </div>
+            <div class="comment-input-row">
+                <div class="comment-avatar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="9" r="3.2"/><path d="M5.5 19c1-3.2 4-5 6.5-5s5.5 1.8 6.5 5"/></svg>
+                </div>
+                <textarea id="commentInput" class="comment-input" placeholder="Say something about this project…" rows="1"></textarea>
+                <button class="comment-send" onclick="postComment()">Post</button>
+            </div>
+            <div id="commentThread"><div class="comment-thread-empty">No comments yet. Be the first.</div></div>
+        </div>`;
+
+    // ── SIDEBAR ──
+    const sidebar = document.getElementById('roomSidebar');
+    sidebar.innerHTML = `
+        <div class="room-back-cta">
+            <div class="h">Back this project.</div>
+            <div class="d">Support it at any level. Your name goes on the wall and you follow every update from here.</div>
+            <div class="room-back-tiers">
+                <div class="room-back-tier"><span class="nm">Follower</span><span class="amt">Free</span></div>
+                <div class="room-back-tier"><span class="nm">Backer</span><span class="amt">$25+</span></div>
+                <div class="room-back-tier"><span class="nm">Champion</span><span class="amt">$100+</span></div>
+                <div class="room-back-tier"><span class="nm">Name your own</span><span class="amt">Any</span></div>
+            </div>
+        </div>
+
+        <div class="room-stat-card">
+            <div class="room-stat-card-title">This project</div>
+            <div class="room-stat-row"><span class="room-stat-k">Status</span><span class="room-stat-v">${e(p.statusLabel)}</span></div>
+            <div class="room-stat-row"><span class="room-stat-k">Format</span><span class="room-stat-v">${e(p.kind)}</span></div>
+            ${p.genre ? `<div class="room-stat-row"><span class="room-stat-k">Genre</span><span class="room-stat-v">${e(p.genre)}</span></div>` : ''}
+            ${p.pages ? `<div class="room-stat-row"><span class="room-stat-k">Pages</span><span class="room-stat-v">${p.pages}</span></div>` : ''}
+            <div class="room-stat-row"><span class="room-stat-k">Pitch deck</span><span class="room-stat-v">${p.hasDeck ? 'Ready' : 'In progress'}</span></div>
+            <div class="room-stat-row"><span class="room-stat-k">Followers</span><span class="room-stat-v" id="sidebarFollowCt">0</span></div>
+        </div>
+
+        <div class="room-stat-card">
+            <div class="room-stat-card-title">The maker</div>
+            <div class="maker-card">
+                <div class="maker-av">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="9" r="3.2"/><path d="M5.5 19c1-3.2 4-5 6.5-5s5.5 1.8 6.5 5"/></svg>
+                </div>
+                <div>
+                    <div class="maker-name">1 maker</div>
+                    <div class="maker-role">Filmmaker · on the lot</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="room-stat-card">
+            <div class="room-stat-card-title">Supporters</div>
+            <div class="supporters-empty">
+                <div class="t">No supporters yet.</div>
+                <div class="d">Be the first to back this one.</div>
+            </div>
+        </div>`;
+
+    if (window.I18N) I18N.apply(document);
+
+    // ── Follow / Cheer ──
+    window.toggle = function(btn, cls, storageKey, offLabel, onLabel) {
+        const on = btn.classList.toggle(cls);
+        const ctEl = btn.querySelector('.ct');
+        if (ctEl) {
+            const cur = parseInt(ctEl.textContent || '0');
+            ctEl.textContent = on ? cur + 1 : Math.max(0, cur - 1);
+        }
+        // update sidebar follow count
+        const sf = document.getElementById('sidebarFollowCt');
+        const followBtn = document.getElementById('btnFollow');
+        if (sf && followBtn) sf.textContent = followBtn.classList.contains('on') ? '1' : '0';
+    };
+
+    // ── Comment ──
+    window.postComment = function() {
+        const input = document.getElementById('commentInput');
+        const text = (input.value || '').trim();
+        if (!text) return;
+        const thread = document.getElementById('commentThread');
+        thread.querySelector('.comment-thread-empty') && (thread.innerHTML = '');
+        const post = document.createElement('div');
+        post.className = 'comment-post';
+        const now = new Date();
+        post.innerHTML = `
+            <div class="comment-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--bg-hover);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="9" r="3.2"/><path d="M5.5 19c1-3.2 4-5 6.5-5s5.5 1.8 6.5 5"/></svg>
+            </div>
+            <div>
+                <div class="comment-post-meta">You · just now</div>
+                <div class="comment-post-text">${EVOLUM.esc(text)}</div>
+            </div>`;
+        thread.appendChild(post);
+        input.value = '';
+        input.style.height = '44px';
+        input.blur();
+    };
+
+    // ── Share ──
+    window.openShare = function() {
+        const url = window.location.host + '/project/' + p.id.slice(0, 8);
+        document.getElementById('shareCardTitle').textContent = p.title;
+        document.getElementById('shareCardKind').textContent = p.kind + (p.genre ? ' · ' + p.genre : '');
+        document.getElementById('shareCardLogline').textContent = p.logline || '';
+        document.getElementById('shareCardLink').textContent = url;
+        document.getElementById('shareUrl').textContent = url;
+        document.getElementById('shareCardPoster').innerHTML = p.poster
+            ? `<img src="${e(p.poster)}" style="width:100%;height:100%;object-fit:cover;">`
+            : `<div class="ev-pa ev-pa-${p.tone||'ember'}" style="position:absolute;inset:0;"></div>`;
+        const text = encodeURIComponent('"' + p.title + '" is in development on EVOLUM.' + (p.logline ? ' ' + p.logline.slice(0, 80) + '…' : ''));
+        document.getElementById('shareX').href = 'https://twitter.com/intent/tweet?text=' + text + '&url=' + encodeURIComponent('https://' + url);
+        document.getElementById('shareOverlay').classList.add('show');
+    };
+    window.closeShare = function() { document.getElementById('shareOverlay').classList.remove('show'); };
+    window.copyLink = function() {
+        const url = document.getElementById('shareUrl').textContent;
+        navigator.clipboard && navigator.clipboard.writeText('https://' + url);
+        const btn = document.getElementById('shareCopyBtn');
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => { btn.textContent = 'Copy link'; }, 2200);
+    };
+})();
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{{ url_for('static', filename='js/projects.js') }}"></script>
+<script src="{{ url_for('static', filename='js/slate-render.js') }}"></script>
+{% endblock %}

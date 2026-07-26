@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Deliverables — {{ project.title }} — EVOLUM{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); min-height: 100vh; }
+.dv { max-width: 1180px; margin: 0 auto; padding: 40px 32px 80px; }
+
+.dv-crumb {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-mute); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+}
+.dv-crumb a { color: var(--text-mute); text-decoration: none; }
+.dv-crumb a:hover { color: var(--gold); }
+
+.dv-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 14px; }
+.dv-h1 { font-family: var(--serif); font-style: italic; font-size: clamp(38px, 6vw, 56px);
+    font-weight: 700; letter-spacing: -1.6px; line-height: 1; color: var(--cream); margin-bottom: 12px; }
+.dv-h1 em { font-style: normal; color: var(--gold); }
+.dv-lede { color: var(--muted); font-size: 16px; line-height: 1.65; max-width: 640px; margin-bottom: 44px; }
+
+/* Asset category sections */
+.dv-section { margin-bottom: 44px; }
+.dv-sec-head {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 14px;
+    display: flex; align-items: center; gap: 10px;
+}
+.dv-sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.dv-asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+.dv-asset {
+    background: var(--bg-card); border: 1px solid var(--border); padding: 20px 22px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+    display: flex; flex-direction: column; gap: 8px;
+    transition: border-color 0.15s;
+}
+.dv-asset:hover { border-color: var(--gold-border); }
+
+.dv-asset-icon {
+    width: 42px; height: 42px;
+    background: var(--gold-dim); border: 1px solid var(--gold-border); color: var(--gold);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 6px;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.dv-asset-name { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.3; word-break: break-word; }
+.dv-asset-meta { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; color: var(--text-mute); }
+.dv-asset-actions { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.dv-btn {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+    padding: 7px 14px; text-decoration: none; cursor: pointer;
+    transition: all 0.15s;
+}
+.dv-btn.primary {
+    background: var(--gold); color: var(--bg-card); border: 1px solid var(--gold);
+    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.dv-btn.primary:hover { background: var(--gold-bright); }
+.dv-btn.ghost {
+    background: var(--bg); color: var(--text-dim); border: 1px solid var(--border);
+}
+.dv-btn.ghost:hover { color: var(--gold); border-color: var(--gold-border); }
+
+.dv-empty-sec {
+    background: var(--bg-card); border: 1px dashed var(--border); padding: 24px;
+    font-family: var(--serif); font-style: italic; color: var(--text-mute); font-size: 13px;
+    display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+}
+.dv-empty-sec a { font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--gold); text-decoration: none; }
+.dv-empty-sec a:hover { color: var(--gold-bright); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_user_topbar.html" %}
+<div class="dv">
+
+    <div class="dv-crumb">
+        <a href="/filmmaker-workspace">← Workspace</a>
+        <span style="opacity:0.4;">/</span>
+        <a href="/project/{{ project.id }}">{{ project.title }}</a>
+        <span style="opacity:0.4;">/</span>
+        <span style="color:var(--text);">Deliverables</span>
+    </div>
+
+    <div class="dv-eyebrow">EVOLUM · Deliverables</div>
+    <h1 class="dv-h1">Everything <em>{{ project.title }}</em> produced.</h1>
+    <p class="dv-lede">All artifacts the deterministic engine composed for this project — deck, sizzle reel, analyses, prep packets. Download or open inline. No cloud dependency — all stored locally with your project.</p>
+
+    {# Define category presentation. Each category gets a section. #}
+    {% set categories = [
+        ('deck', 'Pitch Deck', 'The investor pitch deck (.pptx)'),
+        ('sizzle', 'Sizzle Reel', 'Beat-by-beat self-contained HTML sizzle reel'),
+        ('analysis', 'Script Analysis', 'Deep deterministic read of the screenplay'),
+        ('audition_prep', 'Audition Prep', 'Per-character casting-grade audition packets'),
+        ('booked_role', 'Booked Role', 'Per-character on-set prep documents'),
+        ('brain', 'Story Brain', 'The structured JSON the engine produced (advanced)'),
+    ] %}
+
+    {% for kind, label, blurb in categories %}
+    <div class="dv-section">
+        <div class="dv-sec-head">{{ label }}</div>
+        {% if grouped.get(kind) %}
+        <div class="dv-asset-grid">
+            {% for a in grouped[kind] %}
+            <div class="dv-asset">
+                <div class="dv-asset-icon">
+                    {% if kind == 'deck' %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="13" rx="1"/><path d="M8 21h8M12 17v4"/></svg>
+                    {% elif kind == 'sizzle' %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 4v16l14-8z"/></svg>
+                    {% elif kind == 'analysis' %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h4"/></svg>
+                    {% elif kind == 'audition_prep' %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19c1-3.2 4-5 6.5-5s5.5 1.8 6.5 5"/></svg>
+                    {% elif kind == 'booked_role' %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m5 12 4 4 10-10"/></svg>
+                    {% else %}<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+                    {% endif %}
+                </div>
+                <div class="dv-asset-name">{{ a.asset_name }}</div>
+                <div class="dv-asset-meta">{% if a.size_bytes %}{{ '%.1f'|format(a.size_bytes / 1024) }} KB · {% endif %}{{ a.created_at }}</div>
+                <div class="dv-asset-actions">
+                    {% if kind == 'sizzle' %}
+                    <a class="dv-btn primary" href="/project/{{ project.id }}/sizzle" target="_blank">Play reel →</a>
+                    {% else %}
+                    <a class="dv-btn primary" href="/project/{{ project.id }}/asset/{{ kind }}">Download →</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="dv-empty-sec">
+            <span>{{ blurb }} — not built yet.</span>
+            {% if kind == 'deck' %}<a href="/pitch-deck?project={{ project.id }}">Build the deck →</a>
+            {% elif kind == 'sizzle' %}<a href="/sizzle-reel?project={{ project.id }}">Cut the sizzle reel →</a>
+            {% elif kind == 'analysis' %}<a href="/script-analyzer?project={{ project.id }}">Analyze the script →</a>
+            {% elif kind == 'audition_prep' %}<a href="/audition?project={{ project.id }}">Generate audition prep →</a>
+            {% elif kind == 'booked_role' %}<a href="/booked-role?project={{ project.id }}">Generate booked-role packet →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+</div>
+{% endblock %}

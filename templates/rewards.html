@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block title %}Rewards — EVOLUM{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); min-height: 100vh; }
+.rw { max-width: 1120px; margin: 0 auto; padding: 56px 32px 100px; }
+
+/* ── HEADER ───────────────────────────── */
+.rw-crumb { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 20px; display: flex; align-items: center; gap: 8px; }
+.rw-crumb a { color: var(--text-mute); text-decoration: none; }
+.rw-crumb a:hover { color: var(--gold); }
+
+.rw-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+.rw-h1 { font-family: var(--serif); font-style: italic; font-size: clamp(48px, 7vw, 84px); font-weight: 700; letter-spacing: -2px; line-height: 0.95; color: var(--cream); margin-bottom: 14px; }
+.rw-h1 em { font-style: normal; color: var(--gold); }
+.rw-lede { color: var(--muted); font-size: 17px; line-height: 1.65; max-width: 660px; margin-bottom: 40px; }
+
+/* ── STATS BAR ────────────────────────── */
+.rw-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--border); border: 1px solid var(--border); margin-bottom: 40px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
+.rw-stat { background: var(--bg-card); padding: 22px 20px; }
+.rw-stat b { display: block; font-family: var(--serif); font-style: italic; font-size: 36px; font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: 6px; }
+.rw-stat span { font-family: var(--mono); font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-mute); }
+
+/* ── LINK BOX ─────────────────────────── */
+.rw-link-box { background: var(--bg-card); border: 1px solid var(--gold-border); padding: 24px 26px; margin-bottom: 44px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%); }
+.rw-link-label { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold); margin-bottom: 12px; }
+.rw-link-row { display: flex; align-items: stretch; gap: 10px; }
+.rw-link-url { flex: 1; background: var(--bg); border: 1px solid var(--border); padding: 14px 18px; font-family: var(--mono); font-size: 14px; color: var(--cream); letter-spacing: 0.5px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); }
+.rw-copy-btn { background: var(--gold); color: var(--bg-card); border: none; padding: 0 26px; font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; cursor: pointer; transition: background 0.15s;
+    clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px); }
+.rw-copy-btn:hover { background: var(--gold-bright); }
+.rw-share-row { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.rw-share-btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-dim); background: transparent; border: 1px solid var(--border); padding: 9px 14px; text-decoration: none; transition: all 0.15s; cursor: pointer; }
+.rw-share-btn:hover { color: var(--gold); border-color: var(--gold-border); }
+
+/* ── LADDER ───────────────────────────── */
+.rw-sec-head { display: flex; align-items: center; gap: 12px; margin-top: 24px; margin-bottom: 22px; }
+.rw-sec-head::before, .rw-sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.rw-sec-head-lbl { font-family: var(--mono); font-size: 11px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gold); }
+
+.rw-ladder { display: flex; flex-direction: column; gap: 12px; margin-bottom: 44px; }
+.rw-tier { display: grid; grid-template-columns: 90px 1fr auto; gap: 24px; align-items: center; background: var(--bg-card); border: 1px solid var(--border); padding: 22px 26px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); transition: all 0.15s; }
+.rw-tier:hover { border-color: var(--gold-border); }
+.rw-tier.active { border-left: 3px solid var(--gold); background: linear-gradient(to right, rgba(255, 192, 64, 0.04), var(--bg-card) 30%); }
+
+.rw-tier-badge { width: 78px; height: 78px; display: flex; align-items: center; justify-content: center; }
+.rw-tier-badge svg { width: 100%; height: 100%; }
+
+.rw-tier-main { min-width: 0; }
+.rw-tier-num { font-family: var(--mono); font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 4px; }
+.rw-tier-name { font-family: var(--serif); font-style: italic; font-size: 24px; font-weight: 700; color: var(--cream); line-height: 1.1; margin-bottom: 6px; }
+.rw-tier-desc { font-size: 14px; color: var(--text-dim); line-height: 1.55; margin-bottom: 10px; }
+.rw-tier-perks { display: flex; flex-direction: column; gap: 4px; }
+.rw-tier-perk { font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+.rw-tier-perk::before { content: '→'; color: var(--gold); }
+
+.rw-tier-req { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--gold); border: 1px solid var(--gold-border); padding: 6px 12px; white-space: nowrap; }
+.rw-tier.locked .rw-tier-badge { opacity: 0.35; filter: grayscale(1); }
+.rw-tier.locked .rw-tier-name { color: var(--text-dim); }
+.rw-tier.locked .rw-tier-req { color: var(--text-mute); border-color: var(--border); }
+
+/* ── HOW IT WORKS ─────────────────────── */
+.rw-how { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 48px; }
+.rw-step { background: var(--bg-card); border: 1px solid var(--border); padding: 22px 20px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); }
+.rw-step-num { font-family: var(--serif); font-style: italic; font-size: 42px; font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: 12px; }
+.rw-step-t { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.rw-step-d { font-size: 13px; color: var(--muted); line-height: 1.55; }
+
+/* ── FINE PRINT ───────────────────────── */
+.rw-fine { background: var(--bg-card); border: 1px solid var(--border); padding: 26px 30px; margin-bottom: 24px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
+.rw-fine h3 { font-family: var(--serif); font-style: italic; font-size: 22px; font-weight: 700; color: var(--cream); margin-bottom: 14px; }
+.rw-fine ul { list-style: none; padding: 0; margin: 0; }
+.rw-fine li { position: relative; padding-left: 22px; font-size: 14px; color: var(--text-dim); line-height: 1.65; margin-bottom: 8px; }
+.rw-fine li::before { content: '·'; color: var(--gold); position: absolute; left: 4px; font-size: 24px; line-height: 1; top: -4px; }
+
+@media (max-width: 900px) {
+    .rw-stats { grid-template-columns: repeat(2, 1fr); }
+    .rw-how { grid-template-columns: repeat(2, 1fr); }
+    .rw-tier { grid-template-columns: 64px 1fr; }
+    .rw-tier-badge { width: 60px; height: 60px; }
+    .rw-tier-req { grid-column: 1 / -1; justify-self: start; margin-top: 8px; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_user_topbar.html" %}
+
+{# ── BADGE SVG DEFS — reusable emblems ── #}
+<svg width="0" height="0" style="position:absolute;">
+    <defs>
+        <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f7d268"/>
+            <stop offset="50%" stop-color="#c99c3e"/>
+            <stop offset="100%" stop-color="#8e6a1f"/>
+        </linearGradient>
+        <linearGradient id="silverGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#dfe1e6"/>
+            <stop offset="50%" stop-color="#8f92a1"/>
+            <stop offset="100%" stop-color="#4a4d5a"/>
+        </linearGradient>
+        <linearGradient id="bronzeGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#d7955e"/>
+            <stop offset="50%" stop-color="#a3663d"/>
+            <stop offset="100%" stop-color="#6b3f1f"/>
+        </linearGradient>
+        <linearGradient id="platGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#f0eee8"/>
+            <stop offset="45%" stop-color="#c7c1b0"/>
+            <stop offset="100%" stop-color="#6f6a5a"/>
+        </linearGradient>
+        <linearGradient id="obsidianGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#3a3446"/>
+            <stop offset="50%" stop-color="#1a1723"/>
+            <stop offset="100%" stop-color="#0a0810"/>
+        </linearGradient>
+    </defs>
+</svg>
+
+<div class="rw">
+
+    <div class="rw-crumb">
+        <a href="/filmmaker-workspace">← Workspace</a>
+        <span style="opacity:0.4;">/</span>
+        <span style="color:var(--text);">Rewards</span>
+    </div>
+
+    <div class="rw-eyebrow">EVOLUM · Referral Rewards</div>
+    <h1 class="rw-h1">Bring your people.<br>Get your <em>weeks</em> up.</h1>
+    <p class="rw-lede">Every filmmaker you invite who signs up and sticks with EVOLUM for a full paid month puts a free week in your pocket. Rack up enough and the whole platform's on the house. Rack up more and you're getting paid to invite people. This is your ladder — climb it.</p>
+
+    {# ── PERSONAL STATS ── #}
+    <div class="rw-stats">
+        <div class="rw-stat"><b>{{ stats.invited or 0 }}</b><span>You've invited</span></div>
+        <div class="rw-stat"><b>{{ stats.stuck or 0 }}</b><span>Signed up & stuck</span></div>
+        <div class="rw-stat"><b>{{ stats.weeks_banked or 0 }}</b><span>Weeks banked</span></div>
+        <div class="rw-stat"><b>{{ stats.tier_name or 'Just Started' }}</b><span>Current tier</span></div>
+    </div>
+
+    {# ── YOUR LINK ── #}
+    <div class="rw-link-box">
+        <div class="rw-link-label">Your personal referral link</div>
+        <div class="rw-link-row">
+            <div class="rw-link-url" id="refUrl">{{ referral_url }}</div>
+            <button class="rw-copy-btn" onclick="copyRef()">Copy Link →</button>
+        </div>
+        <div class="rw-share-row">
+            <a class="rw-share-btn" href="mailto:?subject=Come%20build%20with%20me%20on%20EVOLUM&body=I've%20been%20using%20EVOLUM%20to%20develop%20my%20projects%20—%20thought%20you'd%20want%20in.%20{{ referral_url|urlencode }}">✉ Email</a>
+            <a class="rw-share-btn" target="_blank" rel="noopener" href="https://twitter.com/intent/tweet?text=I've%20been%20developing%20my%20projects%20on%20EVOLUM%20—%20come%20build%20with%20me.&url={{ referral_url|urlencode }}">↗ X / Twitter</a>
+            <a class="rw-share-btn" target="_blank" rel="noopener" href="https://www.facebook.com/sharer/sharer.php?u={{ referral_url|urlencode }}">↗ Facebook</a>
+            <a class="rw-share-btn" href="sms:?&body=Come%20build%20on%20EVOLUM%20with%20me%20—%20{{ referral_url|urlencode }}">✎ Text</a>
+        </div>
+    </div>
+
+    {# ── THE LADDER ── #}
+    <div class="rw-sec-head"><div class="rw-sec-head-lbl">The Ladder</div></div>
+
+    <div class="rw-ladder">
+
+        {# TIER 1 — SPARK #}
+        <div class="rw-tier {% if stats.stuck < 3 %}active{% endif %}">
+            <div class="rw-tier-badge">
+                <svg viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="38" fill="url(#bronzeGrad)" stroke="#5a3820" stroke-width="1.5"/>
+                    <circle cx="50" cy="50" r="30" fill="none" stroke="#f0c890" stroke-width="0.8" opacity="0.5"/>
+                    <path d="M50 32 L54 46 L68 46 L57 55 L61 68 L50 60 L39 68 L43 55 L32 46 L46 46 Z" fill="#f0c890" opacity="0.9"/>
+                </svg>
+            </div>
+            <div class="rw-tier-main">
+                <div class="rw-tier-num">Tier 01</div>
+                <div class="rw-tier-name">The Spark</div>
+                <div class="rw-tier-desc">You've started inviting. Every friend who signs up and sticks a full paid month puts a free week in your account.</div>
+                <div class="rw-tier-perks">
+                    <div class="rw-tier-perk">1 free week per stuck signup</div>
+                    <div class="rw-tier-perk">Your friend gets a free week too</div>
+                </div>
+            </div>
+            <div class="rw-tier-req">0 – 2 sticks</div>
+        </div>
+
+        {# TIER 2 — THE REGULAR #}
+        <div class="rw-tier {% if stats.stuck >= 3 and stats.stuck < 10 %}active{% elif stats.stuck < 3 %}locked{% endif %}">
+            <div class="rw-tier-badge">
+                <svg viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="38" fill="url(#silverGrad)" stroke="#3a3d48" stroke-width="1.5"/>
+                    <circle cx="50" cy="50" r="30" fill="none" stroke="#e8ebf2" stroke-width="0.8" opacity="0.6"/>
+                    <path d="M50 30 L58 46 L74 48 L62 60 L66 76 L50 68 L34 76 L38 60 L26 48 L42 46 Z" fill="#e8ebf2" opacity="0.95"/>
+                    <text x="50" y="55" text-anchor="middle" font-family="serif" font-style="italic" font-size="14" font-weight="700" fill="#3a3d48">III</text>
+                </svg>
+            </div>
+            <div class="rw-tier-main">
+                <div class="rw-tier-num">Tier 02</div>
+                <div class="rw-tier-name">The Regular</div>
+                <div class="rw-tier-desc">You're a real one. Same free-week payout, plus you get first-look access to platform drops before anyone else sees them.</div>
+                <div class="rw-tier-perks">
+                    <div class="rw-tier-perk">1 free week per stuck signup</div>
+                    <div class="rw-tier-perk">First-look on new tools + verticals</div>
+                    <div class="rw-tier-perk">Community "Regular" flair</div>
+                </div>
+            </div>
+            <div class="rw-tier-req">3 sticks</div>
+        </div>
+
+        {# TIER 3 — RECRUITER (BADGE) #}
+        <div class="rw-tier {% if stats.stuck >= 10 and stats.stuck < 25 %}active{% elif stats.stuck < 10 %}locked{% endif %}">
+            <div class="rw-tier-badge">
+                <svg viewBox="0 0 100 100">
+                    <path d="M50 8 L88 28 L88 62 C88 78 74 88 50 94 C26 88 12 78 12 62 L12 28 Z" fill="url(#goldGrad)" stroke="#6a4c0e" stroke-width="1.5"/>
+                    <path d="M50 14 L82 31 L82 60 C82 74 71 82 50 87 C29 82 18 74 18 60 L18 31 Z" fill="none" stroke="#fff2b8" stroke-width="0.6" opacity="0.7"/>
+                    <path d="M50 32 L56 47 L72 47 L60 57 L64 72 L50 63 L36 72 L40 57 L28 47 L44 47 Z" fill="#fff2b8" opacity="0.95"/>
+                    <text x="50" y="85" text-anchor="middle" font-family="'DM Mono',monospace" font-size="7" font-weight="700" letter-spacing="1" fill="#6a4c0e">RECRUITER</text>
+                </svg>
+            </div>
+            <div class="rw-tier-main">
+                <div class="rw-tier-num">Tier 03 · BADGED</div>
+                <div class="rw-tier-name">Recruiter</div>
+                <div class="rw-tier-desc">EVOLUM is free forever for you. Your Recruiter shield goes on your public profile and your project pages — the industry sees who's bringing the tribe in.</div>
+                <div class="rw-tier-perks">
+                    <div class="rw-tier-perk">EVOLUM free forever, any tier</div>
+                    <div class="rw-tier-perk">Recruiter badge on public profile + projects</div>
+                    <div class="rw-tier-perk">Direct line to the founder for asks + feedback</div>
+                </div>
+            </div>
+            <div class="rw-tier-req">10 sticks</div>
+        </div>
+
+        {# TIER 4 — AMBASSADOR (BADGE, CASH) #}
+        <div class="rw-tier {% if stats.stuck >= 25 and stats.stuck < 50 %}active{% elif stats.stuck < 25 %}locked{% endif %}">
+            <div class="rw-tier-badge">
+                <svg viewBox="0 0 100 100">
+                    <path d="M50 5 L92 26 L92 60 C92 80 76 92 50 96 C24 92 8 80 8 60 L8 26 Z" fill="url(#platGrad)" stroke="#3a3527" stroke-width="1.8"/>
+                    <path d="M50 12 L85 30 L85 58 C85 74 72 84 50 88 C28 84 15 74 15 58 L15 30 Z" fill="none" stroke="#fffdf0" stroke-width="0.7" opacity="0.6"/>
+                    <circle cx="50" cy="46" r="15" fill="url(#goldGrad)" stroke="#6a4c0e" stroke-width="1"/>
+                    <text x="50" y="51" text-anchor="middle" font-family="serif" font-style="italic" font-size="18" font-weight="700" fill="#4a340a">A</text>
+                    <path d="M32 68 L50 76 L68 68" fill="none" stroke="#4a340a" stroke-width="1" opacity="0.7"/>
+                    <text x="50" y="88" text-anchor="middle" font-family="'DM Mono',monospace" font-size="6.5" font-weight="700" letter-spacing="1" fill="#3a3527">AMBASSADOR</text>
+                </svg>
+            </div>
+            <div class="rw-tier-main">
+                <div class="rw-tier-num">Tier 04 · BADGED · PAID</div>
+                <div class="rw-tier-name">Ambassador</div>
+                <div class="rw-tier-desc">This is where the paycheck starts. You get an EVOLUM-issued Stripe card. Every stuck referral drops real cash on it. You sign a subcontractor agreement, we handle a 1099 at tax time, you spend the card wherever it swipes.</div>
+                <div class="rw-tier-perks">
+                    <div class="rw-tier-perk">EVOLUM Stripe card in your name</div>
+                    <div class="rw-tier-perk">Cash payout per stuck signup (capped by tier LTV)</div>
+                    <div class="rw-tier-perk">Ambassador badge — top-of-profile emblem</div>
+                    <div class="rw-tier-perk">Subcontractor agreement + year-end 1099-NEC</div>
+                </div>
+            </div>
+            <div class="rw-tier-req">25 sticks</div>
+        </div>
+
+        {# TIER 5 — THE INSIDER #}
+        <div class="rw-tier {% if stats.stuck >= 50 %}active{% else %}locked{% endif %}">
+            <div class="rw-tier-badge">
+                <svg viewBox="0 0 100 100">
+                    <path d="M50 4 L94 24 L94 58 C94 82 78 94 50 98 C22 94 6 82 6 58 L6 24 Z" fill="url(#obsidianGrad)" stroke="#c99c3e" stroke-width="2"/>
+                    <path d="M50 12 L86 28 L86 56 C86 76 72 86 50 90 C28 86 14 76 14 56 L14 28 Z" fill="none" stroke="#f7d268" stroke-width="0.8" opacity="0.7"/>
+                    <path d="M50 30 L58 46 L74 48 L62 60 L66 76 L50 68 L34 76 L38 60 L26 48 L42 46 Z" fill="url(#goldGrad)" stroke="#f7d268" stroke-width="0.5"/>
+                    <text x="50" y="55" text-anchor="middle" font-family="serif" font-style="italic" font-size="12" font-weight="700" fill="#0a0810">V</text>
+                    <text x="50" y="88" text-anchor="middle" font-family="'DM Mono',monospace" font-size="6.5" font-weight="700" letter-spacing="1" fill="#c99c3e">INSIDER</text>
+                </svg>
+            </div>
+            <div class="rw-tier-main">
+                <div class="rw-tier-num">Tier 05 · BADGED · PAID · INNER CIRCLE</div>
+                <div class="rw-tier-name">The Insider</div>
+                <div class="rw-tier-desc">You built the room. Payout cap lifts, cash-per-stick tops out at the ceiling, and you land in the founder's private channel — where product direction gets shaped before it ships.</div>
+                <div class="rw-tier-perks">
+                    <div class="rw-tier-perk">Highest per-stick cash payout</div>
+                    <div class="rw-tier-perk">Insider badge — obsidian + gold, unmistakable</div>
+                    <div class="rw-tier-perk">Founder's private channel access</div>
+                    <div class="rw-tier-perk">Voting seat on new-vertical priorities</div>
+                </div>
+            </div>
+            <div class="rw-tier-req">50+ sticks</div>
+        </div>
+
+    </div>
+
+    {# ── HOW IT WORKS ── #}
+    <div class="rw-sec-head"><div class="rw-sec-head-lbl">How It Works</div></div>
+
+    <div class="rw-how">
+        <div class="rw-step">
+            <div class="rw-step-num">01</div>
+            <div class="rw-step-t">Share your link</div>
+            <div class="rw-step-d">Copy it up top. Text it, email it, post it, DM it — whatever works. Every signup that comes through it is yours.</div>
+        </div>
+        <div class="rw-step">
+            <div class="rw-step-num">02</div>
+            <div class="rw-step-t">They sign up</div>
+            <div class="rw-step-d">Your friend joins EVOLUM through your link. They get a free week on their trial as a thank-you for coming in through the front door.</div>
+        </div>
+        <div class="rw-step">
+            <div class="rw-step-num">03</div>
+            <div class="rw-step-t">They stay a paid month</div>
+            <div class="rw-step-d">Once they've been a full paying member for 30 days, the reward triggers. This is the gate — no fake accounts, no trial-hop farms.</div>
+        </div>
+        <div class="rw-step">
+            <div class="rw-step-num">04</div>
+            <div class="rw-step-t">Your reward hits</div>
+            <div class="rw-step-d">One free week lands in your account. Tier up the ladder and the reward changes shape — bigger perks, then real cash.</div>
+        </div>
+    </div>
+
+    {# ── FINE PRINT ── #}
+    <div class="rw-fine">
+        <h3>The rules of the road</h3>
+        <ul>
+            <li>Only new signups count. Existing accounts and re-registrations don't trigger a reward.</li>
+            <li>A "stick" means the referred user has been an active paying customer for at least 30 consecutive days.</li>
+            <li>Free-week rewards are stackable and can be redeemed against any active EVOLUM subscription tier.</li>
+            <li>Ambassador and Insider cash payouts require a signed subcontractor agreement + W-9. A 1099-NEC will be issued at year-end for total payouts over the IRS threshold.</li>
+            <li>Cash payout amounts are capped as a percentage of the referred user's tier LTV to keep the program healthy on both sides. Exact numbers are posted on the Ambassador dashboard.</li>
+            <li>Self-referrals, botted signups, and any attempt to game the ladder result in forfeited rewards and possible account review.</li>
+        </ul>
+    </div>
+
+    <div style="text-align:center;font-family:var(--mono);font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);margin-top:32px;">
+        Questions? <a href="mailto:madbradsmith@gmail.com" style="color:var(--gold);text-decoration:none;">Reach the founder →</a>
+    </div>
+
+</div>
+
+<script>
+function copyRef() {
+    const url = document.getElementById('refUrl').textContent.trim();
+    navigator.clipboard.writeText(url).then(() => {
+        const btn = document.querySelector('.rw-copy-btn');
+        const orig = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
+    });
+}
+</script>
+{% endblock %}

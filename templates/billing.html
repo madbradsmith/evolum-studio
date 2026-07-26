@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block title %}EVOLUM — Choose Your Plan{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); }
+.bill-stage {
+    min-height: 100vh;
+    padding: 60px 24px 80px;
+    position: relative; overflow: hidden;
+}
+.bill-stage::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background:
+        radial-gradient(ellipse 60% 45% at 50% 0%, rgba(197,86,42,0.08) 0%, transparent 70%);
+}
+.bill-shell {
+    position: relative; z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+.bill-head {
+    text-align: center;
+    margin-bottom: 48px;
+}
+.bill-head h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 42px;
+    color: var(--text);
+    margin: 0 0 12px;
+    letter-spacing: -0.01em;
+}
+.bill-head p {
+    color: var(--text-muted);
+    font-size: 16px;
+    margin: 0;
+}
+.bill-active {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 6px 14px;
+    background: rgba(76, 175, 80, 0.12);
+    color: #6abf6e;
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 999px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.bill-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+@media (max-width: 1024px) { .bill-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width:  640px) { .bill-grid { grid-template-columns: 1fr; } }
+
+.plan-card {
+    background: var(--bg-card);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-lg);
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.15s, border-color 0.15s;
+}
+.plan-card:hover { transform: translateY(-3px); border-color: var(--ember); }
+.plan-card.featured {
+    border-color: var(--ember);
+    box-shadow: 0 20px 50px rgba(197, 86, 42, 0.15);
+}
+.plan-card .name {
+    font-family: 'Fraunces', serif;
+    font-size: 22px;
+    color: var(--text);
+    margin: 0 0 8px;
+}
+.plan-card .tagline {
+    color: var(--text-muted);
+    font-size: 13px;
+    min-height: 36px;
+    margin: 0 0 24px;
+}
+.plan-card .price {
+    font-family: 'DM Mono', monospace;
+    color: var(--ember);
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin: 0 0 24px;
+}
+.plan-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 28px;
+    flex-grow: 1;
+}
+.plan-card ul li {
+    font-size: 14px;
+    color: var(--text);
+    padding: 6px 0 6px 22px;
+    position: relative;
+}
+.plan-card ul li::before {
+    content: '→';
+    color: var(--ember);
+    position: absolute;
+    left: 0;
+    font-family: 'DM Mono', monospace;
+}
+.plan-btn {
+    width: 100%;
+    padding: 12px;
+    background: transparent;
+    color: var(--ember);
+    border: 1px solid var(--ember);
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+}
+.plan-btn:hover, .plan-card.featured .plan-btn {
+    background: var(--ember);
+    color: white;
+}
+.plan-card.current .plan-btn {
+    background: transparent;
+    color: var(--text-muted);
+    border-color: var(--gold-border);
+    cursor: default;
+}
+.bill-fine {
+    text-align: center;
+    margin-top: 40px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_user_topbar.html" %}
+<div class="bill-stage">
+  <div class="bill-shell">
+
+    <div class="bill-head">
+      <h1>Pick the room that fits</h1>
+      <p>3-day trial on every plan. Cancel anytime. {{ user_email }}</p>
+      {% if is_subscribed %}
+        <div class="bill-active">Active · {{ current_plan }}</div>
+      {% endif %}
+    </div>
+
+    {% set plan_copy = {
+        'solo':         {'tagline': 'One filmmaker, one project at a time.',       'features': ['Script analyzer', 'Pitch deck generator', 'Sizzle reel', 'Booked-role packet']},
+        'writers_room': {'tagline': 'Built for collaborators and writing teams.',  'features': ['Everything in Solo', 'Shared workspace', 'Collaborator seats', 'Project handoff tools']},
+        'studio':       {'tagline': 'Multiple projects, deeper output.',           'features': ['Everything in Writer\'s Room', 'Higher visuals cap', 'Priority compute', 'Multiple active projects']},
+        'prod_company': {'tagline': 'Slate-level usage for active production co.', 'features': ['Everything in Studio', 'Unlimited projects', 'Direct support channel', 'Custom branding']},
+        'producer':     {'tagline': 'Above the Line — Producer, DP, Director.',    'features': ['Craft-picker workspace', 'Full project pipeline', 'Team collaborators', 'Deliverables room']},
+    } %}
+
+    <div class="bill-grid" style="grid-template-columns: repeat({{ plans|length if plans|length < 4 else 4 }}, 1fr);">
+      {% for plan_key, plan in plans.items() %}
+      <div class="plan-card {% if current_plan == plan_key %}current{% endif %}">
+        <h3 class="name">{{ plan.label }}</h3>
+        <p class="tagline">{{ plan_copy.get(plan_key, {}).get('tagline', '') }}</p>
+        <p class="price">{{ plan.price }}</p>
+        <ul>
+          {% for f in plan_copy.get(plan_key, {}).get('features', []) %}
+          <li>{{ f }}</li>
+          {% endfor %}
+        </ul>
+        {% if current_plan == plan_key and is_subscribed %}
+          <button class="plan-btn" disabled>Current plan</button>
+        {% else %}
+          <form method="POST" action="{{ url_for('billing.create_checkout') }}">
+            <input type="hidden" name="plan" value="{{ plan_key }}">
+            <button type="submit" class="plan-btn">Start {{ plan.label }} →</button>
+          </form>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+
+    <p class="bill-fine">
+      Secure checkout by Stripe. Payment details never touch our servers.
+    </p>
+
+  </div>
+</div>
+{% endblock %}

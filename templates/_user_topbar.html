@@ -1,0 +1,53 @@
+{# ─────────────────────────────────────────────────────────────
+   Shared logged-in top strip. Include at top of any interior
+   page's {% block content %}. Renders nothing if user isn't
+   authenticated. Keeps identity + Workspace ride always visible.
+───────────────────────────────────────────────────────────── #}
+{% if current_user.is_authenticated %}
+<style>
+.utop { position: sticky; top: 0; z-index: 300;
+    display: flex; align-items: center; gap: 24px;
+    padding: 0 28px; height: 56px;
+    background: rgba(7,7,15,0.94); border-bottom: 1px solid var(--border);
+    backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+}
+.utop-logo { font-family: var(--serif); font-size: 20px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--cream); text-decoration: none; }
+.utop-logo em { font-style: italic; color: var(--gold); }
+.utop-links { display: flex; align-items: center; gap: 22px; }
+.utop-link { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-mute); text-decoration: none; transition: color 0.15s; padding: 6px 0; }
+.utop-link:hover, .utop-link.active { color: var(--gold); }
+.utop-right { margin-left: auto; display: flex; align-items: center; gap: 14px; }
+.utop-chip { display: flex; align-items: center; gap: 10px; padding: 6px 12px 6px 6px; border: 1px solid var(--border); text-decoration: none; transition: border-color 0.15s;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+.utop-chip:hover { border-color: var(--gold-border); }
+.utop-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--gold); color: var(--bg-card); display: flex; align-items: center; justify-content: center; font-family: var(--serif); font-weight: 700; font-size: 13px; font-style: italic; flex-shrink: 0; }
+.utop-name { font-family: var(--mono); font-size: 10px; letter-spacing: 0.06em; color: var(--text); white-space: nowrap; }
+.utop-name .role { color: var(--text-mute); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; display: block; margin-top: 1px; }
+.utop-signout { font-family: var(--mono); font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-mute); text-decoration: none; transition: color 0.15s; }
+.utop-signout:hover { color: var(--gold); }
+@media (max-width: 720px) {
+    .utop { padding: 0 16px; gap: 14px; height: 52px; }
+    .utop-links { display: none; }
+    .utop-name { display: none; }
+}
+</style>
+<nav class="utop">
+    <a class="utop-logo" href="/filmmaker-workspace">EV<em>O</em>LUM</a>
+    <div class="utop-links">
+        <a class="utop-link {% if request.path.startswith('/filmmaker-workspace') %}active{% endif %}" href="/filmmaker-workspace">Workspace</a>
+        <a class="utop-link {% if request.path.startswith('/catalog') %}active{% endif %}" href="/catalog">Catalog</a>
+        <a class="utop-link {% if request.path.startswith('/rewards') %}active{% endif %}" href="/rewards">Rewards</a>
+        <a class="utop-link {% if request.path.startswith('/billing') %}active{% endif %}" href="/billing">Billing</a>
+    </div>
+    <div class="utop-right">
+        <a class="utop-chip" href="/billing" title="Account & billing">
+            <div class="utop-avatar">{{ (current_user.name or current_user.email or 'E')[:1]|upper }}</div>
+            <div class="utop-name">
+                {{ current_user.name or current_user.email.split('@')[0] }}
+                <span class="role">{{ current_user.role_label }}</span>
+            </div>
+        </a>
+        <a class="utop-signout" href="/logout">Sign out →</a>
+    </div>
+</nav>
+{% endif %}

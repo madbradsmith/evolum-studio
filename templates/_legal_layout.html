@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}EVOLUM{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#07070f;--surface:#0d0d18;--s2:#111120;
+  --border:#1e1e2e;--bhi:#2e2e48;
+  --text:#ede9e0;--muted:#6a6778;--cream:oklch(0.93 0.03 90);
+  --gold:oklch(0.78 0.16 75);
+  --gg:oklch(0.78 0.16 75 / 0.10);
+  --gm:oklch(0.78 0.16 75 / 0.32);
+}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Space Grotesk',sans-serif;line-height:1.6;
+  min-height:100vh;display:flex;flex-direction:column;
+  position:relative;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:.5;
+}
+a{color:var(--gold);text-decoration:none}
+
+/* ── Nav ── */
+.nav{
+  position:sticky;top:0;z-index:100;
+  display:flex;align-items:center;gap:28px;
+  padding:0 36px;height:64px;
+  background:rgba(7,7,15,0.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);
+}
+.nav-logo{
+  font-family:'Cormorant',serif;font-size:20px;font-weight:600;
+  letter-spacing:0.15em;text-transform:uppercase;color:var(--cream);
+}
+.nav-links{display:flex;align-items:center;gap:28px;margin-left:auto;margin-right:auto}
+.nav-links a{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;
+  text-transform:uppercase;color:var(--muted);transition:color .2s;
+}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{
+  font-family:'Space Mono',monospace;font-size:10px;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--gold);border:1px solid var(--gm);
+  padding:7px 16px;transition:all .2s;
+}
+.nav-cta:hover{background:var(--gg);border-color:var(--gold)}
+
+/* ── Doc layout ── */
+.doc-wrap{
+  flex:1;position:relative;z-index:1;
+  max-width:840px;margin:0 auto;width:100%;
+  padding:64px 32px 80px;
+}
+.doc-eyebrow{
+  font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.28em;
+  text-transform:uppercase;color:var(--gold);margin-bottom:14px;
+  display:inline-flex;align-items:center;gap:9px;
+}
+.doc-eyebrow::before{content:'';width:18px;height:1px;background:var(--gold)}
+.doc-eyebrow::after{content:'';width:18px;height:1px;background:var(--gold)}
+.doc-wrap h1{
+  font-family:'Cormorant',serif;font-size:clamp(38px,6vw,64px);
+  font-weight:600;letter-spacing:-0.01em;line-height:1;
+  color:var(--cream);margin-bottom:14px;
+}
+.doc-wrap h1 em{font-style:italic;color:var(--gold)}
+.doc-date{
+  font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.12em;
+  text-transform:uppercase;color:var(--muted);margin-bottom:48px;
+}
+.doc-wrap h2{
+  font-family:'Cormorant',serif;font-size:26px;font-weight:600;
+  color:var(--cream);margin:48px 0 16px;letter-spacing:-0.01em;
+}
+.doc-wrap h3{
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+  letter-spacing:0.18em;text-transform:uppercase;
+  color:var(--gold);margin:32px 0 10px;
+}
+.doc-wrap p, .doc-wrap li{
+  font-size:15px;color:var(--text);line-height:1.7;margin-bottom:14px;
+}
+.doc-wrap ul{margin:0 0 18px 22px}
+.doc-wrap li{margin-bottom:6px}
+.doc-wrap strong{color:var(--cream);font-weight:600}
+.doc-wrap a{border-bottom:1px solid var(--gm);transition:border-color .15s, color .15s}
+.doc-wrap a:hover{border-bottom-color:var(--gold)}
+
+.doc-back{
+  display:inline-flex;align-items:center;gap:8px;margin-top:48px;
+  font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+  letter-spacing:0.12em;text-transform:uppercase;
+  color:var(--gold);border:1px solid var(--gm);
+  padding:12px 24px;transition:all .2s;
+}
+.doc-back:hover{background:var(--gg);border-color:var(--gold)}
+
+/* ── Footer ── */
+.foot{
+  padding:36px;border-top:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:18px;position:relative;z-index:1;
+}
+.foot-brand{
+  font-family:'Cormorant',serif;font-size:16px;font-weight:600;
+  letter-spacing:0.15em;text-transform:uppercase;color:var(--cream);
+}
+.foot-links{display:flex;gap:22px;flex-wrap:wrap}
+.foot-links a{
+  font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;
+  text-transform:uppercase;color:var(--muted);transition:color .2s;
+  border-bottom:none;
+}
+.foot-links a:hover{color:var(--gold)}
+
+@media (max-width:640px){
+  .doc-wrap{padding:48px 22px 60px}
+  .nav{padding:0 18px;gap:14px}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-logo" href="/">EVOLUM</a>
+  <div class="nav-links">
+    <a href="/#slate">Catalog</a>
+    <a href="/#doors">The Doors</a>
+    <a href="/festival-calendar">Festival</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/house-rules">House Rules</a>
+  </div>
+  {% if current_user.is_authenticated %}
+  <a href="/logout" class="nav-cta">Sign Out →</a>
+  {% else %}
+  <a href="/sign-in" class="nav-cta">Sign In →</a>
+  {% endif %}
+</nav>
+
+<main class="doc-wrap">
+  <div class="doc-eyebrow">{% block eyebrow %}EVOLUM{% endblock %}</div>
+  <h1>{% block heading %}{% endblock %}</h1>
+  <div class="doc-date">{% block effective_date %}{% endblock %}</div>
+
+  {% block content %}{% endblock %}
+
+  <a href="/" class="doc-back">← Back to EVOLUM</a>
+</main>
+
+<footer class="foot">
+  <div class="foot-brand">EVOLUM</div>
+  <div class="foot-links">
+    <a href="/">Home</a>
+    <a href="/catalog">Catalog</a>
+    <a href="/festival-calendar">Festival</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/house-rules">House Rules</a>
+    <a href="/faq">FAQ</a>
+    <a href="/terms">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/acceptable-use">Acceptable Use</a>
+  </div>
+</footer>
+
+{% include "_compliance_bar.html" %}
+
+</body>
+</html>

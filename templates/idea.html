@@ -1,0 +1,311 @@
+{% extends "base.html" %}
+
+{% block title %}Idea — {{ project.title }} — EVOLUM{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); min-height: 100vh; }
+.id-page { max-width: 1180px; margin: 0 auto; padding: 36px 32px 80px; }
+
+/* Crumb + head */
+.id-crumb {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-mute); margin-bottom: 16px;
+    display: flex; align-items: center; gap: 8px;
+}
+.id-crumb a { color: var(--text-mute); text-decoration: none; }
+.id-crumb a:hover { color: var(--gold); }
+.id-crumb .here { color: var(--text); }
+
+.id-eyebrow {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 14px;
+}
+.id-h1 {
+    font-family: var(--serif); font-style: italic; font-size: clamp(34px, 5vw, 52px);
+    font-weight: 700; letter-spacing: -1.4px; line-height: 1; color: var(--cream); margin-bottom: 10px;
+}
+.id-h1 em { font-style: normal; color: var(--gold); }
+.id-lede { color: var(--muted); font-size: 15px; line-height: 1.65; max-width: 620px; margin-bottom: 36px; }
+
+/* Two-column layout */
+.id-grid {
+    display: grid; grid-template-columns: 1fr 320px; gap: 28px;
+    align-items: start;
+}
+@media (max-width: 920px) {
+    .id-grid { grid-template-columns: 1fr; }
+}
+
+/* Form sections */
+.id-sec { background: var(--bg-card); border: 1px solid var(--border); padding: 22px 24px; margin-bottom: 16px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+.id-sec-head {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-mute); margin-bottom: 12px;
+}
+.id-sec-head .num { color: var(--gold); margin-right: 8px; }
+
+.id-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.id-field:last-child { margin-bottom: 0; }
+.id-label {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-mute);
+}
+.id-input, .id-textarea {
+    background: var(--bg); border: 1px solid var(--border); color: var(--text);
+    padding: 11px 14px; font-size: 14px; font-family: var(--serif); font-style: italic;
+    transition: border-color 0.15s; font-style: italic; resize: vertical;
+}
+.id-input:focus, .id-textarea:focus { outline: none; border-color: var(--gold); }
+.id-input::placeholder, .id-textarea::placeholder { color: var(--text-mute); opacity: 0.6; }
+.id-textarea { min-height: 110px; line-height: 1.6; }
+
+/* Elements panel (right column) */
+.id-panel { background: var(--bg-card); border: 1px solid var(--border); padding: 22px 22px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+    position: sticky; top: 24px;
+}
+.id-panel-head {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 14px;
+}
+
+.id-chip-list { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.id-chip {
+    background: var(--bg); border: 1px solid var(--border-hi); padding: 5px 10px;
+    font-family: var(--mono); font-size: 10px; color: var(--text);
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.id-chip .x { color: var(--text-mute); cursor: pointer; }
+.id-chip .x:hover { color: var(--red); }
+
+.id-add-row { display: flex; gap: 6px; margin-bottom: 18px; }
+.id-add-row input { flex: 1; }
+.id-add-row button {
+    background: var(--gold-dim); border: 1px solid var(--gold-border); color: var(--gold);
+    padding: 0 14px; font-family: var(--mono); font-size: 11px; cursor: pointer;
+}
+.id-add-row button:hover { background: var(--gold); color: var(--bg-card); }
+
+/* Save bar */
+.id-save-bar {
+    position: sticky; bottom: 0; background: rgba(7,7,15,0.96); backdrop-filter: blur(8px);
+    border-top: 1px solid var(--border);
+    margin: 36px -32px -80px; padding: 18px 32px;
+    display: flex; align-items: center; gap: 14px;
+    z-index: 50;
+}
+.id-save-status {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-mute);
+}
+.id-save-status.ok { color: var(--gold); }
+.id-save-status.err { color: var(--red); }
+.id-save-bar .spacer { flex: 1; }
+.id-btn {
+    background: var(--bg-card); border: 1px solid var(--border); color: var(--text-dim);
+    padding: 12px 22px; font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 1.4px; text-transform: uppercase; text-decoration: none; cursor: pointer;
+    transition: all 0.15s;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.id-btn:hover { border-color: var(--gold-border); color: var(--gold); }
+.id-btn.gold { background: var(--gold); border-color: var(--gold); color: var(--bg-card); }
+.id-btn.gold:hover { background: var(--gold-bright); }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_user_topbar.html" %}
+<div class="id-page">
+
+    <div class="id-crumb">
+        <a href="/filmmaker-workspace">← Workspace</a>
+        <span style="opacity:0.4;">/</span>
+        <a href="/project/{{ project.id }}">{{ project.title }}</a>
+        <span style="opacity:0.4;">/</span>
+        <span class="here">Idea</span>
+    </div>
+
+    <div class="id-eyebrow">EVOLUM · Story Development</div>
+    <h1 class="id-h1">Shape the <em>idea</em>.</h1>
+    <p class="id-lede">Define what the story is, who's in it, and the world it lives in. These structured inputs feed the deterministic engine when you generate analysis, pitch deck, or sizzle reel — no AI cloud calls.</p>
+
+    {% include "_genre_picker.html" %}
+
+    <form id="ideaForm" class="id-grid" style="margin-top:24px;">
+
+        <div>
+            <!-- Logline + Synopsis -->
+            <div class="id-sec">
+                <div class="id-sec-head"><span class="num">01</span>The Story</div>
+
+                <div class="id-field">
+                    <label class="id-label" for="logline">Logline</label>
+                    <textarea class="id-textarea" id="logline" name="logline" placeholder="One sentence. Protagonist, want, obstacle, stakes." maxlength="600">{{ project.idea_text }}</textarea>
+                </div>
+
+                <div class="id-field">
+                    <label class="id-label" for="synopsis">Synopsis</label>
+                    <textarea class="id-textarea" id="synopsis" name="synopsis" placeholder="A paragraph or two. What happens, who it happens to, why it matters." maxlength="4000" style="min-height:180px;">{{ project.synopsis_text }}</textarea>
+                </div>
+            </div>
+
+            <!-- Characters -->
+            <div class="id-sec">
+                <div class="id-sec-head"><span class="num">02</span>Characters</div>
+                <div class="id-chip-list" id="charChipList"></div>
+                <div class="id-add-row">
+                    <input class="id-input" id="newCharName" placeholder="Character name" maxlength="80">
+                    <input class="id-input" id="newCharRole" placeholder="Role / brief" maxlength="120" style="flex:2;">
+                    <button type="button" onclick="addCharacter()">Add</button>
+                </div>
+                <div style="font-family:var(--mono);font-size:10px;color:var(--text-mute);">Tip: the engine uses these to seed the brain when no script is uploaded yet.</div>
+            </div>
+        </div>
+
+        <!-- Elements / World panel -->
+        <aside class="id-panel">
+            <div class="id-panel-head">Elements</div>
+
+            <div class="id-field">
+                <label class="id-label" for="setting">Setting</label>
+                <input class="id-input" id="setting" placeholder="Location, environment…" maxlength="120">
+            </div>
+            <div class="id-field">
+                <label class="id-label" for="era">Era</label>
+                <input class="id-input" id="era" placeholder="Time period…" maxlength="80">
+            </div>
+            <div class="id-field">
+                <label class="id-label" for="tone">Tone</label>
+                <input class="id-input" id="tone" placeholder="Overall feel…" maxlength="80">
+            </div>
+            <div class="id-field">
+                <label class="id-label" for="themes">Themes</label>
+                <input class="id-input" id="themes" placeholder="Comma-separated…" maxlength="200">
+            </div>
+            <div class="id-field">
+                <label class="id-label" for="notes">Notes</label>
+                <textarea class="id-textarea" id="notes" placeholder="Anything else about this world…" maxlength="1500" style="min-height:80px;"></textarea>
+            </div>
+        </aside>
+
+    </form>
+
+    <div class="id-save-bar">
+        <span class="id-save-status" id="saveStatus">Draft</span>
+        <span class="spacer"></span>
+        <a class="id-btn" href="/project/{{ project.id }}">← Back to project</a>
+        <button class="id-btn" type="button" onclick="saveIdea(false)">Save</button>
+        <button class="id-btn gold" type="button" onclick="saveIdea(true)">Save &amp; Open Script Editor →</button>
+    </div>
+
+</div>
+
+<script>
+const PROJECT_ID = {{ project.id|tojson|safe }};
+
+// ---- Characters list state ----
+let characters = [];
+try {
+    characters = JSON.parse({{ project.characters_json|tojson|safe }} || "[]");
+    if (!Array.isArray(characters)) characters = [];
+} catch (e) { characters = []; }
+
+function renderChars() {
+    const list = document.getElementById("charChipList");
+    list.innerHTML = "";
+    if (characters.length === 0) {
+        list.innerHTML = '<span style="font-family:var(--mono);font-size:10px;color:var(--text-mute);font-style:italic;">No characters yet — add at least your protagonist below.</span>';
+        return;
+    }
+    characters.forEach((c, i) => {
+        const chip = document.createElement("span");
+        chip.className = "id-chip";
+        chip.innerHTML = `<strong>${escapeHTML(c.name)}</strong>${c.role ? ' · <span style="color:var(--muted);">' + escapeHTML(c.role) + '</span>' : ''} <span class="x" onclick="removeChar(${i})">×</span>`;
+        list.appendChild(chip);
+    });
+}
+
+function addCharacter() {
+    const name = document.getElementById("newCharName").value.trim();
+    const role = document.getElementById("newCharRole").value.trim();
+    if (!name) return;
+    characters.push({ name, role });
+    document.getElementById("newCharName").value = "";
+    document.getElementById("newCharRole").value = "";
+    renderChars();
+}
+
+function removeChar(i) {
+    characters.splice(i, 1);
+    renderChars();
+}
+
+function escapeHTML(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ---- World state ----
+let world = {};
+try {
+    world = JSON.parse({{ project.world_json|tojson|safe }} || "{}");
+    if (typeof world !== "object" || !world) world = {};
+} catch (e) { world = {}; }
+
+["setting","era","tone","themes","notes"].forEach(k => {
+    const el = document.getElementById(k);
+    if (el && world[k]) el.value = world[k];
+});
+
+// ---- Save ----
+async function saveIdea(advance) {
+    const btn = event.target;
+    const status = document.getElementById("saveStatus");
+    btn.disabled = true;
+    status.textContent = "Saving…";
+    status.className = "id-save-status";
+
+    world = {
+        setting: document.getElementById("setting").value.trim(),
+        era:     document.getElementById("era").value.trim(),
+        tone:    document.getElementById("tone").value.trim(),
+        themes:  document.getElementById("themes").value.trim(),
+        notes:   document.getElementById("notes").value.trim(),
+    };
+
+    const payload = {
+        idea_text:       document.getElementById("logline").value.trim(),
+        synopsis_text:   document.getElementById("synopsis").value.trim(),
+        characters_json: JSON.stringify(characters),
+        world_json:      JSON.stringify(world),
+    };
+
+    try {
+        const r = await fetch(`/api/projects/${PROJECT_ID}`, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            credentials: "same-origin",
+            body: JSON.stringify(payload),
+        });
+        if (r.ok) {
+            status.textContent = "Saved ✓";
+            status.className = "id-save-status ok";
+            if (advance) {
+                setTimeout(() => { window.location.href = `/script-editor?project=${PROJECT_ID}`; }, 350);
+            }
+        } else {
+            const d = await r.json().catch(() => ({}));
+            status.textContent = d.error || "Save failed";
+            status.className = "id-save-status err";
+        }
+    } catch (e) {
+        status.textContent = "Network error";
+        status.className = "id-save-status err";
+    }
+    btn.disabled = false;
+}
+
+renderChars();
+</script>
+{% endblock %}

@@ -1,0 +1,288 @@
+{% extends "_legal_layout.html" %}
+
+{% block title %}FAQ — EVOLUM{% endblock %}
+{% block eyebrow %}EVOLUM · Frequently Asked Questions{% endblock %}
+{% block heading %}How EVOLUM <em>works</em>.{% endblock %}
+{% block effective_date %}Last updated: June 2026 · evolumstudio.com{% endblock %}
+
+{% block content %}
+
+<p style="font-size:17px;color:var(--muted);font-style:italic;font-family:'Cormorant',serif;margin-bottom:36px">Everything you need to know — how to move around the platform, who the five doors are for, what the engine builds for you, what a Deal Room actually looks like, and how to talk to us if your question isn't here.</p>
+
+<style>
+.faq-section{margin-bottom:48px}
+.faq-section-label{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.faq-section-title{font-family:'Cormorant',serif;font-size:28px;font-weight:600;color:var(--cream);margin-bottom:18px;letter-spacing:-0.01em}
+.faq-section-intro{font-size:15px;color:var(--text);line-height:1.7;margin-bottom:18px}
+.faq-item{border-top:1px solid var(--border)}
+.faq-item:last-child{border-bottom:1px solid var(--border)}
+.faq-q{width:100%;text-align:left;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:18px 4px;background:transparent;border:none;cursor:pointer;font-family:'Space Grotesk',sans-serif;color:var(--text);font-size:15px;font-weight:600;line-height:1.4;transition:color .15s}
+.faq-q:hover{color:var(--gold)}
+.faq-q-toggle{font-family:'Space Mono',monospace;font-size:14px;color:var(--muted);flex-shrink:0;line-height:1.4;transition:transform .2s,color .15s}
+.faq-item.open .faq-q-toggle{transform:rotate(45deg);color:var(--gold)}
+.faq-a{display:none;padding:0 4px 22px;font-family:'Cormorant',serif;font-size:16px;color:var(--text);line-height:1.75;max-width:760px}
+.faq-a p{margin:0 0 10px}
+.faq-a p:last-child{margin-bottom:0}
+.faq-a strong{color:var(--cream);font-weight:600}
+.faq-a a{color:var(--gold);border-bottom:1px solid var(--gm)}
+.faq-item.open .faq-a{display:block}
+</style>
+
+<!-- 1 · Getting around -->
+<div class="faq-section">
+  <div class="faq-section-label">Section One</div>
+  <h2 class="faq-section-title" style="margin-top:0">Getting around EVOLUM</h2>
+  <p class="faq-section-intro">EVOLUM has five doors — Filmmaker, Above the Line (producers, DPs, directors), Actor, Investor, Supporter — and each opens onto a different set of rooms. Most users live in one door but can browse the public surfaces of the others.</p>
+
+  <div class="faq-item">
+    <button class="faq-q">I'm a filmmaker — where do I start?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Start at <strong><a href="/filmmaker-workspace">/filmmaker-workspace</a></strong>. That's your home room. From there you'll see your project slate (or an empty state with "Upload Your First Script"). Each project flows through:</p>
+      <p><strong>Idea → Script → Pitch Deck → Deal Room → Booking → Production → Deliverables.</strong></p>
+      <p>You don't have to go in order, but most filmmakers do. The script feeds the deck. The deck feeds the deal rooms. Pledges feed production. If you get lost, every room has a back-to-home link and clear navigation — nothing is more than two clicks away.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">I'm an actor — where do I start?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Two rooms: <strong><a href="/audition">/audition</a></strong> (the actor's workspace with sides, prompter, and self-tape recording) and <strong><a href="/actor-casting">/actor-casting</a></strong> (the public casting board with open roles posted by filmmakers).</p>
+      <p>Browse Casting to find roles. Use the Audition workspace to prep — mark up your sides, run your lines, and record takes. When you book a role, log it into your Booked Role packet so the prep notes follow you to set.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">I'm an investor — where do I start?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Start at <strong><a href="/investor-deal-room">/investor-deal-room</a></strong>. Every project currently raising appears there with its funding ask, deal type, and pitch link. Click any project to read its pitch. You'll sign a one-page NDA to access the deck, the package, and the filmmaker's contact.</p>
+      <p>When a project's drive closes, the filmmaker schedules a private Deal Room session with you. It's a real two-party negotiation — term sheets get drafted collaboratively, and your counsel takes it from there.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">I'm a supporter — where do I start?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Start at <strong><a href="/supporter-feed">/supporter-feed</a></strong>. Projects currently raising are listed there with their funding progress, deal type, and pledge link. Click any project to read the pitch and pledge support.</p>
+      <p>Your pledge is a <strong>Letter of Intent</strong>, not a payment. If the project hits 100% of its drive, the filmmaker reaches out to close. If it doesn't, the pledge dissolves and no money moves. The first supporter on any project gets the <strong>Cherry Breaker</strong> badge — the credit given to the one who believed first.</p>
+    </div>
+  </div>
+
+</div>
+
+<!-- 2 · For Filmmakers -->
+<div class="faq-section">
+  <div class="faq-section-label">Section Two</div>
+  <h2 class="faq-section-title">For Filmmakers</h2>
+
+  <div class="faq-item">
+    <button class="faq-q">How does the pitch deck get built?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Upload your screenplay. The deterministic engine analyzes it and generates a multi-slide investor deck — logline, synopsis, key art, comparable films, market analysis, team, budget, ask, return profile. You can regenerate any slide, edit the copy directly, or rebuild from scratch. Export as PDF or PowerPoint.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">What's the script analysis?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>An end-to-end deterministic read of your script. It surfaces dramatic arc, character notes, structural observations, theme, market comparables, and notes a coverage reader might give. Useful as a private second-pair-of-eyes before you send the script out — or as the foundation for the deck.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">How do I open a pledge drive?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>From your Project Room, set your funding goal, deal type (equity / revenue share / donation), and closing date. Flip the project to <strong>live</strong>. Your pitch page goes public at /project-room?id=&lt;your-project-id&gt; and the project appears on the Investor Deal Room and Supporter Feed.</p>
+      <p>You can run an investor side (NDA-gated, accredited investors) and a supporter side (open, smaller pledges, EP credit for backing) on the same project — most filmmakers run both.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">What happens when my drive hits 100%?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>The drive auto-closes. Every pledger gets an email saying "drive closed, your Deal Room is next." You get the closing playbook. Your project moves into the Production phase on your workspace. You schedule Deal Room sessions with each investor, sign real paper with your counsel, and start spending.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 3 · For Actors -->
+<div class="faq-section">
+  <div class="faq-section-label">Section Three</div>
+  <h2 class="faq-section-title">For Actors</h2>
+
+  <div class="faq-item">
+    <button class="faq-q">What's the Audition tool?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>A self-tape studio built into your workspace. Mark up your sides, run your reads with the on-screen prompter, the prompter scrolls at your pace, and you record straight from the room. Background removal and scene-context backgrounds are included — actor tools are free.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">What's a Booked Role packet?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Once you book a role, EVOLUM generates a prep packet for the production day — scene-by-scene breakdown, emotional arc, character history, costume/continuity notes, and call-time logistics. Download as a PDF before your call.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">Can I find work through the platform?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Yes — the Actor Casting board lists open roles posted by filmmakers on the platform. The board is free to browse. Submitting a self-tape and following up with the filmmaker requires an active subscription on the actor side.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 4 · For Investors -->
+<div class="faq-section">
+  <div class="faq-section-label">Section Four</div>
+  <h2 class="faq-section-title">For Investors</h2>
+
+  <div class="faq-item">
+    <button class="faq-q">Why is there an NDA?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Filmmakers post unproduced screenplays and unsigned deals. The NDA protects their material from being copied or shopped while you decide. It's a one-page confidentiality agreement, signed digitally in 30 seconds, before the deck and the package open.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">What's the Deal Room?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>A private two-party negotiation — you and the filmmaker. Draft a term sheet together in real time, the platform surfaces standard clauses, flags what's missing, and produces a signable document at the end. Both parties take the draft to their counsel before signing.</p>
+      <p>It's not a chatbot. It's a two-sided negotiation with a third party in the middle keeping it clean and on the record.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">Does EVOLUM hold investment money?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p><strong>No.</strong> EVOLUM never touches investor money. Wire instructions and execution happen between you and each filmmaker outside the platform — bank to bank. We're a deal-making and document-drafting workshop, not an escrow service or broker-dealer.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">All-or-nothing — what does that mean?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>If a project's drive doesn't reach 100% of its funding goal by the close date, every pledge dissolves automatically. No money moves. This protects investors from getting trapped in undercapitalized productions, and pushes filmmakers to either re-launch the drive at a lower goal or move on.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 5 · For Supporters -->
+<div class="faq-section">
+  <div class="faq-section-label">Section Five</div>
+  <h2 class="faq-section-title">For Supporters</h2>
+
+  <div class="faq-item">
+    <button class="faq-q">Is a pledge a payment?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p><strong>No.</strong> A pledge is a Letter of Intent — your stated commitment to back the project IF the drive hits 100%. No money moves on a pledge. If the project closes, the filmmaker reaches out to confirm and you complete the contribution (Stripe charge or wire, depending on tier). If the drive fails, the pledge dissolves automatically.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">What's a Cherry Breaker?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>The first person to pledge on a project. Your name gets the Cherry Breaker badge, you're highlighted on the project's Honor Roll, and most filmmakers credit you by name on the finished film. It's the most-watched slot on every drive — it signals to everyone behind you that the project is real.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">Do supporters get an EP credit?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>The Cherry Breaker, the Closer (the pledge that hits 100%), and the First Wave (top early pledgers) typically get the highest-billed supporter credits. The standard supporter tier is "Backed By" or "Special Thanks." Executive Producer credit is reserved for investor-tier participation through a signed Deal Room agreement.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">Can I take a pledge back?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Yes — until the drive closes at 100%. While the drive is live, you can revoke a pledge from your supporter dashboard. Once the drive closes, your pledge becomes a binding commitment and revocation goes through the filmmaker and their counsel.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 6 · Money & Legal -->
+<div class="faq-section">
+  <div class="faq-section-label">Section Six</div>
+  <h2 class="faq-section-title">Money &amp; Legal</h2>
+
+  <div class="faq-item">
+    <button class="faq-q">How does EVOLUM make money?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Subscription fees from filmmakers and the paid actor tier. EVOLUM does not take a cut of pledges, investments, or supporter funds. Deals happen between filmmakers and their backers — we're the workshop, not the middleman.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">Are pledges legally binding?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>A pledge is a Letter of Intent, not a contract. It becomes binding only when the drive closes at 100%, both parties confirm in the Deal Room, and a signed term sheet exists. Before that, either side can step back.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">Do I need accredited investor status to invest?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Depends on the deal type. <strong>Supporter pledges</strong> (small-dollar, donation-style, supporter-credit backing) are open to anyone. <strong>Equity and revenue-share investments</strong> typically require accredited investor status per SEC rules. Filmmakers verify status before closing.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">Where do my screenplays go?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Screenplays stay in your workspace. They are analyzed by the EVOLUM deterministic engine — no third-party AI cloud calls, no model training. Your script stays on the platform. We are also developing <strong>Moving Target Defense (MTD)</strong> — a sharded, rotating storage system for IP-sensitive uploads. See the <a href="/privacy">Privacy Policy</a> for full data handling.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 7 · Account -->
+<div class="faq-section">
+  <div class="faq-section-label">Section Seven</div>
+  <h2 class="faq-section-title">Account &amp; Plans</h2>
+
+  <div class="faq-item">
+    <button class="faq-q">How do I change my plan?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>From the <a href="/billing">Billing</a> page — pick a new plan card. Upgrades take effect immediately and are pro-rated. Downgrades take effect at the next billing cycle. Cancellation takes effect at the end of the current cycle — access stays live until then.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">Can I have multiple roles?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Yes. Filmmakers can also pledge as supporters on other projects. Actors can also be supporters. Each role uses the same account — your dashboard surfaces what's relevant to what you're doing right now.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">How do I reset my password?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>On the sign-in page, click "Forgot password?" — we'll send a reset link to the email on your account.</p>
+    </div>
+  </div>
+
+  <div class="faq-item">
+    <button class="faq-q">How do I delete my account?<span class="faq-q-toggle">+</span></button>
+    <div class="faq-a">
+      <p>Email <a href="mailto:madbradsmith@gmail.com">madbradsmith@gmail.com</a> with the address on your account. We complete the data purge within 30 days, including project files and generated outputs. Stripe billing history is retained as required by tax and financial regulations.</p>
+    </div>
+  </div>
+</div>
+
+<!-- 8 · Contact -->
+<div class="faq-section">
+  <div class="faq-section-label">Section Eight</div>
+  <h2 class="faq-section-title">Still have a question?</h2>
+  <p>Email <a href="mailto:madbradsmith@gmail.com" style="color:var(--gold);border-bottom:1px solid var(--gm)">madbradsmith@gmail.com</a>. We read every message and usually respond within a day.</p>
+</div>
+
+<script>
+document.querySelectorAll('.faq-q').forEach(btn => {
+  btn.addEventListener('click', () => {
+    btn.closest('.faq-item').classList.toggle('open');
+  });
+});
+</script>
+
+<p style="margin-top:48px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">© 2026 EVOLUM · A division of Developum AI Engine</p>
+
+{% endblock %}

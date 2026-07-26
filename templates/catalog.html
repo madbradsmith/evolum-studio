@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOLUM — The Slate</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#07070f;--surface:#0d0d18;--s2:#111120;
+  --border:#1e1e2e;--bhi:#2e2e48;--dim:#363450;
+  --text:#ede9e0;--muted:#6a6778;--cream:oklch(0.93 0.03 90);
+  --gold:oklch(0.78 0.16 75);
+  --gg:oklch(0.78 0.16 75/0.10);
+  --gm:oklch(0.78 0.16 75/0.32);
+  --green:oklch(0.72 0.18 145);
+  --green-g:oklch(0.72 0.18 145/0.10);
+  --green-m:oklch(0.72 0.18 145/0.30);
+}
+body{background:var(--bg);color:var(--text);font-family:'Space Grotesk',sans-serif;line-height:1.5;
+  background-image:radial-gradient(circle,rgba(255,255,255,0.032) 1px,transparent 1px);background-size:28px 28px}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");opacity:.5}
+a{text-decoration:none;color:inherit}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+
+/* ── NAV ── */
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:0 48px;height:64px;background:rgba(7,7,15,0.94);border-bottom:1px solid var(--border);backdrop-filter:blur(16px)}
+.nav-logo{font-family:'Cormorant',serif;font-size:20px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--cream)}
+.nav-logo em{font-style:italic;color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--text)}
+.nav-cta{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gm);padding:7px 16px;transition:all .2s}
+.nav-cta:hover{background:var(--gg);border-color:var(--gold)}
+
+/* ── PAGE HEADER ── */
+.page-header{position:relative;z-index:1;padding:96px 48px 0;text-align:center}
+.ph-eyebrow{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:20px}
+.ph-rule{height:1px;width:48px;background:var(--gm)}
+.ph-tag{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold)}
+.page-header h1{font-family:'Cormorant',serif;font-size:clamp(48px,8vw,96px);font-weight:600;letter-spacing:-0.01em;line-height:.95;color:var(--cream);margin-bottom:12px}
+.page-header h1 em{font-style:italic;color:var(--gold)}
+.page-header p{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.08em;color:var(--muted);margin-bottom:48px}
+.ph-stats{display:inline-flex;border:1px solid var(--border);margin-bottom:52px}
+.ph-stat{padding:12px 24px;border-right:1px solid var(--border);text-align:center}
+.ph-stat:last-child{border-right:none}
+.ph-stat b{display:block;font-family:'Cormorant',serif;font-size:22px;font-weight:600;color:var(--gold);line-height:1;margin-bottom:2px}
+.ph-stat span{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase}
+
+/* ── FILTERS ── */
+.filters{display:flex;align-items:center;justify-content:center;gap:0;border:1px solid var(--border);display:inline-flex;margin-bottom:60px}
+.filter-btn{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;padding:10px 20px;border-right:1px solid var(--border);background:none;border-top:none;border-bottom:none;border-left:none;color:var(--muted);cursor:pointer;transition:all .2s;border-right:1px solid var(--border)}
+.filter-btn:last-child{border-right:none}
+.filter-btn.active,.filter-btn:hover{background:var(--gg);color:var(--gold)}
+.filter-wrap{text-align:center;position:relative;z-index:1}
+
+/* ── GRID ── */
+.catalog-wrap{position:relative;z-index:1;padding:0 48px 80px;max-width:1600px;margin:0 auto}
+.catalog-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border)}
+
+/* ── POSTER CARD ── */
+.pcard{background:var(--surface);position:relative;overflow:hidden;cursor:pointer;display:flex;flex-direction:column}
+.pcard:hover .pcard-overlay{opacity:1}
+.pcard:hover .pcard-img{transform:scale(1.03)}
+
+.pcard-poster{aspect-ratio:2/3;overflow:hidden;position:relative;background:var(--s2)}
+.pcard-img{width:100%;height:100%;object-fit:cover;transition:transform .5s ease;display:block}
+
+/* Wide-format cards span 2 columns */
+.pcard.wide{grid-column:span 2}
+.pcard.wide .pcard-poster{aspect-ratio:16/9}
+
+/* Placeholder poster */
+.pcard-placeholder{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:var(--s2);
+  background-image:repeating-linear-gradient(135deg,rgba(255,255,255,0.012) 0,rgba(255,255,255,0.012) 1px,transparent 1px,transparent 14px)}
+.pp-icon{color:var(--dim)}
+.pp-label{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--dim);text-align:center}
+
+/* Overlay on hover */
+.pcard-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(7,7,15,0.96) 0%,rgba(7,7,15,0.6) 50%,transparent 100%);opacity:0;transition:opacity .35s ease;display:flex;flex-direction:column;justify-content:flex-end;padding:20px}
+.pcard-status{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;padding:2px 8px;border:1px solid;display:inline-flex;align-items:center;gap:5px;align-self:flex-start;margin-bottom:8px}
+.pcard-status.done{color:var(--green);border-color:var(--green-m);background:var(--green-g)}
+.pcard-status.dev{color:var(--gold);border-color:var(--gm);background:var(--gg)}
+.pcard-status-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:blink 2s ease-in-out infinite}
+.pcard-title{font-family:'Cormorant',serif;font-size:clamp(18px,2vw,24px);font-weight:600;color:var(--cream);line-height:1.1;margin-bottom:4px}
+.pcard-tagline{font-size:12px;color:var(--muted);line-height:1.4;margin-bottom:12px}
+.pcard-cta{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--gold);display:flex;align-items:center;gap:6px}
+
+/* Always-visible bottom strip */
+.pcard-info{padding:14px 16px 16px;border-top:1px solid var(--border);background:var(--surface)}
+.pcard-genre{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+.pcard-name{font-size:15px;font-weight:700;color:var(--cream);letter-spacing:-0.01em;margin-top:2px}
+
+/* ── DEAL ROOM CTA ROW ── */
+.cta-row{position:relative;z-index:1;background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:32px 48px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.ctr-left h2{font-family:'Cormorant',serif;font-size:clamp(22px,3vw,36px);font-weight:600;color:var(--cream)}
+.ctr-left h2 em{font-style:italic;color:var(--gold)}
+.ctr-left p{font-size:14px;color:var(--muted);margin-top:4px;max-width:480px}
+.ctr-btns{display:flex;align-items:center;gap:12px;flex-shrink:0;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:13px 24px;transition:all .2s;cursor:pointer;border:none;white-space:nowrap}
+.btn-gold{background:var(--gold);color:#07070f}.btn-gold:hover{background:oklch(0.84 0.16 75)}
+.btn-ghost{background:transparent;border:1px solid var(--bhi);color:var(--text)}.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── FOOTER ── */
+.footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:32px 48px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.flogo{font-family:'Cormorant',serif;font-size:16px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--cream)}
+.flogo em{font-style:italic;color:var(--gold)}
+.ftag{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.08em;margin-top:2px}
+.flinks{display:flex;align-items:center;gap:20px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;flex-wrap:wrap}
+.flinks a{color:var(--muted);transition:color .2s}.flinks a:hover{color:var(--text)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:1200px){.catalog-grid{grid-template-columns:repeat(3,1fr)}.pcard.wide{grid-column:span 2}}
+@media(max-width:860px){.catalog-grid{grid-template-columns:repeat(2,1fr)}.pcard.wide{grid-column:span 2}.nav{padding:0 20px}.nav-links{display:none}.catalog-wrap{padding:0 0 60px}.page-header{padding:96px 20px 0}.cta-row{padding:24px 20px}.footer{padding:24px 20px}}
+@media(max-width:520px){.catalog-grid{grid-template-columns:1fr}.pcard.wide{grid-column:span 1}.pcard.wide .pcard-poster{aspect-ratio:2/3}}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-logo" href="/">EV<em>O</em>LUM</a>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="#" class="active">Catalog</a>
+    <a href="/festival-calendar">Festival</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/house-rules">House Rules</a>
+  </div>
+  <a href="/#doors" class="nav-cta">Open Your Door →</a>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="page-header">
+  <div class="ph-eyebrow">
+    <div class="ph-rule"></div>
+    <span class="ph-tag">The Slate · Every Project In Development</span>
+    <div class="ph-rule"></div>
+  </div>
+  <h1>The <em>Slate.</em></h1>
+  <p>Independent film and television. All of it in development here, on this platform, by this creator.</p>
+  <div class="ph-stats">
+    <div class="ph-stat"><b>16</b><span>Projects</span></div>
+    <div class="ph-stat"><b>2</b><span>Complete</span></div>
+    <div class="ph-stat"><b>4</b><span>Formats</span></div>
+    <div class="ph-stat"><b>1</b><span>Creator</span></div>
+  </div>
+
+  <div class="filter-wrap">
+    <div class="filters">
+      <button class="filter-btn active" onclick="filterCatalog('all', this)">All</button>
+      <button class="filter-btn" onclick="filterCatalog('feature', this)">Features</button>
+      <button class="filter-btn" onclick="filterCatalog('series', this)">Series</button>
+      <button class="filter-btn" onclick="filterCatalog('animation', this)">Animation</button>
+      <button class="filter-btn" onclick="filterCatalog('unscripted', this)">Unscripted</button>
+      <button class="filter-btn" onclick="filterCatalog('complete', this)">Complete</button>
+    </div>
+  </div>
+</div>
+
+<!-- CATALOG GRID -->
+<div class="catalog-wrap">
+<div class="catalog-grid" id="catalog-grid">
+
+  <!-- MANDATORY REPORTER -->
+  <div class="pcard" data-format="feature" data-status="complete">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="Duty of Care" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status done"><span class="pcard-status-dot"></span>Production Complete</div>
+        <div class="pcard-title">Duty of Care</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <a href="/investor-deal-room" class="pcard-cta">View Deal Room →</a>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Feature · Drama</div>
+      <div class="pcard-name">Duty of Care</div>
+    </div>
+  </div>
+
+  <!-- THE COURT JESTER -->
+  <div class="pcard" data-format="animation" data-status="complete">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="The Understudy" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status done"><span class="pcard-status-dot"></span>Production Complete</div>
+        <div class="pcard-title">The Understudy</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <a href="/investor-deal-room" class="pcard-cta">View Deal Room →</a>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Feature · Animated · Fantasy Satire Comedy</div>
+      <div class="pcard-name">The Understudy</div>
+    </div>
+  </div>
+
+  <!-- SOLITAIRE -->
+  <div class="pcard" data-format="series" data-status="dev">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="SOLITAIRE" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">SOLITAIRE</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Series · Crime Drama</div>
+      <div class="pcard-name">SOLITAIRE</div>
+    </div>
+  </div>
+
+  <!-- COVER STORY -->
+  <div class="pcard" data-format="feature" data-status="dev">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="The Long Way Home" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">The Long Way Home</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Feature · Drama</div>
+      <div class="pcard-name">The Long Way Home</div>
+    </div>
+  </div>
+
+  <!-- NOT TODAY -->
+  <div class="pcard" data-format="feature" data-status="dev">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="Night Freight" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Night Freight</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Feature · Crime Drama</div>
+      <div class="pcard-name">Night Freight</div>
+    </div>
+  </div>
+
+  <!-- LIL RIZZ -->
+  <div class="pcard" data-format="animation" data-status="dev">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="Small Talk" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Small Talk</div>
+        <div class="pcard-tagline">The fame is real. The rapper isn't.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Series · Animated · Comedy Drama</div>
+      <div class="pcard-name">Small Talk</div>
+    </div>
+  </div>
+
+  <!-- WE'RE COUSINS?!? -->
+  <div class="pcard" data-format="feature" data-status="dev">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="Family Reunion" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Family Reunion</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Feature · Romantic Comedy</div>
+      <div class="pcard-name">Family Reunion</div>
+    </div>
+  </div>
+
+  <!-- RENT FREE -->
+  <div class="pcard" data-format="series" data-status="dev">
+    <div class="pcard-poster">
+      <div class="pcard-placeholder">
+        <svg class="pp-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="24" height="24"/><line x1="2" y1="9" x2="26" y2="9"/><line x1="9" y1="26" x2="9" y2="9"/></svg>
+        <div class="pp-label">Poster<br>Coming Soon</div>
+      </div>
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Month to Month</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Series · Comedy Drama</div>
+      <div class="pcard-name">Month to Month</div>
+    </div>
+  </div>
+
+  <!-- TAX SEASON -->
+  <div class="pcard" data-format="series" data-status="dev">
+    <div class="pcard-poster">
+      <div class="pcard-placeholder">
+        <svg class="pp-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="24" height="24"/><line x1="2" y1="9" x2="26" y2="9"/><line x1="9" y1="26" x2="9" y2="9"/></svg>
+        <div class="pp-label">Poster<br>Coming Soon</div>
+      </div>
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Paper Trail</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Series · Crime Drama</div>
+      <div class="pcard-name">Paper Trail</div>
+    </div>
+  </div>
+
+  <!-- ROACH COACH -->
+  <div class="pcard" data-format="feature" data-status="dev">
+    <div class="pcard-poster">
+      <div class="pcard-placeholder">
+        <svg class="pp-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="24" height="24"/><line x1="2" y1="9" x2="26" y2="9"/><line x1="9" y1="26" x2="9" y2="9"/></svg>
+        <div class="pp-label">Poster<br>Coming Soon</div>
+      </div>
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Food Truck</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Feature · Drama</div>
+      <div class="pcard-name">Food Truck</div>
+    </div>
+  </div>
+
+  <!-- BIG SANITATION -->
+  <div class="pcard" data-format="series" data-status="dev">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="Clean Sweep" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Clean Sweep</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Series · 30min · Drama</div>
+      <div class="pcard-name">Clean Sweep</div>
+    </div>
+  </div>
+
+  <!-- SAFEWORD -->
+  <div class="pcard" data-format="feature" data-status="dev">
+    <div class="pcard-poster">
+      <div class="pcard-placeholder">
+        <svg class="pp-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="24" height="24"/><line x1="2" y1="9" x2="26" y2="9"/><line x1="9" y1="26" x2="9" y2="9"/></svg>
+        <div class="pp-label">Poster<br>Coming Soon</div>
+      </div>
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Codeword</div>
+        <div class="pcard-tagline">[ Logline coming soon ]</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Feature · [ Genre ]</div>
+      <div class="pcard-name">Codeword</div>
+    </div>
+  </div>
+
+  <!-- WOOD BERNS -->
+  <div class="pcard" data-format="series" data-status="dev">
+    <div class="pcard-poster">
+      <div class="pcard-placeholder">
+        <svg class="pp-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="24" height="24"/><line x1="2" y1="9" x2="26" y2="9"/><line x1="9" y1="26" x2="9" y2="9"/></svg>
+        <div class="pp-label">Poster<br>Coming Soon</div>
+      </div>
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Timber</div>
+        <div class="pcard-tagline">[ Logline coming soon ]</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Series · [ Genre ]</div>
+      <div class="pcard-name">Timber</div>
+    </div>
+  </div>
+
+  <!-- WHO INVITED YOU? -->
+  <div class="pcard" data-format="animation" data-status="dev">
+    <div class="pcard-poster">
+      <div class="pcard-placeholder">
+        <svg class="pp-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" stroke="currentColor" stroke-width="1"><rect x="2" y="2" width="24" height="24"/><line x1="2" y1="9" x2="26" y2="9"/><line x1="9" y1="26" x2="9" y2="9"/></svg>
+        <div class="pp-label">Poster<br>Coming Soon</div>
+      </div>
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Uninvited</div>
+        <div class="pcard-tagline">[ Logline coming soon ]</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Feature · Animated · [ Genre ]</div>
+      <div class="pcard-name">Uninvited</div>
+    </div>
+  </div>
+
+  <!-- DARE MASTER -->
+  <div class="pcard wide" data-format="feature" data-status="dev">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="Truth or Dare" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Truth or Dare</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Series · Animated · Social Comedy</div>
+      <div class="pcard-name">Truth or Dare</div>
+    </div>
+  </div>
+
+  <!-- AT THE COOKOUT -->
+  <div class="pcard wide" data-format="feature" data-status="dev">
+    <div class="pcard-poster">
+      <img class="pcard-img" src="/static/posters/placeholder.svg" alt="Backyard" loading="lazy">
+      <div class="pcard-overlay">
+        <div class="pcard-status dev"><span class="pcard-status-dot"></span>In Development</div>
+        <div class="pcard-title">Backyard</div>
+        <div class="pcard-tagline">A short demo logline. Replace this sample slate with your own projects.</div>
+        <div class="pcard-cta">View Project →</div>
+      </div>
+    </div>
+    <div class="pcard-info">
+      <div class="pcard-genre">Series · Unscripted · Comedy</div>
+      <div class="pcard-name">Backyard</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- FILMMAKER CTA — for the ones browsing who are also building -->
+{% if not current_user.is_authenticated %}
+<div style="max-width:1180px; margin:0 auto; padding:44px 48px; border-top:1px solid var(--border); display:grid; grid-template-columns:1fr auto; gap:32px; align-items:center;">
+  <div>
+    <div style="font-family:'Space Mono',monospace; font-size:10px; letter-spacing:0.28em; text-transform:uppercase; color:var(--gold); margin-bottom:12px;">Got your own slate?</div>
+    <h2 style="font-family:'Cormorant',serif; font-size:clamp(28px,3.5vw,42px); font-weight:600; color:var(--cream); letter-spacing:-0.01em; margin-bottom:10px;">Your projects belong on this <em style="color:var(--gold);">wall</em>, too.</h2>
+    <p style="color:var(--muted); font-size:15px; line-height:1.65; max-width:560px; margin:0;">Every filmmaker on EVOLUM lands their work here. Bring an idea or a script — the workshop handles the rest. Three days free, cancel anytime.</p>
+  </div>
+  <a href="/signup" class="btn btn-gold" style="text-decoration:none; white-space:nowrap;">Bring your project →</a>
+</div>
+{% endif %}
+
+<!-- DEAL ROOM CTA -->
+<div class="cta-row">
+  <div class="ctr-left">
+    <h2>Ready to invest in the <em>slate?</em></h2>
+    <p>Two projects are production-complete and investor-ready. NDA-verified deal rooms open for qualified investors.</p>
+  </div>
+  <div class="ctr-btns">
+    <a href="/investor-deal-room" class="btn btn-gold">Enter Deal Room →</a>
+    <a href="/#doors" class="btn btn-ghost">Open Your Door</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div>
+    <div class="flogo">EV<em>O</em>LUM</div>
+    <div class="ftag">No Hollywood Required. · Est. 2026</div>
+  </div>
+  <div class="flinks">
+    <a href="/">Home</a>
+    <a href="/festival-calendar">Festival</a>
+    <a href="/pricing">Pricing</a>
+    {% if current_user.is_authenticated %}<a href="/logout">Sign Out</a>{% else %}<a href="/sign-in">Sign In</a>{% endif %}
+  </div>
+</footer>
+
+<script>
+function filterCatalog(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.pcard').forEach(card => {
+    if (type === 'all') {
+      card.style.display = '';
+    } else if (type === 'complete') {
+      card.style.display = card.dataset.status === 'complete' ? '' : 'none';
+    } else {
+      card.style.display = card.dataset.format === type ? '' : 'none';
+    }
+    // Handle wide cards in grid after filtering
+    if (card.style.display === 'none') {
+      card.style.gridColumn = '';
+    } else {
+      if (card.classList.contains('wide')) card.style.gridColumn = 'span 2';
+    }
+  });
+}
+</script>
+
+{% include "_compliance_bar.html" %}
+</body>
+</html>

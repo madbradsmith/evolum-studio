@@ -1,0 +1,1906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOLUM — Self-Tape Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/css/main.css">
+<link rel="stylesheet" href="static/css/evolum_dark.css">
+<style>
+/* ============================================================
+   SELF-TAPE ROOM
+   The booth: dark walls, warm paper in hand, Evie between.
+   ============================================================ */
+
+:root {
+    --booth-bg:        #0c0805;
+    --booth-panel:     #14110a;
+    --booth-panel-hi:  #1c1810;
+    --booth-line:      rgba(255,236,206,0.10);
+    --booth-line-hi:   rgba(255,236,206,0.18);
+    --booth-text:      #f6f0e2;
+    --booth-text-dim:  rgba(246,240,226,0.68);
+    --booth-text-mute: rgba(246,240,226,0.42);
+    --rec-red:         #d65439;
+}
+
+/* ── Presentation canvas (the page that hosts the two device views) ── */
+.canvas {
+    min-height: 100vh;
+    background:
+        radial-gradient(ellipse 50% 40% at 50% 0%, rgba(197,86,42,0.10) 0%, transparent 70%),
+        #0a0604;
+    padding: 36px 36px 60px;
+    color: var(--booth-text);
+    font-family: var(--font);
+}
+
+.canvas-head {
+    max-width: 1640px;
+    margin: 0 auto 28px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+}
+.canvas-eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.8px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    display: inline-flex; align-items: center; gap: 8px;
+}
+.canvas-eyebrow::before {
+    content: ''; width: 18px; height: 1px; background: var(--gold);
+}
+.canvas-title {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 44px;
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    line-height: 0.95;
+    color: var(--booth-text);
+}
+.canvas-title em { font-style: normal; color: var(--gold); }
+.canvas-sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+    margin-top: 12px;
+    max-width: 600px;
+    line-height: 1.6;
+}
+.canvas-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--booth-panel);
+    border: 1px solid var(--booth-line-hi);
+    padding: 4px;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.canvas-toggle-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+    background: transparent;
+    border: none;
+    padding: 8px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+.canvas-toggle-btn.active {
+    background: var(--gold);
+    color: var(--booth-bg);
+}
+.canvas-toggle-btn:not(.active):hover { color: var(--booth-text); }
+
+.canvas-stage {
+    max-width: 1640px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 32px;
+    align-items: start;
+}
+
+/* ── Desktop browser frame ── */
+.browser {
+    background: var(--booth-panel);
+    border: 1px solid var(--booth-line-hi);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5);
+}
+.browser-chrome {
+    height: 36px;
+    background: #1f1a12;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    gap: 10px;
+    border-bottom: 1px solid var(--booth-line);
+}
+.browser-dots { display: flex; gap: 6px; }
+.browser-dot { width: 11px; height: 11px; border-radius: 50%; }
+.browser-dot.r { background: #e54d4d; }
+.browser-dot.y { background: #e5b04d; }
+.browser-dot.g { background: #4dc97a; }
+.browser-url {
+    flex: 1;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid var(--booth-line);
+    height: 22px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--booth-text-mute);
+    letter-spacing: 0.3px;
+    margin: 0 80px 0 12px;
+}
+.browser-url .lock { color: var(--gold); margin-right: 6px; }
+.browser-url .path { color: var(--booth-text-dim); }
+
+/* ── iPhone frame (right column) ── */
+.phone {
+    width: 380px;
+    height: 780px;
+    background: #1a1208;
+    border-radius: 46px;
+    padding: 12px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.5),
+                inset 0 0 0 1px rgba(255,236,206,0.08);
+    position: relative;
+}
+.phone-screen {
+    width: 100%;
+    height: 100%;
+    background: var(--booth-bg);
+    border-radius: 36px;
+    overflow: hidden;
+    position: relative;
+}
+.phone-notch {
+    position: absolute;
+    top: 8px; left: 50%;
+    transform: translateX(-50%);
+    width: 110px; height: 30px;
+    background: #000;
+    border-radius: 16px;
+    z-index: 10;
+}
+.phone-statusbar {
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px 0 28px;
+    color: var(--booth-text);
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+}
+.phone-statusbar .right {
+    display: flex; gap: 6px; align-items: center;
+    font-size: 11px;
+    color: var(--booth-text-dim);
+}
+
+/* =====================================================================
+   THE SELF-TAPE ROOM ITSELF (lives inside the browser frame)
+   ===================================================================== */
+
+.booth {
+    background: var(--booth-bg);
+    color: var(--booth-text);
+    font-family: var(--font);
+    height: 880px;
+    display: grid;
+    grid-template-rows: 56px 1fr 96px;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ── Top cinema bar ── */
+.booth-bar {
+    background: var(--booth-panel);
+    border-bottom: 1px solid var(--booth-line);
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    gap: 18px;
+    position: relative;
+    z-index: 30;
+}
+.booth-bar-brand {
+    display: flex; align-items: center; gap: 8px;
+}
+.booth-bar-mark {
+    width: 22px; height: 22px;
+    background: var(--gold);
+    color: var(--booth-bg);
+    font-size: 11px;
+    font-weight: 900;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    display: flex; align-items: center; justify-content: center;
+}
+.booth-crumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+}
+.booth-crumb .sep { opacity: 0.4; }
+.booth-crumb .here { color: var(--booth-text); }
+.booth-crumb .role {
+    color: var(--gold);
+    border: 1px solid var(--gold-border);
+    padding: 3px 8px;
+    background: rgba(197,86,42,0.10);
+}
+
+.booth-scene {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 22px;
+}
+.booth-scene-block {
+    display: flex; flex-direction: column; gap: 1px;
+    text-align: center;
+}
+.booth-scene-key {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+}
+.booth-scene-val {
+    font-family: var(--font);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--booth-text);
+    letter-spacing: -0.2px;
+}
+.booth-scene-val em {
+    font-family: var(--mono);
+    font-style: normal;
+    font-size: 10px;
+    color: var(--booth-text-mute);
+    margin-left: 4px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+.booth-bar-right {
+    margin-left: auto;
+    display: flex; align-items: center; gap: 14px;
+}
+.tech-row {
+    display: flex; gap: 4px; align-items: center;
+    border: 1px solid var(--booth-line);
+    background: rgba(0,0,0,0.3);
+    padding: 4px 10px;
+    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.tech-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 3px 6px;
+    color: var(--booth-text-dim);
+}
+.tech-pill .dot {
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--green);
+}
+.tech-pill.warn .dot { background: var(--mustard); }
+.tech-pill.bad .dot { background: var(--rec-red); }
+.tech-pill.warn { color: var(--mustard); }
+
+.booth-submit {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold);
+    color: var(--booth-bg);
+    border: none;
+    padding: 9px 18px;
+    font-family: var(--font);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    clip-path: polygon(7px 0, 100% 0, 100% 100%, 0 100%, 0 7px);
+    transition: background 0.15s;
+}
+.booth-submit:hover { background: var(--gold-bright); }
+.booth-submit-count {
+    background: rgba(0,0,0,0.18);
+    padding: 1px 7px;
+    font-family: var(--mono);
+    font-size: 10px;
+    margin-left: 2px;
+}
+
+/* Mode toggle (with-role / casting-browse) — slot in top bar */
+.mode-toggle {
+    display: flex; align-items: center;
+    border: 1px solid var(--booth-line);
+    background: rgba(0,0,0,0.3);
+    padding: 2px;
+}
+.mode-toggle-btn {
+    background: transparent; border: none;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+    padding: 5px 9px;
+    cursor: pointer;
+    transition: all 0.12s;
+}
+.mode-toggle-btn.active {
+    background: var(--booth-text);
+    color: var(--booth-bg);
+}
+
+/* ── Stage: sides + camera ── */
+.booth-stage {
+    display: grid;
+    grid-template-columns: 460px 1fr;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ── SIDES PANEL (warm paper held in the dark) ── */
+.sides {
+    background: #0d0d18;
+    color: var(--text);
+    overflow-y: auto;
+    border-right: 1px solid var(--booth-line);
+    position: relative;
+    padding: 22px 26px 80px;
+    box-shadow: inset -20px 0 40px rgba(0,0,0,0.18),
+                4px 0 16px rgba(0,0,0,0.4);
+}
+.sides::-webkit-scrollbar { width: 4px; }
+.sides::-webkit-scrollbar-thumb { background: rgba(237, 233, 224,0.16); }
+
+.sides-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+}
+.sides-head-left {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-mute);
+}
+.sides-clip {
+    display: inline-block;
+    width: 14px; height: 18px;
+    background: var(--gold);
+    clip-path: polygon(0 0, 100% 0, 100% 80%, 50% 100%, 0 80%);
+}
+.sides-toolset {
+    display: flex; gap: 4px;
+}
+.sides-tool-btn {
+    background: transparent;
+    border: 1px solid var(--border-hi);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    cursor: pointer;
+    transition: all 0.12s;
+}
+.sides-tool-btn.active { background: var(--text); color: var(--bg-card); border-color: var(--text); }
+.sides-tool-btn:hover:not(.active) { border-color: var(--gold-border); color: var(--gold); }
+
+.sides-scene-head {
+    margin-top: 18px;
+    padding: 12px 14px;
+    background: var(--bg-card);
+    border-left: 3px solid var(--gold);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+}
+.sides-scene-slug {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--text);
+}
+.sides-scene-page {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--text-mute);
+    letter-spacing: 1px;
+}
+
+.sides-context {
+    margin: 14px 0 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+}
+.context-cell {
+    padding: 9px 10px;
+    background: rgba(255,255,255,0.4);
+    border: 1px solid var(--border);
+}
+.context-key {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    margin-bottom: 3px;
+}
+.context-val {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.3;
+    font-weight: 400;
+}
+
+/* Script body */
+.script {
+    margin-top: 22px;
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.55;
+    color: var(--text);
+    font-weight: 400;
+    letter-spacing: -0.1px;
+}
+.action {
+    font-style: italic;
+    color: var(--text-dim);
+    margin: 14px 0;
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 1.5;
+}
+.charline {
+    margin-top: 18px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text);
+    font-weight: 700;
+    text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+}
+.charline.her { color: var(--gold); }
+.charline.evie { color: var(--olive); }
+.charline-tag {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 1.4px;
+    border: 1px solid currentColor;
+    padding: 1px 5px;
+    font-weight: 500;
+    opacity: 0.8;
+}
+.paren {
+    text-align: center;
+    font-style: italic;
+    font-size: 12px;
+    color: var(--text-mute);
+    margin: 2px 0;
+    font-family: var(--font);
+    font-weight: 400;
+    letter-spacing: 0;
+}
+.line {
+    max-width: 360px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 4px 0;
+}
+.line.now {
+    background: rgba(197,86,42,0.10);
+    border-left: 3px solid var(--gold);
+    border-right: 3px solid var(--gold);
+    padding: 8px 12px;
+    margin: 6px auto;
+    font-weight: 400;
+    color: var(--text);
+}
+.line.evie-said {
+    color: var(--text-mute);
+    font-style: italic;
+}
+
+/* Mini waveform inside script */
+.evie-wave {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 10px;
+    color: var(--olive);
+    margin-left: 4px;
+}
+.evie-wave .b { display: inline-block; width: 2px; height: 10px; background: currentColor; }
+.evie-wave .b1 { animation: w1 0.9s ease-in-out infinite; }
+.evie-wave .b2 { animation: w2 0.85s ease-in-out infinite 0.1s; }
+.evie-wave .b3 { animation: w3 0.95s ease-in-out infinite 0.05s; }
+@keyframes w1 { 0%,100% { transform: scaleY(0.3) } 50% { transform: scaleY(1) } }
+@keyframes w2 { 0%,100% { transform: scaleY(0.6) } 50% { transform: scaleY(0.2) } }
+@keyframes w3 { 0%,100% { transform: scaleY(0.4) } 50% { transform: scaleY(0.9) } }
+
+/* ── CAMERA AREA (the dark booth) ── */
+.cam {
+    background: #0a0604;
+    position: relative;
+    overflow: hidden;
+}
+.cam-feed {
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(ellipse 50% 55% at 50% 45%, rgba(255,210,160,0.22) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 110%, rgba(0,0,0,0.95) 0%, transparent 60%),
+        linear-gradient(170deg, #2a1a0e 0%, #120c06 60%, #060402 100%);
+}
+.cam-feed::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 2px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.014) 0 1px, transparent 1px 2px);
+    mix-blend-mode: overlay;
+}
+/* Subject silhouette */
+.cam-subject {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 38%; height: 65%;
+    background: radial-gradient(ellipse 50% 28% at 50% 18%,
+        rgba(255,200,150,0.25) 0%,
+        rgba(120,70,40,0.4) 45%,
+        transparent 75%);
+    filter: blur(2px);
+}
+
+/* Rule-of-thirds grid */
+.cam-grid {
+    position: absolute; inset: 0;
+    pointer-events: none;
+}
+.cam-grid::before, .cam-grid::after {
+    content: '';
+    position: absolute;
+    background: rgba(255,236,206,0.10);
+}
+.cam-grid::before { left: 33.33%; right: 33.33%; top: 0; bottom: 0; border-left: 1px solid rgba(255,236,206,0.10); border-right: 1px solid rgba(255,236,206,0.10); background: transparent; }
+.cam-grid::after  { top: 33.33%; bottom: 33.33%; left: 0; right: 0; border-top: 1px solid rgba(255,236,206,0.10); border-bottom: 1px solid rgba(255,236,206,0.10); background: transparent; }
+
+/* Eyeline tick (top-third) */
+.cam-eyeline {
+    position: absolute;
+    left: 50%; top: 33.33%;
+    transform: translate(-50%, -50%);
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: rgba(255,236,206,0.55);
+    background: rgba(0,0,0,0.4);
+    padding: 3px 8px;
+    border: 1px solid rgba(255,236,206,0.15);
+}
+.cam-eyeline::before {
+    content: ''; width: 8px; height: 8px;
+    border: 1px solid var(--gold);
+    border-radius: 50%;
+}
+
+/* Slate (top-left) */
+.cam-slate {
+    position: absolute;
+    top: 16px; left: 16px;
+    display: grid;
+    grid-template-columns: auto auto;
+    gap: 4px 14px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,236,206,0.18);
+    padding: 12px 16px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.8px;
+    color: rgba(255,236,206,0.55);
+    backdrop-filter: blur(8px);
+}
+.cam-slate-key { text-transform: uppercase; letter-spacing: 1.4px; font-size: 8px; }
+.cam-slate-val { color: var(--booth-text); font-weight: 500; }
+.cam-slate-bar {
+    grid-column: 1 / -1;
+    height: 2px;
+    background: var(--gold);
+    margin: 2px 0 4px;
+    width: 28px;
+}
+
+/* Tech overlay (top-right of cam) */
+.cam-tech {
+    position: absolute;
+    top: 16px; right: 16px;
+    display: flex; flex-direction: column; gap: 4px;
+    align-items: flex-end;
+}
+.cam-tech-row {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,236,206,0.15);
+    padding: 5px 9px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: rgba(255,236,206,0.7);
+    backdrop-filter: blur(8px);
+}
+.cam-tech-row .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--green);
+}
+.cam-tech-row.warn .dot { background: var(--mustard); }
+.cam-tech-row.warn { color: var(--mustard); }
+
+/* Audio meter */
+.audio-meter {
+    display: inline-flex; gap: 1px; align-items: end; height: 10px;
+}
+.audio-meter span {
+    width: 2px;
+    background: rgba(255,236,206,0.3);
+}
+.audio-meter span.on { background: var(--green); }
+.audio-meter span.peak { background: var(--mustard); }
+
+/* REC indicator */
+.cam-rec {
+    position: absolute;
+    top: 16px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(214,84,57,0.4);
+    padding: 6px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--rec-red);
+    backdrop-filter: blur(8px);
+}
+.cam-rec .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--rec-red);
+    animation: recblink 1.2s ease infinite;
+}
+@keyframes recblink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+.cam-rec .ts { color: var(--booth-text); }
+
+/* Bottom controls bar inside cam */
+.cam-controls {
+    position: absolute;
+    bottom: 22px; left: 0; right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    z-index: 5;
+}
+.cam-take-meta {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--booth-text-dim);
+    text-align: center;
+}
+.cam-take-meta strong { color: var(--booth-text); font-weight: 700; }
+.cam-take-meta div + div { margin-top: 2px; color: var(--booth-text-mute); font-size: 9px; }
+
+.rec-btn {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    background: var(--rec-red);
+    border: 4px solid rgba(255,236,206,0.5);
+    cursor: pointer;
+    box-shadow: 0 0 0 6px rgba(214,84,57,0.18),
+                0 0 36px rgba(214,84,57,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    color: rgba(255,255,255,0.96);
+    transition: transform 0.15s;
+    position: relative;
+}
+.rec-btn:hover { transform: scale(1.05); }
+.rec-btn::before {
+    content: '';
+    width: 22px; height: 22px;
+    background: rgba(255,236,206,0.95);
+    border-radius: 4px;
+}
+
+.cam-side-action {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,236,206,0.18);
+    padding: 9px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--booth-text);
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: all 0.15s;
+}
+.cam-side-action:hover { border-color: var(--gold-border); color: var(--gold); }
+
+/* ── EVIE FLOATING COACH PANEL ── */
+.evie-coach {
+    position: absolute;
+    right: 20px; bottom: 130px;
+    width: 320px;
+    background: rgba(20,17,10,0.92);
+    border: 1px solid rgba(255,236,206,0.18);
+    backdrop-filter: blur(20px);
+    color: var(--booth-text);
+    font-family: var(--font);
+    z-index: 20;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+}
+.evie-head {
+    padding: 12px 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,236,206,0.10);
+}
+.evie-avatar {
+    width: 32px; height: 32px;
+    background: var(--gold);
+    color: var(--booth-bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    font-weight: 900;
+    flex-shrink: 0;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 6px 100%, 0 calc(100% - 6px));
+    position: relative;
+}
+.evie-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; right: -2px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    border: 2px solid var(--booth-panel);
+}
+.evie-name-row {
+    flex: 1;
+    display: flex; flex-direction: column; gap: 1px;
+}
+.evie-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--booth-text);
+    letter-spacing: -0.2px;
+}
+.evie-status {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: var(--olive);
+    display: flex; align-items: center; gap: 5px;
+}
+.evie-controls { display: flex; gap: 4px; }
+.evie-ctrl-btn {
+    width: 24px; height: 24px;
+    background: transparent;
+    border: 1px solid rgba(255,236,206,0.18);
+    color: var(--booth-text-dim);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+}
+.evie-ctrl-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.evie-mode-tabs {
+    display: flex;
+    border-bottom: 1px solid rgba(255,236,206,0.10);
+}
+.evie-mode-tab {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 9px 8px;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.12s;
+}
+.evie-mode-tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+}
+.evie-mode-tab:hover:not(.active) { color: var(--booth-text); }
+
+.evie-body {
+    padding: 14px 16px;
+    max-height: 280px;
+    overflow-y: auto;
+    display: flex; flex-direction: column; gap: 12px;
+}
+.evie-body::-webkit-scrollbar { width: 3px; }
+.evie-body::-webkit-scrollbar-thumb { background: rgba(255,236,206,0.18); }
+
+.evie-message {
+    display: flex; flex-direction: column; gap: 4px;
+    padding-left: 10px;
+    border-left: 2px solid var(--gold);
+}
+.evie-message.her { border-left-color: var(--olive); }
+.evie-message-meta {
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+}
+.evie-message-text {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 13px;
+    line-height: 1.45;
+    color: var(--booth-text-dim);
+    font-weight: 300;
+}
+.evie-message.note .evie-message-text {
+    font-family: var(--font);
+    font-style: normal;
+    font-size: 12px;
+    color: var(--booth-text);
+    font-weight: 400;
+}
+.evie-cta-row {
+    display: flex; gap: 6px; margin-top: 4px; flex-wrap: wrap;
+}
+.evie-chip {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    border: 1px solid rgba(255,236,206,0.18);
+    padding: 4px 8px;
+    color: var(--booth-text-dim);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.12s;
+}
+.evie-chip:hover { border-color: var(--gold); color: var(--gold); }
+
+.evie-foot {
+    padding: 10px 14px;
+    border-top: 1px solid rgba(255,236,206,0.10);
+    display: flex; align-items: center; gap: 8px;
+}
+.evie-input {
+    flex: 1;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,236,206,0.10);
+    color: var(--booth-text);
+    padding: 6px 10px;
+    font-size: 12px;
+    font-family: var(--font);
+    width: 100%;
+    border-radius: 0;
+}
+.evie-input::placeholder { color: var(--booth-text-mute); font-style: italic; }
+.evie-mic {
+    width: 28px; height: 28px;
+    background: var(--gold);
+    color: var(--booth-bg);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    clip-path: polygon(5px 0, 100% 0, 100% 100%, 0 100%, 0 5px);
+}
+
+/* ── TAKE LIBRARY (bottom strip) ── */
+.takes {
+    background: var(--booth-panel);
+    border-top: 1px solid var(--booth-line);
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    overflow: hidden;
+}
+.takes-label {
+    flex-shrink: 0;
+    display: flex; flex-direction: column; gap: 2px;
+}
+.takes-label-key {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+}
+.takes-label-val {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--booth-text);
+    letter-spacing: -0.5px;
+}
+.takes-rail {
+    flex: 1;
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+}
+.takes-rail::-webkit-scrollbar { height: 3px; }
+.takes-rail::-webkit-scrollbar-thumb { background: rgba(255,236,206,0.18); }
+.take-card {
+    flex-shrink: 0;
+    width: 200px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--booth-panel-hi);
+    border: 1px solid rgba(255,236,206,0.06);
+    padding: 8px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%);
+}
+.take-card:hover { border-color: var(--gold-border); }
+.take-card.fav { border-color: var(--gold); background: rgba(197,86,42,0.08); }
+.take-thumb {
+    width: 50px; height: 38px;
+    background: linear-gradient(160deg, #3a2614 0%, #14110a 70%);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+}
+.take-thumb::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 40% 60% at 50% 65%, rgba(255,200,150,0.4) 0%, transparent 70%);
+}
+.take-thumb-tc {
+    position: absolute;
+    bottom: 2px; right: 3px;
+    font-family: var(--mono);
+    font-size: 7px;
+    color: rgba(255,236,206,0.7);
+    letter-spacing: 0.5px;
+}
+.take-meta { flex: 1; min-width: 0; }
+.take-num {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--booth-text);
+    font-weight: 700;
+}
+.take-num em {
+    color: var(--booth-text-mute);
+    font-style: normal;
+    font-weight: 500;
+}
+.take-tag {
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 11px;
+    color: var(--booth-text-dim);
+    line-height: 1.3;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.take-fav {
+    background: transparent;
+    border: none;
+    color: var(--booth-text-mute);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 2px;
+    transition: color 0.12s;
+}
+.take-fav.on { color: var(--gold); }
+.take-fav:hover { color: var(--gold); }
+
+/* New take button — large rec-style at right end */
+.take-new {
+    flex-shrink: 0;
+    display: flex; align-items: center; gap: 8px;
+    background: transparent;
+    border: 1px dashed rgba(255,236,206,0.25);
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--booth-text-dim);
+    cursor: pointer;
+    transition: all 0.12s;
+}
+.take-new:hover { border-color: var(--gold); color: var(--gold); }
+
+/* =====================================================================
+   PHONE LAYOUT — same booth, stacked
+   ===================================================================== */
+.booth-mobile {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--booth-bg);
+    color: var(--booth-text);
+    font-family: var(--font);
+}
+.m-bar {
+    padding: 6px 16px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--booth-line);
+    background: var(--booth-panel);
+}
+.m-bar-left {
+    display: flex; align-items: center; gap: 8px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+}
+.m-bar-role { color: var(--gold); }
+.m-bar-x {
+    color: var(--booth-text-mute);
+    background: transparent; border: 1px solid var(--booth-line); padding: 4px 8px;
+    font-family: var(--mono); font-size: 11px; cursor: pointer;
+}
+
+.m-cam {
+    height: 280px;
+    background: #0a0604;
+    position: relative;
+    overflow: hidden;
+}
+.m-cam-feed {
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse 50% 55% at 50% 45%, rgba(255,210,160,0.22) 0%, transparent 60%),
+        linear-gradient(170deg, #2a1a0e 0%, #120c06 60%, #060402 100%);
+}
+.m-cam-subject {
+    position: absolute;
+    bottom: 0; left: 50%;
+    transform: translateX(-50%);
+    width: 50%; height: 65%;
+    background: radial-gradient(ellipse 50% 28% at 50% 18%,
+        rgba(255,200,150,0.25) 0%,
+        rgba(120,70,40,0.4) 45%,
+        transparent 75%);
+    filter: blur(2px);
+}
+.m-cam-grid::before, .m-cam-grid::after {
+    content: '';
+    position: absolute;
+    background: rgba(255,236,206,0.08);
+}
+.m-cam-grid::before { left: 33.33%; right: 33.33%; top: 0; bottom: 0; border-left: 1px solid rgba(255,236,206,0.10); border-right: 1px solid rgba(255,236,206,0.10); }
+.m-cam-grid::after  { top: 33.33%; bottom: 33.33%; left: 0; right: 0; border-top: 1px solid rgba(255,236,206,0.10); border-bottom: 1px solid rgba(255,236,206,0.10); }
+
+.m-cam-rec {
+    position: absolute;
+    top: 12px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 6px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(214,84,57,0.45);
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--rec-red);
+}
+.m-cam-rec .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--rec-red);
+    animation: recblink 1.2s ease infinite;
+}
+.m-cam-rec .ts { color: var(--booth-text); }
+.m-cam-tech {
+    position: absolute;
+    top: 12px; right: 12px;
+    display: flex; gap: 4px; flex-direction: column; align-items: flex-end;
+}
+.m-tech-pill {
+    background: rgba(0,0,0,0.55);
+    border: 1px solid rgba(255,236,206,0.15);
+    padding: 3px 6px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: rgba(255,236,206,0.7);
+    display: inline-flex; align-items: center; gap: 4px;
+}
+.m-tech-pill .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); }
+.m-cam-slate {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: rgba(0,0,0,0.6);
+    border: 1px solid rgba(255,236,206,0.18);
+    padding: 6px 9px;
+    font-family: var(--mono);
+    font-size: 8px;
+    letter-spacing: 1px;
+    color: rgba(255,236,206,0.7);
+    line-height: 1.5;
+}
+.m-cam-slate strong { color: var(--booth-text); }
+
+.m-tabs {
+    display: flex;
+    background: var(--booth-panel);
+    border-bottom: 1px solid var(--booth-line);
+}
+.m-tab {
+    flex: 1;
+    padding: 10px 6px;
+    background: transparent; border: none;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 1.3px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+}
+.m-tab.active {
+    color: var(--gold);
+    border-bottom-color: var(--gold);
+}
+
+.m-content {
+    flex: 1;
+    overflow-y: auto;
+    background: #0d0d18;
+    color: var(--text);
+    padding: 16px 18px 20px;
+}
+.m-content.dark { background: var(--booth-bg); color: var(--booth-text); padding: 14px 16px; }
+
+.m-scene-head {
+    padding: 9px 11px;
+    background: var(--bg-card);
+    border-left: 3px solid var(--gold);
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 12px;
+}
+.m-scene-slug {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--text);
+    font-weight: 700;
+}
+.m-scene-page {
+    font-family: var(--mono);
+    font-size: 8px;
+    color: var(--text-mute);
+    letter-spacing: 1px;
+}
+
+.m-controls {
+    background: var(--booth-panel);
+    border-top: 1px solid var(--booth-line);
+    padding: 10px 18px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+.m-take-meta {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--booth-text-dim);
+}
+.m-take-meta strong { color: var(--booth-text); }
+.m-rec-btn {
+    width: 56px; height: 56px;
+    border-radius: 50%;
+    background: var(--rec-red);
+    border: 3px solid rgba(255,236,206,0.5);
+    cursor: pointer;
+    box-shadow: 0 0 0 5px rgba(214,84,57,0.18);
+    display: flex; align-items: center; justify-content: center;
+}
+.m-rec-btn::before {
+    content: '';
+    width: 18px; height: 18px;
+    background: rgba(255,236,206,0.95);
+    border-radius: 4px;
+}
+
+/* ── Side note label below each device ── */
+.device-cap {
+    text-align: center;
+    margin-top: 18px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--booth-text-mute);
+}
+.device-cap strong { color: var(--booth-text); }
+
+/* Media: stack columns on smaller canvas widths */
+@media (max-width: 1380px) {
+    .canvas-stage { grid-template-columns: 1fr; justify-content: center; }
+    .phone { margin: 0 auto; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="canvas" data-screen-label="01 Self-Tape Room">
+
+    <!-- ==================== HEADER ==================== -->
+    <div class="canvas-head">
+        <div>
+            <a class="canvas-eyebrow" href="/actor-casting" style="text-decoration:none; cursor:pointer;">← Casting Room</a>
+            <h1 class="canvas-title">Self-Tape <em>Room</em>.</h1>
+            <p class="canvas-sub">A dark room with warm sides in your hand. Mark up your sides, run your lines, watch your framing — and save every take.</p>
+        </div>
+
+        <!-- Entry-state toggle -->
+        <div>
+            <div style="font-family:var(--mono); font-size:9px; letter-spacing:1.4px; text-transform:uppercase; color:var(--booth-text-mute); margin-bottom:8px; text-align:right;">Entry Point</div>
+            <div class="canvas-toggle">
+                <button class="canvas-toggle-btn active" id="modeRole">Role Loaded</button>
+                <button class="canvas-toggle-btn" id="modeBrowse">Casting Browse</button>
+            </div>
+            <div data-lang-mount style="margin-top:12px; display:flex; justify-content:flex-end;"></div>
+        </div>
+    </div>
+
+    <!-- ==================== STAGE: desktop + phone ==================== -->
+    <div class="canvas-stage">
+
+        <!-- ============================================
+             DESKTOP — browser frame
+             ============================================ -->
+        <div>
+        <div class="browser">
+            <div class="browser-chrome">
+                <div class="browser-dots">
+                    <div class="browser-dot r"></div>
+                    <div class="browser-dot y"></div>
+                    <div class="browser-dot g"></div>
+                </div>
+                <div class="browser-url">
+                    <span class="lock">⚿</span><span class="path" id="urlPath">evolum.io / casting / salt-of-the-stars / iona-vex / tape</span>
+                </div>
+            </div>
+
+            <!-- ============== BOOTH ============== -->
+            <div class="booth">
+
+                <!-- Top bar -->
+                <div class="booth-bar">
+                    <div class="booth-bar-brand">
+                        <div class="booth-bar-mark">E</div>
+                    </div>
+
+                    <!-- Crumb (changes by mode) -->
+                    <div class="booth-crumb" id="crumbRole">
+                        <span>Casting</span>
+                        <span class="sep">/</span>
+                        <span class="here">Salt of the Stars</span>
+                        <span class="sep">/</span>
+                        <span class="role">Iona Vex · Lead</span>
+                    </div>
+
+                    <div class="booth-crumb" id="crumbBrowse" style="display:none;">
+                        <span>Casting Browse</span>
+                        <span class="sep">/</span>
+                        <span class="here">42 open roles</span>
+                        <span class="sep">·</span>
+                        <span class="role">Pick a role to tape →</span>
+                    </div>
+
+                    <div class="booth-scene">
+                        <div class="booth-scene-block">
+                            <div class="booth-scene-key">Scene</div>
+                            <div class="booth-scene-val">14 <em>of 4</em></div>
+                        </div>
+                        <div class="booth-scene-block">
+                            <div class="booth-scene-key">Take</div>
+                            <div class="booth-scene-val">03</div>
+                        </div>
+                    </div>
+
+                    <div class="booth-bar-right">
+                        <div class="tech-row">
+                            <span class="tech-pill"><span class="dot"></span>Frame</span>
+                            <span class="tech-pill"><span class="dot"></span>Light</span>
+                            <span class="tech-pill warn"><span class="dot"></span>Audio -3dB</span>
+                            <span class="tech-pill"><span class="dot"></span>Eyes</span>
+                        </div>
+                        <button class="booth-submit">
+                            Submit Best Takes
+                            <span class="booth-submit-count">3</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stage: sides + camera -->
+                <div class="booth-stage">
+
+                    <!-- ===== SIDES (warm paper) ===== -->
+                    <div class="sides">
+                        <div class="sides-head">
+                            <div class="sides-head-left">
+                                <span class="sides-clip"></span>
+                                <span>Sides · 4 pages</span>
+                            </div>
+                            <div class="sides-toolset">
+                                <button class="sides-tool-btn active">Sides</button>
+                                <button class="sides-tool-btn">Prompter</button>
+                                <button class="sides-tool-btn">Highlight</button>
+                            </div>
+                        </div>
+
+                        <div class="sides-scene-head">
+                            <div class="sides-scene-slug">Scene 14 · INT. STARSHIP MESS — NIGHT</div>
+                            <div class="sides-scene-page">pg. 31</div>
+                        </div>
+
+                        <div class="sides-context">
+                            <div class="context-cell">
+                                <div class="context-key">Intent</div>
+                                <div class="context-val">Make him stay</div>
+                            </div>
+                            <div class="context-cell">
+                                <div class="context-key">Beat</div>
+                                <div class="context-val">The reveal</div>
+                            </div>
+                            <div class="context-cell">
+                                <div class="context-key">Note</div>
+                                <div class="context-val">She's lying</div>
+                            </div>
+                        </div>
+
+                        <div class="script">
+
+                            <p class="action">The mess is empty. IONA stands at the porthole, watching the slow turn of a planet she shouldn't recognize. HENRY enters, freezes when he sees her.</p>
+
+                            <div class="charline evie">
+                                Henry
+                                <span class="charline-tag">Reader</span>
+                                
+                            </div>
+                            <div class="line evie-said">You weren't on the manifest.</div>
+
+                            <div class="charline her">
+                                Iona
+                                <span class="charline-tag">You</span>
+                            </div>
+                            <p class="paren">(without turning)</p>
+                            <div class="line now">No. I wasn't.</div>
+
+                            <div class="charline evie">
+                                Henry
+                                <span class="charline-tag">Reader</span>
+                            </div>
+                            <div class="line">Then how —</div>
+
+                            <div class="charline her">
+                                Iona
+                                <span class="charline-tag">You</span>
+                            </div>
+                            <div class="line">I walked on at Eight Bell. Same as you. I just kept my head down.</div>
+
+                            <p class="action">She turns. He sees her face properly for the first time and something in him goes very still.</p>
+
+                            <div class="charline evie">
+                                Henry
+                                <span class="charline-tag">Reader</span>
+                            </div>
+                            <p class="paren">(quietly)</p>
+                            <div class="line">You're the one from the salt mines.</div>
+
+                        </div>
+                    </div>
+
+                    <!-- ===== CAMERA (the booth) ===== -->
+                    <div class="cam">
+                        <div class="cam-feed"></div>
+                        <div class="cam-subject"></div>
+                        <div class="cam-grid"></div>
+                        <div class="cam-eyeline">Eye-line · Camera Right</div>
+
+                        <!-- REC indicator -->
+                        <div class="cam-rec">
+                            <span class="dot"></span>
+                            <span>Rec</span>
+                            <span class="ts">00:42</span>
+                        </div>
+
+                        <!-- Slate -->
+                        <div class="cam-slate">
+                            <div class="cam-slate-bar"></div>
+                            <div class="cam-slate-key">Project</div>  <div class="cam-slate-val">Salt of the Stars</div>
+                            <div class="cam-slate-key">Role</div>     <div class="cam-slate-val">Iona Vex</div>
+                            <div class="cam-slate-key">Actor</div>    <div class="cam-slate-val">Avery Holt</div>
+                            <div class="cam-slate-key">Eyes</div>     <div class="cam-slate-val">Hazel · 5'7"</div>
+                            <div class="cam-slate-key">Rep</div>      <div class="cam-slate-val">Self-rep</div>
+                            <div class="cam-slate-key">Take</div>     <div class="cam-slate-val">03 · Scene 14</div>
+                        </div>
+
+                        <!-- Tech overlay -->
+                        <div class="cam-tech">
+                            <div class="cam-tech-row">
+                                <span class="dot"></span>
+                                <span>Framing · 1.85</span>
+                            </div>
+                            <div class="cam-tech-row">
+                                <span class="dot"></span>
+                                <span>Lighting · 4200K</span>
+                            </div>
+                            <div class="cam-tech-row warn">
+                                <span class="dot"></span>
+                                <span>Audio</span>
+                                <span class="audio-meter">
+                                    <span class="on" style="height:3px;"></span>
+                                    <span class="on" style="height:5px;"></span>
+                                    <span class="on" style="height:7px;"></span>
+                                    <span class="on" style="height:8px;"></span>
+                                    <span class="on" style="height:6px;"></span>
+                                    <span class="on" style="height:9px;"></span>
+                                    <span class="peak" style="height:10px;"></span>
+                                    <span style="height:10px;"></span>
+                                </span>
+                            </div>
+                            <div class="cam-tech-row">
+                                <span class="dot"></span>
+                                <span>Face · Centered</span>
+                            </div>
+                        </div>
+
+                        <!-- Bottom controls -->
+                        <div class="cam-controls">
+                            <div class="cam-side-action">
+                                <span>↺</span>
+                                <span>Reset Take</span>
+                            </div>
+
+                            <div style="display:flex; flex-direction:column; align-items:center; gap:8px;">
+                                <button class="rec-btn" aria-label="Stop recording"></button>
+                                <div class="cam-take-meta">
+                                    <div><strong>TAKE 03</strong> · 00:42</div>
+                                    <div>Tap to stop · Space ⎵</div>
+                                </div>
+                            </div>
+
+                            <div class="cam-side-action">
+                                <span>★</span>
+                                <span>Mark Favorite</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Take Library -->
+                <div class="takes">
+                    <div class="takes-label">
+                        <div class="takes-label-key">Takes · 4 saved</div>
+                        <div class="takes-label-val">Your reel</div>
+                    </div>
+                    <div class="takes-rail">
+                        <div class="take-card fav">
+                            <div class="take-thumb"><div class="take-thumb-tc">00:48</div></div>
+                            <div class="take-meta">
+                                <div class="take-num">Take 01 <em>· 0:48</em></div>
+                                <div class="take-tag">"The reveal landed."</div>
+                            </div>
+                            <button class="take-fav on">★</button>
+                        </div>
+                        <div class="take-card">
+                            <div class="take-thumb"><div class="take-thumb-tc">00:51</div></div>
+                            <div class="take-meta">
+                                <div class="take-num">Take 02 <em>· 0:51</em></div>
+                                <div class="take-tag">Pace dropped on beat two.</div>
+                            </div>
+                            <button class="take-fav">☆</button>
+                        </div>
+                        <div class="take-card fav">
+                            <div class="take-thumb"><div class="take-thumb-tc">00:42</div></div>
+                            <div class="take-meta">
+                                <div class="take-num">Take 03 <em>· recording</em></div>
+                                <div class="take-tag">In progress…</div>
+                            </div>
+                            <button class="take-fav on">★</button>
+                        </div>
+                        <div class="take-card">
+                            <div class="take-thumb"><div class="take-thumb-tc">00:46</div></div>
+                            <div class="take-meta">
+                                <div class="take-num">Take 04 <em>· warmup</em></div>
+                                <div class="take-tag">Off-the-cuff run-through.</div>
+                            </div>
+                            <button class="take-fav">☆</button>
+                        </div>
+                    </div>
+                    <button class="take-new">+ New Take</button>
+                </div>
+
+            </div>
+            <!-- ============== /BOOTH ============== -->
+
+        </div>
+        <div class="device-cap"><strong>Desktop · iPad</strong> &nbsp;·&nbsp; Room view, 4-up framing checks</div>
+        </div>
+        <!-- ============== /DESKTOP ============== -->
+
+
+        <!-- ============================================
+             PHONE — iPhone frame
+             ============================================ -->
+        <div>
+        <div class="phone">
+            <div class="phone-screen">
+                <div class="phone-notch"></div>
+
+                <div class="phone-statusbar">
+                    <span>9:41</span>
+                    <span class="right">
+                        <span>●●●</span>
+                        <span>5G</span>
+                        <span>▮</span>
+                    </span>
+                </div>
+
+                <!-- ============== MOBILE BOOTH ============== -->
+                <div class="booth-mobile">
+
+                    <!-- top bar -->
+                    <div class="m-bar">
+                        <div class="m-bar-left">
+                            <span>Salt of the Stars</span>
+                            <span style="opacity:0.4;">/</span>
+                            <span class="m-bar-role">Iona</span>
+                        </div>
+                        <button class="m-bar-x">×</button>
+                    </div>
+
+                    <!-- camera -->
+                    <div class="m-cam">
+                        <div class="m-cam-feed"></div>
+                        <div class="m-cam-subject"></div>
+                        <div class="m-cam-grid"></div>
+
+                        <div class="m-cam-rec">
+                            <span class="dot"></span>
+                            <span>Rec</span>
+                            <span class="ts">00:42</span>
+                        </div>
+
+                        <div class="m-cam-slate">
+                            <div><strong>SCENE 14 · TAKE 03</strong></div>
+                            <div>Iona Vex · Avery Holt</div>
+                        </div>
+
+                        <div class="m-cam-tech">
+                            <span class="m-tech-pill"><span class="dot"></span>Frame</span>
+                            <span class="m-tech-pill"><span class="dot"></span>Light</span>
+                            <span class="m-tech-pill"><span class="dot" style="background:var(--mustard)"></span>Audio</span>
+                        </div>
+                    </div>
+
+                    <!-- tabs -->
+                    <div class="m-tabs">
+                        <button class="m-tab active" data-tab="sides">Sides</button>
+                        <button class="m-tab" data-tab="coach">Coach</button>
+                        <button class="m-tab" data-tab="takes">Takes · 3</button>
+                    </div>
+
+                    <!-- sides content (default) -->
+                    <div class="m-content" id="m-tab-sides" style="font-size:14px;">
+                        <div class="m-scene-head">
+                            <div class="m-scene-slug">Scene 14 · INT. MESS — NIGHT</div>
+                            <div class="m-scene-page">pg. 31</div>
+                        </div>
+
+                        <p style="font-family:var(--serif); font-style:italic; font-size:12px; color:var(--text-dim); line-height:1.5; margin-bottom:14px;">The mess is empty. IONA stands at the porthole. HENRY enters, freezes.</p>
+
+                        <div style="font-family:var(--mono); font-size:10px; letter-spacing:1.6px; text-transform:uppercase; color:var(--olive); text-align:center; margin:10px 0 2px; display:flex; align-items:center; justify-content:center; gap:8px;">
+                            <span>Henry</span>
+                            <span style="font-family:var(--mono); font-size:8px; border:1px solid var(--olive); padding:1px 5px;">Reader</span>
+                        </div>
+                        <div style="font-family:var(--serif); font-style:italic; text-align:center; color:var(--text-mute); font-size:14px; margin-bottom:8px;">"You weren't on the manifest."</div>
+
+                        <div style="font-family:var(--mono); font-size:10px; letter-spacing:1.6px; text-transform:uppercase; color:var(--gold); text-align:center; margin:10px 0 2px;">
+                            Iona <span style="font-family:var(--mono); font-size:8px; border:1px solid var(--gold); padding:1px 5px; margin-left:6px;">You</span>
+                        </div>
+                        <div style="text-align:center; font-style:italic; color:var(--text-mute); font-size:11px;">(without turning)</div>
+                        <div style="background:rgba(197,86,42,0.10); border-left:3px solid var(--gold); border-right:3px solid var(--gold); padding:8px 12px; margin:6px auto; font-family:var(--serif); font-size:15px; text-align:center; color:var(--text);">No. I wasn't.</div>
+
+                        <div style="font-family:var(--mono); font-size:10px; letter-spacing:1.6px; text-transform:uppercase; color:var(--olive); text-align:center; margin:14px 0 2px;">Henry</div>
+                        <div style="font-family:var(--serif); font-style:italic; text-align:center; color:var(--text-mute); font-size:14px;">"Then how —"</div>
+                    </div>
+
+                    <!-- coach content (hidden by default) -->
+                    <div class="m-content" id="m-tab-coach" style="display:none; font-size:13px; color:var(--text-mute);">
+                        <div style="font-family:var(--mono); font-size:9px; letter-spacing:1.6px; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">Coach notes</div>
+                        <div style="font-family:var(--serif); font-style:italic; color:var(--text); margin-bottom:10px;">"Your read of Iona is restrained, almost guarded — let the porthole carry the weight. Don't push her surprise."</div>
+                        <ul style="list-style:none; padding:0; margin:0; font-size:12px; line-height:1.7;">
+                            <li>↳ Try the line slower on take 02 — pull breath before "No."</li>
+                            <li>↳ Watch your eyeline drift on take 03</li>
+                            <li>↳ Strong physicality. Hold the stillness one more beat.</li>
+                        </ul>
+                    </div>
+
+                    <!-- takes content (hidden by default) -->
+                    <div class="m-content" id="m-tab-takes" style="display:none; font-size:13px;">
+                        <div style="font-family:var(--mono); font-size:9px; letter-spacing:1.6px; text-transform:uppercase; color:var(--gold); margin-bottom:10px;">3 takes saved</div>
+                        <div style="display:flex; flex-direction:column; gap:6px;">
+                            <div style="display:flex; align-items:center; gap:10px; padding:8px; background:var(--booth-bg); border-radius:4px;">
+                                <strong style="font-family:var(--mono); font-size:10px;">TAKE 01</strong>
+                                <span style="color:var(--text-mute);">00:38</span>
+                                <button class="take-fav on" style="margin-left:auto; background:none; border:none; cursor:pointer; color:var(--gold);">★</button>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; padding:8px; background:var(--booth-bg); border-radius:4px;">
+                                <strong style="font-family:var(--mono); font-size:10px;">TAKE 02</strong>
+                                <span style="color:var(--text-mute);">00:41</span>
+                                <button class="take-fav" style="margin-left:auto; background:none; border:none; cursor:pointer; color:var(--text-mute);">☆</button>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; padding:8px; background:var(--booth-bg); border-radius:4px;">
+                                <strong style="font-family:var(--mono); font-size:10px;">TAKE 03</strong>
+                                <span style="color:var(--text-mute);">00:42</span>
+                                <button class="take-fav on" style="margin-left:auto; background:none; border:none; cursor:pointer; color:var(--gold);">★</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- bottom controls -->
+                    <div class="m-controls">
+                        <div class="m-take-meta">
+                            <div><strong>TAKE 03</strong></div>
+                            <div>00:42</div>
+                        </div>
+                        <button class="m-rec-btn" aria-label="Stop"></button>
+                        <div class="m-take-meta" style="text-align:right;">
+                            <div>★ Fav</div>
+                            <div>3 saved</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <div class="device-cap"><strong>iPhone</strong> &nbsp;·&nbsp; Tab between Sides / Coach / Takes</div>
+        </div>
+        <!-- ============== /PHONE ============== -->
+
+    </div>
+
+</div>
+
+<script src="static/js/i18n-strings.js"></script>
+<script src="static/js/i18n.js"></script>
+<script src="static/js/evie-chat-new.js"></script>
+<script>
+// Entry-state toggle: swap crumb + URL
+(function(){
+    const r = document.getElementById('modeRole');
+    const b = document.getElementById('modeBrowse');
+    const cR = document.getElementById('crumbRole');
+    const cB = document.getElementById('crumbBrowse');
+    const url = document.getElementById('urlPath');
+
+    if (r && b) {
+        r.addEventListener('click', () => {
+            r.classList.add('active'); b.classList.remove('active');
+            if (cR) cR.style.display = '';
+            if (cB) cB.style.display = 'none';
+            if (url) url.textContent = 'evolum.io / casting / salt-of-the-stars / iona-vex / tape';
+        });
+        b.addEventListener('click', () => {
+            b.classList.add('active'); r.classList.remove('active');
+            if (cB) cB.style.display = '';
+            if (cR) cR.style.display = 'none';
+            if (url) url.textContent = 'evolum.io / casting / browse';
+        });
+    }
+})();
+
+// Booth tabs (Sides / Coach / Takes)
+(function(){
+    const tabs = document.querySelectorAll('.m-tab');
+    const panels = {
+        sides: document.getElementById('m-tab-sides'),
+        coach: document.getElementById('m-tab-coach'),
+        takes: document.getElementById('m-tab-takes'),
+    };
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const which = tab.dataset.tab;
+            tabs.forEach(t => t.classList.toggle('active', t === tab));
+            Object.entries(panels).forEach(([k, el]) => {
+                if (el) el.style.display = (k === which) ? '' : 'none';
+            });
+        });
+    });
+})();
+
+// Take favorites — toggle ★/☆
+(function(){
+    document.querySelectorAll('.take-fav').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const on = btn.classList.toggle('on');
+            btn.textContent = on ? '★' : '☆';
+        });
+    });
+})();
+
+// + New Take
+(function(){
+    const btn = document.querySelector('.take-new');
+    if (!btn) return;
+    let nextTake = 4;
+    btn.addEventListener('click', () => {
+        const takesTab = document.querySelector('.m-tab[data-tab="takes"]');
+        if (takesTab) takesTab.textContent = `Takes · ${nextTake}`;
+        const subCount = document.querySelector('.booth-submit-count');
+        if (subCount) subCount.textContent = String(nextTake);
+        const takesPanel = document.getElementById('m-tab-takes');
+        if (takesPanel) {
+            const wrap = takesPanel.querySelector('div[style*="flex-direction:column"]');
+            if (wrap) {
+                const row = document.createElement('div');
+                row.style.cssText = 'display:flex; align-items:center; gap:10px; padding:8px; background:var(--booth-bg); border-radius:4px;';
+                row.innerHTML = `
+                    <strong style="font-family:var(--mono); font-size:10px;">TAKE ${String(nextTake).padStart(2,'0')}</strong>
+                    <span style="color:var(--text-mute);">00:00</span>
+                    <button class="take-fav" style="margin-left:auto; background:none; border:none; cursor:pointer; color:var(--text-mute);">☆</button>
+                `;
+                wrap.appendChild(row);
+                row.querySelector('.take-fav').addEventListener('click', (e) => {
+                    const t = e.currentTarget;
+                    const on = t.classList.toggle('on');
+                    t.textContent = on ? '★' : '☆';
+                });
+            }
+        }
+        btn.style.opacity = '0.6';
+        setTimeout(() => { btn.style.opacity = '1'; }, 280);
+        nextTake++;
+    });
+})();
+
+// m-bar-x close
+(function(){
+    const x = document.querySelector('.m-bar-x');
+    const bar = document.querySelector('.m-bar');
+    if (x && bar) {
+        x.addEventListener('click', () => {
+            bar.style.transition = 'opacity .25s';
+            bar.style.opacity = '0';
+            setTimeout(() => { bar.style.display = 'none'; }, 260);
+        });
+    }
+})();
+
+// Submit Best Takes
+(function(){
+    const btn = document.querySelector('.booth-submit');
+    if (!btn) return;
+    btn.addEventListener('click', async () => {
+        const stars = document.querySelectorAll('.take-fav.on').length;
+        const original = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = 'Submitting...';
+        try {
+            const r = await fetch('/api/submit-takes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'same-origin',
+                body: JSON.stringify({ favored: stars, role: 'Iona', project: 'Salt of the Stars' })
+            });
+            if (r.ok) {
+                btn.innerHTML = '✓ Submitted';
+                setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 2200);
+            } else {
+                const d = await r.json().catch(() => ({}));
+                btn.innerHTML = d.error || 'Failed — try again';
+                setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 2600);
+            }
+        } catch (e) {
+            btn.innerHTML = 'Network error';
+            setTimeout(() => { btn.innerHTML = original; btn.disabled = false; }, 2600);
+        }
+    });
+})();
+</script>
+
+
+{% include "_compliance_bar.html" %}
+</body>
+</html>

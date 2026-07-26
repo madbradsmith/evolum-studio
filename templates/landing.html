@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOLUM — No Hollywood Required</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+:root{
+  --bg:#07070f; --surface:#0d0d18; --s2:#111120; --s3:#16162a;
+  --border:#1e1e2e; --bhi:#2e2e48; --dim:#363450;
+  --text:#ede9e0; --muted:#6a6778; --cream:oklch(0.93 0.03 90);
+  --gold:oklch(0.78 0.16 75);
+  --gg:oklch(0.78 0.16 75 / 0.10);
+  --gm:oklch(0.78 0.16 75 / 0.32);
+  --lime:#9dff4b;
+  --lime-g:rgba(157,255,75,0.09);
+}
+body{
+  background:var(--bg);color:var(--text);
+  font-family:'Space Grotesk',sans-serif;line-height:1.5;
+  min-height:100vh;
+}
+a{text-decoration:none;color:inherit}
+
+/* Film grain overlay */
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  opacity:.6;
+}
+body::after{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%, rgba(120,90,40,0.08) 0%, transparent 70%);
+}
+
+/* ── UTILITY ──────────────────────────────── */
+.z1{position:relative;z-index:1}
+.mono{font-family:'Space Mono',monospace}
+.serif{font-family:'Cormorant',serif}
+
+.tag{display:inline-flex;align-items:center;gap:7px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gm);padding:5px 12px}
+.tag.lime{color:var(--lime);border-color:rgba(157,255,75,0.3)}
+.tag-dot{width:5px;height:5px;border-radius:50%;background:currentColor;box-shadow:0 0 5px currentColor;animation:blink 1.8s ease-in-out infinite;flex-shrink:0}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0.15}}
+
+.btn{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:14px 28px;transition:all .2s;cursor:pointer;border:none;white-space:nowrap}
+.btn-gold{background:var(--gold);color:#07070f}
+.btn-gold:hover{background:oklch(0.84 0.16 75);box-shadow:0 0 28px var(--gm)}
+.btn-ghost{background:transparent;border:1px solid var(--bhi);color:var(--text)}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── NAV ──────────────────────────────────── */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:0 48px;height:64px;
+  background:rgba(7,7,15,0.92);border-bottom:1px solid var(--border);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+}
+.nav-logo{font-family:'Cormorant',serif;font-size:20px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--cream)}
+.nav-logo em{font-style:italic;color:var(--gold)}
+.nav-links{display:flex;align-items:center;gap:28px}
+.nav-links a{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-cta{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gm);padding:7px 16px;transition:all .2s}
+.nav-cta:hover{background:var(--gg);border-color:var(--gold)}
+
+/* ── HERO ─────────────────────────────────── */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;text-align:center;padding:120px 40px 100px}
+
+/* Film strip perfs — left + right edges */
+.hero-perf{position:absolute;top:0;bottom:0;width:32px;display:flex;flex-direction:column;justify-content:space-around;padding:8px 0;pointer-events:none;opacity:.12}
+.hero-perf.l{left:0}.hero-perf.r{right:0}
+.perf{width:14px;height:10px;background:var(--border);border-radius:2px;margin:0 auto}
+
+/* Hero ambient glow */
+.hero-glow{position:absolute;top:20%;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse,oklch(0.78 0.16 75/0.06) 0%,transparent 70%);pointer-events:none}
+
+.hero-inner{position:relative;z-index:1;max-width:1000px}
+.hero-eyebrow{margin-bottom:32px;display:flex;align-items:center;justify-content:center;gap:16px}
+.hero-rule{height:1px;width:60px;background:var(--gm)}
+.hero-kicker{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--gold)}
+
+.hero h1{
+  font-family:'Cormorant',serif;
+  font-size:clamp(64px,11vw,140px);
+  font-weight:600;
+  letter-spacing:-0.01em;
+  line-height:.9;
+  color:var(--cream);
+  margin-bottom:8px;
+  text-wrap:balance;
+}
+.hero h1 em{font-style:italic;color:var(--gold)}
+
+.hero-sub{
+  font-family:'Cormorant',serif;
+  font-size:clamp(22px,3.5vw,42px);
+  font-weight:400;
+  font-style:italic;
+  color:var(--muted);
+  margin-bottom:28px;
+  letter-spacing:0.02em;
+}
+
+.hero-body{font-size:16px;color:var(--muted);line-height:1.7;max-width:520px;margin:0 auto 44px;text-wrap:pretty}
+
+.hero-ctas{display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;margin-bottom:60px}
+
+.hero-stats{display:inline-flex;border:1px solid var(--border)}
+.h-stat{padding:14px 28px;border-right:1px solid var(--border);text-align:center}
+.h-stat:last-child{border-right:none}
+.h-stat b{display:block;font-family:'Cormorant',serif;font-size:26px;font-weight:600;color:var(--gold);line-height:1;margin-bottom:3px}
+.h-stat span{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;color:var(--muted);text-transform:uppercase}
+
+/* Powered by badge */
+.powered{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:rgba(157,255,75,0.5);margin-top:24px}
+.powered-dot{width:5px;height:5px;border-radius:50%;background:var(--lime);box-shadow:0 0 5px var(--lime);animation:blink 2s ease-in-out infinite}
+
+/* ── SECTION WRAPPER ──────────────────────── */
+.sec{position:relative;z-index:1;padding:80px 48px;max-width:1400px;margin:0 auto}
+
+.sh{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;margin-bottom:12px}
+.sh-rule{height:1px;background:linear-gradient(90deg,transparent,var(--bhi))}
+.sh-rule.r{background:linear-gradient(90deg,var(--bhi),transparent)}
+.sh-lbl{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);white-space:nowrap}
+.sh-title{font-family:'Cormorant',serif;font-size:clamp(28px,4vw,48px);font-weight:600;letter-spacing:0.01em;text-align:center;margin-bottom:8px;color:var(--cream)}
+.sh-title em{font-style:italic;color:var(--gold)}
+.sh-sub{text-align:center;font-family:'Space Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:0.05em;margin-bottom:52px}
+
+/* ── SLATE ────────────────────────────────── */
+.slate-grid{display:flex;flex-direction:column;gap:1px;background:var(--border)}
+.slate-card{display:grid;grid-template-columns:280px 1fr;background:var(--surface);min-height:320px;transition:background .25s}
+.slate-card:hover{background:var(--s2)}
+
+/* Poster placeholder */
+.poster{background:var(--s2);border-right:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;padding:24px;position:relative;overflow:hidden;min-height:280px}
+.poster-bg{
+  position:absolute;inset:0;
+  background:repeating-linear-gradient(
+    135deg,
+    rgba(255,255,255,0.015) 0px, rgba(255,255,255,0.015) 1px,
+    transparent 1px, transparent 12px
+  );
+}
+.poster-label{font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.2em;text-transform:uppercase;color:var(--dim);text-align:center;position:relative;z-index:1}
+.poster-frame{width:100%;aspect-ratio:2/3;border:1px dashed var(--bhi);display:flex;align-items:center;justify-content:center;position:relative;z-index:1;max-width:160px}
+.poster-icon{width:32px;height:32px;color:var(--dim)}
+
+/* Card content */
+.slate-body{padding:36px 40px;display:flex;flex-direction:column;justify-content:space-between}
+.slate-meta{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.s-badge{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;padding:3px 10px;border:1px solid}
+.s-badge.done{color:var(--gold);border-color:var(--gm);background:var(--gg)}
+.s-badge.dev{color:var(--muted);border-color:var(--border)}
+.s-badge.feat{color:var(--text);border-color:var(--bhi)}
+
+.slate-title{font-family:'Cormorant',serif;font-size:clamp(32px,4vw,54px);font-weight:600;letter-spacing:0.01em;color:var(--cream);margin-bottom:6px;line-height:1.05}
+.slate-format{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+
+.slate-logline{
+  font-family:'Cormorant',serif;font-style:italic;
+  font-size:18px;color:var(--muted);line-height:1.6;
+  border-left:2px solid var(--gm);padding-left:16px;
+  margin-bottom:24px;flex:1;max-width:580px;
+}
+.slate-logline.ph{font-style:normal;font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.08em;color:var(--dim);border-color:var(--border)}
+
+.slate-ctas{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.slate-link{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);border:1px solid var(--gm);padding:8px 18px;transition:all .2s}
+.slate-link:hover{background:var(--gg);border-color:var(--gold)}
+.slate-link.ghost{color:var(--muted);border-color:var(--border)}
+.slate-link.ghost:hover{border-color:var(--bhi);color:var(--text)}
+
+/* Dev projects count row */
+.dev-row{background:var(--s2);border:1px solid var(--border);border-top:none;padding:20px 40px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.dev-count{font-family:'Cormorant',serif;font-size:22px;font-weight:600;color:var(--cream)}
+.dev-count em{font-style:italic;color:var(--gold)}
+.dev-sub{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase}
+
+/* ── 5 DOORS ──────────────────────────────── */
+.doors{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border)}
+.door{background:var(--surface);padding:28px 22px;display:flex;flex-direction:column;position:relative;overflow:hidden;transition:background .25s;cursor:pointer}
+.door:hover{background:var(--s2)}
+.door:hover .door-enter{color:var(--gold)}
+.door-num{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.2em;color:var(--dim);text-transform:uppercase;margin-bottom:20px}
+.door-icon{width:32px;height:32px;color:var(--gold);margin-bottom:16px;opacity:.8}
+.door-role{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+.door-title{font-family:'Cormorant',serif;font-size:22px;font-weight:600;color:var(--cream);margin-bottom:12px;line-height:1.1}
+.door-desc{font-size:13px;color:var(--muted);line-height:1.6;flex:1}
+.door-perks{margin-top:16px;display:flex;flex-direction:column;gap:5px}
+.door-perk{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.06em;color:var(--dim);display:flex;align-items:center;gap:8px}
+.door-perk::before{content:'→';color:var(--gold);font-size:10px}
+.door-enter{margin-top:20px;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);transition:color .2s}
+.door-price{display:inline-block;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.12em;border:1px solid var(--bhi);padding:4px 10px;color:var(--muted);margin-top:12px;align-self:flex-start}
+/* FREE indicator for free-tier doors */
+.door-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:8px}
+.door-head .door-num{margin-bottom:0}
+.door-free-tag{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.24em;color:var(--lime);border:1px solid rgba(157,255,75,0.45);background:var(--lime-g);padding:3px 9px;text-transform:uppercase;box-shadow:0 0 14px rgba(157,255,75,0.18);white-space:nowrap;animation:free-pulse 3s ease-in-out infinite}
+@keyframes free-pulse{0%,100%{box-shadow:0 0 14px rgba(157,255,75,0.18)}50%{box-shadow:0 0 20px rgba(157,255,75,0.40)}}
+.door-price.free{color:var(--lime);border-color:rgba(157,255,75,0.45);background:rgba(157,255,75,0.08);font-weight:700}
+
+/* ── EVIE ─────────────────────────────────── */
+.evie-wrap{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.evie-info{background:var(--surface);padding:48px 40px;display:flex;flex-direction:column;justify-content:center}
+.evie-tag{margin-bottom:20px}
+.evie-title{font-family:'Cormorant',serif;font-size:clamp(28px,4vw,48px);font-weight:600;color:var(--cream);margin-bottom:16px;line-height:1.1}
+.evie-title em{font-style:italic;color:var(--gold)}
+.evie-body{font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:28px;max-width:440px}
+.evie-caps{display:flex;flex-direction:column;gap:12px}
+.ecap{display:flex;align-items:flex-start;gap:12px}
+.ecap-icon{width:28px;height:28px;border:1px solid var(--gm);background:var(--gg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--gold)}
+.ecap-text strong{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.ecap-text span{font-size:12px;color:var(--muted)}
+.evie-el-badge{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--lime);border:1px solid rgba(157,255,75,0.25);padding:5px 12px;margin-top:24px;background:var(--lime-g)}
+
+/* Evie widget panel */
+.evie-widget-panel{background:var(--s2);padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;position:relative;overflow:hidden}
+.evie-widget-panel::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 30%,oklch(0.78 0.16 75/0.06),transparent 70%)}
+
+/* The floating widget itself */
+.evie-widget{width:100%;max-width:380px;position:relative;z-index:1;
+  background:rgba(13,13,24,0.75);
+  border:1px solid rgba(255,255,255,0.10);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  box-shadow:0 24px 64px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04) inset;
+}
+.ew-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid rgba(255,255,255,0.07)}
+.ew-identity{display:flex;align-items:center;gap:10px}
+.ew-avatar{width:28px;height:28px;border-radius:50%;background:var(--gg);border:1px solid var(--gm);display:flex;align-items:center;justify-content:center;color:var(--gold)}
+.ew-name{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.1em;color:var(--cream)}
+.ew-sub{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--muted)}
+.ew-live{display:flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.12em;color:var(--gold)}
+.ew-live-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold);animation:blink 1.8s ease-in-out infinite}
+
+/* Audio visualizer */
+.ew-viz{padding:18px 18px 14px;display:flex;align-items:center;gap:4px;height:64px;justify-content:center}
+.ew-bar{width:3px;border-radius:2px;background:var(--gold);animation:viz-dance linear infinite;transform-origin:bottom}
+.ew-bar:nth-child(1){height:18px;animation-duration:0.9s;animation-delay:0s}
+.ew-bar:nth-child(2){height:32px;animation-duration:0.7s;animation-delay:0.1s}
+.ew-bar:nth-child(3){height:24px;animation-duration:1.1s;animation-delay:0.2s}
+.ew-bar:nth-child(4){height:40px;animation-duration:0.8s;animation-delay:0.05s}
+.ew-bar:nth-child(5){height:28px;animation-duration:0.6s;animation-delay:0.15s}
+.ew-bar:nth-child(6){height:44px;animation-duration:1.0s;animation-delay:0.25s}
+.ew-bar:nth-child(7){height:32px;animation-duration:0.75s;animation-delay:0.1s}
+.ew-bar:nth-child(8){height:20px;animation-duration:0.85s;animation-delay:0.3s}
+.ew-bar:nth-child(9){height:36px;animation-duration:0.65s;animation-delay:0.05s}
+.ew-bar:nth-child(10){height:24px;animation-duration:0.95s;animation-delay:0.2s}
+.ew-bar:nth-child(11){height:14px;animation-duration:1.2s;animation-delay:0.35s}
+.ew-bar:nth-child(12){height:30px;animation-duration:0.7s;animation-delay:0.1s}
+@keyframes viz-dance{0%,100%{transform:scaleY(0.4)}50%{transform:scaleY(1.0)}}
+
+/* Script line (click-to-narrate) */
+.ew-script{margin:0 18px 14px;border:1px solid rgba(255,255,255,0.07);background:rgba(255,255,255,0.03);padding:12px 14px}
+.ew-char{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.ew-line-text{font-family:'Cormorant',serif;font-size:16px;font-style:italic;color:var(--cream);line-height:1.45}
+
+/* Controls */
+.ew-controls{padding:12px 18px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid rgba(255,255,255,0.07)}
+.ew-btns{display:flex;align-items:center;gap:8px}
+.ew-btn{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.10);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .2s;font-size:10px}
+.ew-btn.play{background:var(--gg);border-color:var(--gm);color:var(--gold)}
+.ew-speed{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.1em;color:var(--muted);border:1px solid rgba(255,255,255,0.08);padding:3px 8px}
+.ew-voice{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.08em;color:var(--muted);display:flex;align-items:center;gap:4px}
+
+/* Caption below widget */
+.ew-caption{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--dim);text-align:center;margin-top:20px;position:relative;z-index:1}
+
+@keyframes blink-step{50%{opacity:0}}
+
+/* ── DUAL CTA ─────────────────────────────── */
+.dual-cta{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border)}
+.cta-panel{padding:52px 48px;display:flex;flex-direction:column;justify-content:space-between}
+.cta-panel.dark{background:var(--surface)}
+.cta-panel.gold-bg{background:var(--gold)}
+.cta-eyebrow{font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.25em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.cta-panel.gold-bg .cta-eyebrow{color:rgba(0,0,0,0.5)}
+.cta-title{font-family:'Cormorant',serif;font-size:clamp(26px,3.5vw,44px);font-weight:600;color:var(--cream);margin-bottom:12px;line-height:1.1}
+.cta-panel.gold-bg .cta-title{color:#07070f}
+.cta-body{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:32px;max-width:360px}
+.cta-panel.gold-bg .cta-body{color:rgba(0,0,0,0.6)}
+.cta-btn{display:inline-flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;padding:14px 28px;transition:all .2s;align-self:flex-start}
+.cta-btn.dark-btn{background:var(--gold);color:#07070f}
+.cta-btn.dark-btn:hover{background:oklch(0.84 0.16 75)}
+.cta-btn.light-btn{background:#07070f;color:var(--cream);border:1px solid rgba(7,7,15,0.2)}
+.cta-btn.light-btn:hover{background:rgba(7,7,15,0.85)}
+
+/* ── FOOTER CONTACT CARD ──────────────────── */
+.footer-contact{position:relative;z-index:1;background:var(--surface);border-top:1px solid var(--border);padding:60px 48px 32px}
+.fc-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:44px}
+.fc-brand{display:flex;flex-direction:column;gap:12px}
+.fc-brand .flogo{font-family:'Cormorant',serif;font-size:22px;font-weight:600;letter-spacing:0.15em;text-transform:uppercase;color:var(--cream)}
+.fc-brand .flogo em{font-style:italic;color:var(--gold)}
+.fc-tag{font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);letter-spacing:0.08em}
+.fc-blurb{font-size:13px;color:var(--muted);line-height:1.65;max-width:340px;margin-top:4px}
+.fc-license{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.06em;color:var(--dim);line-height:1.7;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)}
+.fc-license b{color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:0.14em;font-size:9px;display:block;margin-bottom:6px}
+.fc-license a{color:var(--gold);border-bottom:1px dotted var(--gm)}
+.fc-license a:hover{color:oklch(0.88 0.16 75);border-color:var(--gold)}
+.fc-col h4{font-family:'Space Mono',monospace;font-size:9px;font-weight:700;letter-spacing:0.28em;text-transform:uppercase;color:var(--gold);margin-bottom:16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.fc-col ul{list-style:none;padding:0;margin:0}
+.fc-col li{margin-bottom:10px}
+.fc-col a{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:0.08em;color:var(--muted);transition:color .2s}
+.fc-col a:hover{color:var(--text)}
+.fc-legal-bar{max-width:1200px;margin:44px auto 0;padding-top:22px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-family:'Space Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:0.06em}
+.fc-legal-bar em{font-style:italic;color:var(--muted)}
+
+/* ── RESPONSIVE ───────────────────────────── */
+@media(max-width:1200px){
+  .doors{grid-template-columns:repeat(2,1fr)}
+  .evie-wrap{grid-template-columns:1fr}
+  .fc-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:768px){
+  body{padding-top:0}
+  .nav{padding:0 20px}.nav-links{display:none}
+  .sec{padding:60px 20px}
+  .hero{padding:100px 20px 80px}
+  .slate-card{grid-template-columns:1fr}
+  .poster{display:none}
+  .slate-body{padding:28px 24px}
+  .doors{grid-template-columns:1fr}
+  .footer-contact{padding:44px 20px 24px}
+  .fc-grid{grid-template-columns:1fr;gap:32px}
+  .fc-legal-bar{flex-direction:column;text-align:center;margin-top:32px}
+  .dev-row{padding:16px 24px}
+  .hero-perf{display:none}
+}
+</style>
+
+<style>
+/* Language pill (mounted by /static/js/i18n.js into [data-lang-mount]) */
+[data-lang-mount]{position:relative;display:inline-block}
+[data-lang-mount] .lang-btn{
+  display:inline-flex;align-items:center;gap:6px;
+  background:transparent;border:1px solid var(--gm,#3a3a42);color:var(--muted,#a8a8ac);
+  padding:6px 12px;font-family:'Space Mono',monospace;font-size:10px;
+  letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all .2s;
+}
+[data-lang-mount] .lang-btn:hover{border-color:var(--gold,#c8a153);color:var(--gold,#c8a153)}
+[data-lang-mount] .lang-globe{opacity:0.65}
+[data-lang-mount] .lang-caret{font-size:9px;opacity:0.6}
+[data-lang-mount] .lang-menu{
+  display:none;position:absolute;top:calc(100% + 6px);right:0;
+  background:#0f0f14;border:1px solid var(--gm,#3a3a42);
+  min-width:200px;padding:4px 0;z-index:100;
+  box-shadow:0 8px 28px rgba(0,0,0,0.5);
+}
+[data-lang-mount].open .lang-menu{display:block}
+[data-lang-mount] .lang-opt{
+  display:flex;width:100%;justify-content:space-between;align-items:baseline;
+  background:transparent;border:0;padding:8px 14px;color:#d8d8dc;
+  font-family:inherit;font-size:12px;cursor:pointer;text-align:left;transition:all .12s;
+}
+[data-lang-mount] .lang-opt:hover{background:#1a1a20;color:var(--gold,#c8a153)}
+[data-lang-mount] .lang-opt.on{color:var(--gold,#c8a153)}
+[data-lang-mount] .lang-opt-native{font-size:13px}
+[data-lang-mount] .lang-opt-name{opacity:0.4;font-size:9px;text-transform:uppercase;letter-spacing:0.1em;font-family:'Space Mono',monospace}
+html[dir="rtl"] [data-lang-mount] .lang-menu{left:0;right:auto}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════ NAV — work only -->
+<nav class="nav z1">
+  <a class="nav-logo" href="/">EV<em>O</em>LUM</a>
+  <div class="nav-links">
+    {% if current_user.is_authenticated %}
+      <a href="/filmmaker-workspace">Workspace</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/festival-calendar">Festival</a>
+      <a href="#contact">Contact</a>
+    {% else %}
+      <a href="#slate">Catalog</a>
+      <a href="#doors">The Doors</a>
+      <a href="/festival-calendar">Festival</a>
+      <a href="#contact">Contact</a>
+    {% endif %}
+  </div>
+  <div data-lang-mount style="margin-left:auto;margin-right:14px"></div>
+  {% if current_user.is_authenticated %}
+  <a href="/logout" class="nav-cta"><span data-i18n="nav.signout">Sign Out</span> →</a>
+  {% else %}
+  <a href="/sign-in" class="nav-cta"><span data-i18n="nav.signin">Sign In</span> →</a>
+  {% endif %}
+</nav>
+
+<!-- ═══════════════════════════════════ HERO -->
+<section class="hero">
+  <!-- Film perfs -->
+  <div class="hero-perf l">
+    <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+    <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+    <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+    <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+  </div>
+  <div class="hero-perf r">
+    <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+    <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+    <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+    <div class="perf"></div><div class="perf"></div><div class="perf"></div>
+  </div>
+
+  <div class="hero-glow"></div>
+
+  <div class="hero-inner z1">
+    <div class="hero-eyebrow">
+      <div class="hero-rule"></div>
+      <span class="hero-kicker" data-i18n="home.eyebrow">The Independent Film Portal</span>
+      <div class="hero-rule"></div>
+    </div>
+
+    <h1 data-i18n-html="home.h1">No <em>Hollywood</em><br>Required.</h1>
+    <p class="hero-sub">Develop it, fund it, cast it, back it.</p>
+    <p class="hero-body">The whole pipeline in one house. Built by a working writer-producer for the ones who stopped waiting on Hollywood a long time ago — and got to work.</p>
+
+    <div class="hero-ctas">
+      <a href="#doors" class="btn btn-gold">Open Your Door</a>
+      <a href="#slate" class="btn btn-ghost">View the Slate →</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="h-stat"><b>15</b><span>In Development</span></div>
+      <div class="h-stat"><b>2</b><span>Production Complete</span></div>
+      <div class="h-stat"><b>4</b><span>Formats</span></div>
+      <div class="h-stat"><b>1</b><span>House. One Roof.</span></div>
+    </div>
+
+    <div class="powered">
+      <span class="powered-dot"></span>
+      Powered by Developum AI Engine
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════ SLATE -->
+<div id="slate" style="position:relative;z-index:1;background:var(--bg);border-top:1px solid var(--border)">
+<div class="sec">
+  <div class="sh">
+    <div class="sh-rule"></div>
+    <div class="sh-lbl">THE SLATE</div>
+    <div class="sh-rule r"></div>
+  </div>
+  <div class="sh-title">In <em>Production.</em> In Development.</div>
+  <div class="sh-sub">The founder's own slate. Proof the whole thing works.</div>
+
+  <div class="slate-grid">
+
+    <!-- MANDATORY REPORTER -->
+    <div class="slate-card">
+      <div class="poster">
+        <div class="poster-bg"></div>
+        <div class="poster-frame">
+          <img src="/static/posters/placeholder.svg" style="width:100%; height:100%; object-fit:cover;" alt="Duty of Care">
+        </div>
+        
+      </div>
+      <div class="slate-body">
+        <div>
+          <div class="slate-meta">
+            <span class="s-badge done">Production Complete</span>
+            <span class="s-badge feat">Feature Film</span>
+            <span class="s-badge feat">Drama</span>
+          </div>
+          <div class="slate-title">Duty of Care</div>
+          <div class="slate-format">Written &amp; Produced by Bradley Smith · 2024</div>
+          
+        </div>
+        <div class="slate-ctas">
+          <a href="/investor-deal-room" class="slate-link">Request Deal Room →</a>
+          <a href="/pitch-deck" class="slate-link ghost">Download One-Sheet</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- COURT JESTER -->
+    <div class="slate-card">
+      <div class="poster">
+        <div class="poster-bg"></div>
+        <div class="poster-frame">
+          <img src="/static/posters/placeholder.svg" style="width:100%; height:100%; object-fit:cover;" alt="The Understudy">
+        </div>
+        
+      </div>
+      <div class="slate-body">
+        <div>
+          <div class="slate-meta">
+            <span class="s-badge done">Production Complete</span>
+            <span class="s-badge feat">Limited Series</span>
+            <span class="s-badge feat">Dark Comedy</span>
+          </div>
+          <div class="slate-title">The Understudy</div>
+          <div class="slate-format">Written &amp; Produced by Bradley Smith · 2024</div>
+          
+        </div>
+        <div class="slate-ctas">
+          <a href="/investor-deal-room" class="slate-link">Request Deal Room →</a>
+          <a href="/pitch-deck" class="slate-link ghost">Download One-Sheet</a>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 13 in development -->
+  <div class="dev-row">
+    <div>
+      <div class="dev-count"><em>13</em> more in active development</div>
+      <div class="dev-sub">Feature Films · TV Drama · Animation · Limited Series</div>
+    </div>
+    <a href="/catalog" class="btn btn-ghost" style="font-size:10px;padding:10px 20px">View Full Catalog →</a>
+  </div>
+
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ 5 DOORS -->
+<div id="doors" style="position:relative;z-index:1;background:var(--bg);border-top:1px solid var(--border)">
+<div class="sec">
+  <div class="sh">
+    <div class="sh-rule"></div>
+    <div class="sh-lbl">FIVE DOORS · ONE HOUSE</div>
+    <div class="sh-rule r"></div>
+  </div>
+  <div class="sh-title">Pick the <em>Door</em> That's Yours</div>
+  <div class="sh-sub">Every role in independent film has a seat at this table.</div>
+
+  <div class="doors">
+
+    <a href="/supporter-feed" class="door">
+      <div class="door-head">
+        <div class="door-num">DOOR 01</div>
+        <div class="door-free-tag">Free</div>
+      </div>
+      <svg class="door-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <path d="M16 6L18.4 11.8H25L20 15.5L22.4 21.3L16 17.5L9.6 21.3L12 15.5L7 11.8H13.6L16 6z"/>
+      </svg>
+      <div class="door-role">For the Believers</div>
+      <div class="door-title" data-i18n="role.supporter">Supporter</div>
+      <div class="door-desc">Back the films you love at any tier, follow their journey from development to screen, and get perks straight from the filmmakers.</div>
+      <div class="door-perks">
+        <div class="door-perk">Browse the full public catalog</div>
+        <div class="door-perk">Back projects at any amount</div>
+        <div class="door-perk">Progress updates + creator perks</div>
+      </div>
+      <div class="door-price free">Free to join</div>
+      <div class="door-enter">Enter the Feed →</div>
+    </a>
+
+    <a href="/investor-deal-room" class="door">
+      <div class="door-head">
+        <div class="door-num">DOOR 02</div>
+        <div class="door-free-tag">Free</div>
+      </div>
+      <svg class="door-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <rect x="4" y="10" width="24" height="18" rx="1"/>
+        <path d="M10 10V7a6 6 0 0112 0v3"/>
+        <circle cx="16" cy="19" r="2"/><line x1="16" y1="21" x2="16" y2="24"/>
+      </svg>
+      <div class="door-role">For the Capital</div>
+      <div class="door-title" data-i18n="role.investor">Investor</div>
+      <div class="door-desc">NDA-verified access to vetted deal rooms with real numbers. Pledge, e-sign equity docs, and track your portfolio — all in one place.</div>
+      <div class="door-perks">
+        <div class="door-perk">Accredited investor verification</div>
+        <div class="door-perk">NDA-protected deal rooms</div>
+        <div class="door-perk">E-sign + portfolio tracking</div>
+      </div>
+      <div class="door-price free">Free · verification required</div>
+      <div class="door-enter">Enter the Deal Rooms →</div>
+    </a>
+
+    <a href="/filmmaker-workspace" class="door">
+      <div class="door-num">DOOR 03</div>
+      <svg class="door-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+         <rect x="4" y="6" width="24" height="18" rx="1"/>
+         <circle cx="16" cy="15" r="4"/><line x1="16" y1="6" x2="16" y2="11"/>
+         <line x1="4" y1="15" x2="12" y2="15"/><line x1="20" y1="15" x2="28" y2="15"/>
+       </svg>
+      <div class="door-role">For the Creator</div>
+      <div class="door-title" data-i18n="role.filmmaker">Filmmaker</div>
+      <div class="door-desc">Bring your work. Develop it in the editor, build your pitch materials, open a deal room to backers and investors.</div>
+      <div class="door-perks">
+        <div class="door-perk">Idea → script → deck pipeline</div>
+        <div class="door-perk">Pitch deck + sizzle reel tools</div>
+        <div class="door-perk">Investor-ready deal room</div>
+      </div>
+      <div class="door-price">Filmmaker tier · from $10/mo</div>
+      <div class="door-enter">Enter the Workspace →</div>
+    </a>
+
+    <a href="/filmmaker-workspace" class="door">
+      <div class="door-num">DOOR 04</div>
+      <svg class="door-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <rect x="4" y="8" width="24" height="18" rx="1"/>
+        <circle cx="11" cy="17" r="3"/><circle cx="21" cy="17" r="3"/>
+        <path d="M4 8l6-3h12l6 3"/>
+      </svg>
+      <div class="door-role">For Above the Line</div>
+      <div class="door-title">Producer · DP · Director</div>
+      <div class="door-desc">Bring the craft. Own the pipeline. Full project workspace, deliverables room, and team collaborators — built for the folks running the room.</div>
+      <div class="door-perks">
+        <div class="door-perk">Craft-picker workspace</div>
+        <div class="door-perk">Full project pipeline + deliverables</div>
+        <div class="door-perk">Team collaborator seats</div>
+      </div>
+      <div class="door-price">Above the Line · $49/mo</div>
+      <div class="door-enter">Enter the Workspace →</div>
+    </a>
+
+    <a href="/actor-casting" class="door">
+      <div class="door-head">
+        <div class="door-num">DOOR 05</div>
+        <div class="door-free-tag">Free</div>
+      </div>
+      <svg class="door-icon" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+        <circle cx="16" cy="10" r="5"/><path d="M6 28c0-5.5 4.5-10 10-10s10 4.5 10 10"/>
+        <path d="M22 18l4 4-4 4"/>
+      </svg>
+      <div class="door-role">For the Talent</div>
+      <div class="door-title" data-i18n="role.actor">Actor</div>
+      <div class="door-desc">Build a profile, find open roles, self-tape with marked-up sides. Book work and get paid through the platform.</div>
+      <div class="door-perks">
+        <div class="door-perk">Profile + role discovery</div>
+        <div class="door-perk">Self-tape room · Evie reads opposite</div>
+        <div class="door-perk">Submission tracking</div>
+      </div>
+      <div class="door-price free">Free · all actor tools included</div>
+      <div class="door-enter">Enter the Casting Room →</div>
+    </a>
+
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════ PRIMARY CTA -->
+<div style="position:relative;z-index:1;background:var(--bg);border-top:1px solid var(--border)">
+  <div class="cta-panel dark" style="max-width:960px;margin:0 auto;padding:64px 48px;text-align:center;align-items:center">
+    <div class="cta-eyebrow" style="margin-bottom:16px">For Filmmakers, Actors &amp; Supporters</div>
+    <div class="cta-title" style="margin-bottom:14px">Your project deserves<br>a real home.</div>
+    <p class="cta-body" style="margin:0 auto 32px">Join the portal. Open your door. Whether you're developing your first feature or your fifteenth — the workspace, the engine, and the investor network are here.</p>
+    {% if current_user.is_authenticated %}
+      <a href="/filmmaker-workspace" class="cta-btn dark-btn" style="align-self:center">Open Your Workspace →</a>
+    {% else %}
+      <a href="/sign-in" class="cta-btn dark-btn" style="align-self:center">Open My Door →</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════ FOOTER CONTACT CARD -->
+<section id="contact" class="footer-contact">
+  <div class="fc-grid">
+
+    <div class="fc-brand">
+      <div class="flogo">EV<em>O</em>LUM</div>
+      <div class="fc-tag">No Hollywood Required. · Est. 2024</div>
+      <p class="fc-blurb">The independent film portal — built by a working writer-producer, powered by AI, open to every creator who refuses to wait.</p>
+      <div class="fc-license">
+        <b>Operators &amp; industry licensees</b>
+        The Evolum engine white-labels for other verticals. <a href="https://kissmysaas.skin#intake" target="_blank">Inquire →</a>
+      </div>
+    </div>
+
+    <div class="fc-col">
+      <h4>The House</h4>
+      <ul>
+        <li><a href="/house-rules">House Rules</a></li>
+        <li><a href="/pricing">Pricing</a></li>
+        <li><a href="/faq">FAQ</a></li>
+        <li><a href="/terms">Terms</a></li>
+        <li><a href="/privacy">Privacy</a></li>
+      </ul>
+    </div>
+
+    <div class="fc-col">
+      <h4>The Portal</h4>
+      <ul>
+        <li><a href="/catalog">Catalog</a></li>
+        <li><a href="/the-lot">The Lot</a></li>
+        <li><a href="/festival-calendar">Festival Calendar</a></li>
+        <li><a href="/investor-deal-room">Deal Rooms</a></li>
+        <li><a href="/actor-casting">Casting Room</a></li>
+        <li><a href="/sponsor">Sponsor</a></li>
+        <li><a href="/rewards">Rewards</a></li>
+      </ul>
+    </div>
+
+    <div class="fc-col">
+      <h4>Contact</h4>
+      <ul>
+        <li><a href="mailto:madbradsmith@gmail.com">madbradsmith@gmail.com</a></li>
+      </ul>
+    </div>
+
+  </div>
+
+  <div class="fc-legal-bar">
+    <div>© 2026 Evolum Studio · <em>Powered by Developum AI Engine · All projects, all rights reserved.</em></div>
+    <div style="display:inline-flex;align-items:center;gap:8px;color:oklch(0.78 0.16 75);letter-spacing:0.14em;"><span style="width:6px;height:6px;border-radius:50%;background:oklch(0.78 0.16 75);opacity:.8;"></span>SOC-2 TYPE II · AUDIT IN PROGRESS</div>
+  </div>
+</section>
+
+
+{% include "_compliance_bar.html" %}
+<script src="/static/js/i18n-strings.js"></script>
+<script src="/static/js/i18n.js"></script>
+</body>
+</html>

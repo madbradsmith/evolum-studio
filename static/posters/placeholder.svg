@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600" width="400" height="600" role="img" aria-label="Project poster placeholder">
+  <rect width="400" height="600" fill="#1c1c1e"/>
+  <rect x="16" y="16" width="368" height="568" fill="none" stroke="#3a3a3d" stroke-width="2"/>
+  <g fill="#6e6e73">
+    <rect x="150" y="252" width="100" height="72" rx="6" fill="none" stroke="#6e6e73" stroke-width="3"/>
+    <circle cx="200" cy="288" r="16" fill="none" stroke="#6e6e73" stroke-width="3"/>
+    <rect x="168" y="240" width="24" height="12" rx="3"/>
+  </g>
+  <text x="200" y="372" font-family="Helvetica,Arial,sans-serif" font-size="17" fill="#8e8e93" text-anchor="middle">No poster</text>
+  <text x="200" y="396" font-family="Helvetica,Arial,sans-serif" font-size="13" fill="#6e6e73" text-anchor="middle">Add your own artwork</text>
+</svg>

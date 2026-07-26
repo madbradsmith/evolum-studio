@@ -1,0 +1,61 @@
+{# ─────────────────────────────────────────────────────────────
+   Genre picker — user's override on top of classifier suggestion.
+   Requires: project, suggestion, world_display in context.
+   Auto-saves via PATCH /api/projects/<id> on change.
+───────────────────────────────────────────────────────────── #}
+{% if project %}
+<div class="gp-picker" style="max-width:680px; margin:20px auto 0; background:var(--bg-card); border:1px solid var(--border); padding:22px 28px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);">
+    <div style="display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;">
+        <div style="font-family:var(--mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--text-mute);">Genre</div>
+        {% if suggestion and suggestion.confidence %}
+        <div style="font-family:var(--mono); font-size:9px; letter-spacing:1px; color:var(--gold);">
+            {% if project.world_override %}your pick{% else %}suggested · {{ suggestion.confidence }}% confidence{% endif %}
+        </div>
+        {% elif not project.has_script %}
+        <div style="font-family:var(--mono); font-size:9px; letter-spacing:1px; color:var(--text-mute);">upload a script for a suggestion</div>
+        {% endif %}
+    </div>
+    <select id="worldOverride" style="width:100%; margin-top:10px; background:var(--bg); border:1px solid var(--border); color:var(--text); padding:12px 14px; font-family:var(--serif); font-style:italic; font-size:15px;
+        clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);">
+        {% set _selected = project.world_override or (suggestion.world if suggestion else 'feature / drama') %}
+        {% for value, label in world_display %}
+        <option value="{{ value }}" {% if value == _selected %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <div style="font-family:var(--mono); font-size:9px; letter-spacing:1.2px; color:var(--text-mute); margin-top:10px; text-transform:uppercase;">
+        Change the genre and every downstream tool — logline, synopsis, character work, deck, analysis — reads your pick instead of the guess.
+    </div>
+    <div id="worldSaveStatus" style="font-family:var(--mono); font-size:10px; letter-spacing:1.2px; color:var(--text-mute); margin-top:6px; min-height:14px;"></div>
+</div>
+
+<script>
+(function(){
+    var sel = document.getElementById('worldOverride');
+    var status = document.getElementById('worldSaveStatus');
+    var PROJECT_ID = {{ project.id|tojson|safe }};
+    if (!sel || !PROJECT_ID) return;
+    sel.addEventListener('change', async function() {
+        status.textContent = 'Saving genre…'; status.style.color = 'var(--text-mute)';
+        try {
+            var r = await fetch('/api/projects/' + PROJECT_ID, {
+                method: 'PATCH',
+                headers: {'Content-Type':'application/json'},
+                credentials: 'same-origin',
+                body: JSON.stringify({ world_override: sel.value })
+            });
+            if (r.ok) {
+                status.textContent = 'Genre saved — applies to every downstream tool.';
+                status.style.color = 'var(--gold)';
+            } else {
+                status.textContent = 'Save failed. Try again?';
+                status.style.color = 'var(--red)';
+            }
+        } catch (e) {
+            status.textContent = 'Network hiccup — try again.';
+            status.style.color = 'var(--red)';
+        }
+    });
+})();
+</script>
+{% endif %}

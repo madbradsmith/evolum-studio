@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.title }} — EVOLUM{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); min-height: 100vh; }
+.pr { max-width: 1180px; margin: 0 auto; padding: 40px 32px 80px; }
+
+.pr-crumb {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-mute); margin-bottom: 18px;
+    display: flex; align-items: center; gap: 8px;
+}
+.pr-crumb a { color: var(--text-mute); text-decoration: none; }
+.pr-crumb a:hover { color: var(--gold); }
+.pr-crumb .here { color: var(--text); }
+
+.pr-head { display: flex; align-items: flex-start; gap: 28px; margin-bottom: 36px; flex-wrap: wrap; }
+.pr-head-main { flex: 1; min-width: 0; }
+.pr-title {
+    font-family: var(--serif); font-style: italic; font-size: clamp(36px, 5vw, 56px);
+    font-weight: 700; letter-spacing: -1.6px; line-height: 1; color: var(--cream);
+}
+.pr-meta {
+    margin-top: 12px;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--muted);
+    display: flex; gap: 14px; flex-wrap: wrap;
+}
+.pr-meta .pill { border: 1px solid var(--border); padding: 4px 9px; color: var(--text-dim); }
+.pr-meta .pill.gold { border-color: var(--gold-border); color: var(--gold); }
+
+.pr-head-side { display: flex; gap: 10px; }
+.pr-btn {
+    background: var(--bg-card); border: 1px solid var(--border); color: var(--text-dim);
+    padding: 9px 16px; font-family: var(--mono); font-size: 10px; font-weight: 600;
+    letter-spacing: 1.2px; text-transform: uppercase; text-decoration: none; cursor: pointer;
+    transition: all 0.15s;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.pr-btn:hover { border-color: var(--gold-border); color: var(--gold); }
+.pr-btn.gold { background: var(--gold); border-color: var(--gold); color: var(--bg-card); }
+.pr-btn.gold:hover { background: var(--gold-bright); }
+
+/* Pipeline stages */
+.pr-stages {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
+    margin-bottom: 44px;
+}
+.pr-stage {
+    background: var(--bg-card); border: 1px solid var(--border);
+    padding: 18px 16px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+    display: flex; flex-direction: column; gap: 8px;
+    text-decoration: none; color: inherit;
+    transition: all 0.15s;
+}
+.pr-stage:hover { border-color: var(--gold-border); }
+.pr-stage.done { border-left: 3px solid var(--gold); }
+.pr-stage .num {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-mute);
+}
+.pr-stage .nm { font-size: 15px; font-weight: 700; color: var(--text); }
+.pr-stage .st {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-mute); margin-top: 2px;
+}
+.pr-stage.done .st { color: var(--gold); }
+
+/* Assets */
+.pr-sec-head {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--text-mute); margin: 30px 0 14px;
+    display: flex; align-items: center; gap: 10px;
+}
+.pr-sec-head::before, .pr-sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.pr-assets {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px;
+}
+.pr-asset {
+    background: var(--bg-card); border: 1px solid var(--border);
+    padding: 14px 14px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
+}
+.pr-asset .kind {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 6px;
+}
+.pr-asset .nm { font-size: 13px; font-weight: 600; color: var(--text); }
+.pr-asset .sz {
+    font-family: var(--mono); font-size: 9px; color: var(--text-mute); margin-top: 4px;
+}
+.pr-asset-empty {
+    grid-column: 1 / -1;
+    background: var(--bg-card); border: 1px dashed var(--border);
+    padding: 36px 20px; text-align: center;
+    font-size: 13px; color: var(--text-mute); font-style: italic; font-family: var(--serif);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_user_topbar.html" %}
+<div class="pr">
+
+    <div class="pr-crumb">
+        <a href="/filmmaker-workspace">← Workspace</a>
+        <span style="opacity:0.4;">/</span>
+        <span class="here">{{ project.title }}</span>
+    </div>
+
+    <div class="pr-head">
+        <div class="pr-head-main">
+            <div class="pr-title">{{ project.title }}</div>
+            <div class="pr-meta">
+                <span class="pill gold">{{ project.project_type|capitalize }}</span>
+                <span class="pill">{{ project.status|capitalize }}</span>
+                {% if project.has_script %}<span class="pill">Script ✓</span>{% endif %}
+                {% if project.has_deck %}<span class="pill">Deck ✓</span>{% endif %}
+                {% if project.has_sizzle %}<span class="pill">Sizzle ✓</span>{% endif %}
+                {% if project.has_analysis %}<span class="pill">Analysis ✓</span>{% endif %}
+            </div>
+        </div>
+        <div class="pr-head-side">
+            <a class="pr-btn" href="/project/{{ project.id }}/deliverables">Deliverables →</a>
+        </div>
+    </div>
+
+    <!-- Pipeline stages -->
+    <div class="pr-stages">
+        <a class="pr-stage {% if project.idea_text %}done{% endif %}" href="/idea?project={{ project.id }}">
+            <div class="num">Step 01</div>
+            <div class="nm">Idea</div>
+            <div class="st">{% if project.idea_text %}Captured ✓{% else %}Start the story{% endif %}</div>
+        </a>
+        <a class="pr-stage {% if project.has_script %}done{% endif %}" href="/script-editor?project={{ project.id }}">
+            <div class="num">Step 02</div>
+            <div class="nm">Script</div>
+            <div class="st">{% if project.has_script %}Drafted ✓{% else %}Write the screenplay{% endif %}</div>
+        </a>
+        <a class="pr-stage {% if project.has_deck %}done{% endif %}" href="/pitch-deck?project={{ project.id }}">
+            <div class="num">Step 03</div>
+            <div class="nm">Pitch Deck</div>
+            <div class="st">{% if project.has_deck %}Built ✓{% else %}Generate the deck{% endif %}</div>
+        </a>
+        <a class="pr-stage {% if project.has_sizzle %}done{% endif %}" href="/sizzle-reel?project={{ project.id }}">
+            <div class="num">Step 04</div>
+            <div class="nm">Sizzle Reel</div>
+            <div class="st">{% if project.has_sizzle %}Cut ✓{% else %}Cut the reel{% endif %}</div>
+        </a>
+    </div>
+
+    <!-- Assets -->
+    <div class="pr-sec-head">Project assets</div>
+    <div class="pr-assets">
+        {% if assets %}
+            {% for a in assets %}
+            <div class="pr-asset">
+                <div class="kind">{{ a.asset_kind }}</div>
+                <div class="nm">{{ a.asset_name }}</div>
+                <div class="sz">{% if a.size_bytes %}{{ (a.size_bytes / 1024)|round(1) }} KB · {% endif %}{{ a.created_at }}</div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="pr-asset-empty">Nothing on the shelf yet. As you work through the pipeline, every finished piece lands right here — ready to grab.</div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

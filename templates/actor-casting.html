@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EVOLUM — Casting Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;1,9..144,300;1,9..144,400;1,9..144,700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="static/css/main.css">
+<link rel="stylesheet" href="static/css/portal.css">
+<link rel="stylesheet" href="static/css/evolum_dark.css">
+<style>
+/* ============================================================
+   ACTOR — Casting Room dashboard. Olive accent. Blank slate.
+   ============================================================ */
+body { background: var(--bg); }
+.act { min-height: 100vh; display: flex; flex-direction: column; }
+.act-wrap { max-width: 1180px; width: 100%; margin: 0 auto; padding: 0 28px; }
+
+/* Dashboard header */
+.act-head { padding: 36px 0 8px; display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+.act-eyebrow {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: var(--olive); display: inline-flex; align-items: center; gap: 9px; margin-bottom: 12px;
+}
+.act-eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--olive); }
+.act-head h1 { font-family: var(--serif); font-style: italic; font-size: clamp(36px, 5vw, 56px); font-weight: 700; letter-spacing: -1.6px; line-height: 0.95; color: var(--text); }
+.act-head h1 em { font-style: normal; color: var(--olive); }
+.act-head .sub { font-family: var(--mono); font-size: 11px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--text-mute); margin-top: 10px; }
+
+/* Profile setup banner */
+.act-profile {
+    margin-top: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--olive);
+    display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: center;
+    padding: 20px 24px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+.act-headshot {
+    width: 64px; height: 64px; flex-shrink: 0;
+    background: var(--bg-hover); border: 1px dashed var(--border-hi);
+    display: flex; align-items: center; justify-content: center; color: var(--text-mute);
+}
+.act-profile-info .t { font-size: 16px; font-weight: 700; color: var(--text); }
+.act-profile-info .d { font-size: 13px; color: var(--text-dim); margin-top: 3px; line-height: 1.5; }
+.act-profile-prog { margin-top: 10px; max-width: 360px; }
+.act-prog-bar { height: 4px; background: rgba(237, 233, 224,0.08); overflow: hidden; }
+.act-prog-bar i { display: block; height: 100%; width: 15%; background: var(--olive); }
+.act-prog-row { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--text-mute); margin-top: 5px; }
+
+/* Stat row */
+.act-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 22px; }
+.act-stat { background: var(--bg-card); padding: 16px 18px; position: relative; overflow: hidden; clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); }
+.act-stat .bar { position: absolute; top: 0; left: 0; width: 40px; height: 4px; background: var(--olive); }
+.act-stat .k { font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute); margin-top: 6px; }
+.act-stat .v { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; margin-top: 2px; }
+.act-stat .v em { font-family: var(--mono); font-style: normal; font-size: 11px; color: var(--text-mute); font-weight: 500; letter-spacing: 0.5px; }
+
+/* Section header */
+.act-sec { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin: 48px 0 16px; flex-wrap: wrap; }
+.act-sec h2 { font-family: var(--serif); font-style: italic; font-size: 30px; font-weight: 700; letter-spacing: -1px; color: var(--text); line-height: 1; }
+.act-sec h2 em { font-style: normal; color: var(--olive); }
+.act-sec .lbl { font-family: var(--mono); font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 6px; }
+.act-sec .link { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-dim); cursor: pointer; }
+.act-sec .link:hover { color: var(--olive); }
+
+/* Empty state block */
+.act-empty {
+    border: 1px dashed var(--border-hi);
+    background: repeating-linear-gradient(135deg, rgba(237, 233, 224,0.015) 0 12px, transparent 12px 24px);
+    padding: 48px 32px; text-align: center;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%);
+}
+.act-empty .ic {
+    width: 52px; height: 52px; margin: 0 auto 16px;
+    background: var(--olive-dim); border: 1px solid rgba(111,112,64,0.3); color: var(--olive);
+    display: flex; align-items: center; justify-content: center;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.act-empty .t { font-family: var(--serif); font-style: italic; font-size: 24px; font-weight: 700; color: var(--text); letter-spacing: -0.5px; }
+.act-empty .d { font-size: 13px; color: var(--text-dim); max-width: 400px; margin: 8px auto 0; line-height: 1.6; }
+.act-empty .cta { margin-top: 22px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+
+/* Booth feature card */
+.act-booth {
+    margin-top: 16px;
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 0;
+    background: #0c0805; color: var(--bg-card);
+    overflow: hidden; position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 16px), calc(100% - 16px) 100%, 0 100%);
+}
+.act-booth-copy { padding: 36px 38px; display: flex; flex-direction: column; gap: 14px; position: relative; z-index: 2; }
+.act-booth-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gold-bright); display: inline-flex; align-items: center; gap: 8px; }
+.act-booth-eyebrow::before { content: ''; width: 18px; height: 1px; background: var(--gold-bright); }
+.act-booth h3 { font-family: var(--serif); font-style: italic; font-size: 34px; font-weight: 700; letter-spacing: -1px; line-height: 1; color: var(--bg-card); }
+.act-booth p { font-size: 14px; line-height: 1.65; color: rgba(246,240,226,0.72); max-width: 380px; }
+.act-booth-feats { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+.act-booth-feat { display: flex; align-items: center; gap: 10px; font-size: 13px; color: rgba(246,240,226,0.82); }
+.act-booth-feat::before { content: ''; width: 6px; height: 6px; background: var(--gold); flex-shrink: 0; }
+.act-booth-cta { margin-top: 10px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.act-booth-price { font-family: var(--mono); font-size: 10px; letter-spacing: 1.3px; text-transform: uppercase; color: rgba(246,240,226,0.5); }
+.act-booth-visual { position: relative; overflow: hidden; min-height: 280px; }
+.act-booth-feed {
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse 50% 55% at 50% 45%, rgba(255,210,160,0.22) 0%, transparent 60%),
+        linear-gradient(170deg, #2a1a0e 0%, #120c06 60%, #060402 100%);
+}
+.act-booth-subject { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 50%; height: 70%; background: radial-gradient(ellipse 50% 28% at 50% 18%, rgba(255,200,150,0.25) 0%, rgba(120,70,40,0.4) 45%, transparent 75%); filter: blur(2px); }
+.act-booth-grid::before, .act-booth-grid::after { content: ''; position: absolute; background: rgba(255,236,206,0.08); }
+.act-booth-grid::before { left: 33.33%; right: 33.33%; top: 0; bottom: 0; border-left: 1px solid rgba(255,236,206,0.1); border-right: 1px solid rgba(255,236,206,0.1); }
+.act-booth-grid::after { top: 33.33%; bottom: 33.33%; left: 0; right: 0; border-top: 1px solid rgba(255,236,206,0.1); border-bottom: 1px solid rgba(255,236,206,0.1); }
+.act-booth-rec { position: absolute; top: 16px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 7px; background: rgba(0,0,0,0.55); border: 1px solid rgba(214,84,57,0.4); padding: 5px 12px; font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: #d65439; }
+.act-booth-rec .dot { width: 6px; height: 6px; border-radius: 50%; background: #d65439; animation: portalPulse 1.2s ease infinite; }
+
+@media (max-width: 860px) {
+    .act-stats { grid-template-columns: repeat(2, 1fr); }
+    .act-booth { grid-template-columns: 1fr; }
+    .act-booth-visual { min-height: 200px; }
+    .act-profile { grid-template-columns: 1fr; text-align: center; }
+    .act-headshot { margin: 0 auto; }
+}
+
+/* ── MOBILE ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .act-wrap { padding: 0 16px; }
+    .act-head { padding: 24px 0 6px; flex-direction: column; align-items: flex-start; gap: 12px; }
+    .act-head h1 { font-size: clamp(32px, 10vw, 52px); letter-spacing: -1.4px; }
+    .act-head .sub { font-size: 9px; letter-spacing: 1px; }
+
+    .act-profile { padding: 16px 14px; gap: 14px; }
+    .act-profile .btn-notch { width: 100%; justify-content: center; }
+    .act-prog-bar { margin-top: 8px; }
+    .act-prog-row { font-size: 8px; }
+
+    .act-stats { gap: 8px; }
+    .act-stat { padding: 13px 14px; }
+    .act-stat .v { font-size: 22px; }
+
+    .act-sec { flex-direction: column; align-items: flex-start; gap: 8px; margin: 32px 0 12px; }
+    .act-sec h2 { font-size: 24px; letter-spacing: -0.6px; }
+
+    .act-empty { padding: 32px 18px; }
+    .act-empty .t { font-size: 19px; }
+    .act-empty .cta { flex-direction: column; }
+    .act-empty .cta .btn-notch { width: 100%; justify-content: center; }
+
+    .act-booth-copy { padding: 24px 20px; }
+    .act-booth h3 { font-size: 26px; letter-spacing: -0.8px; }
+    .act-booth p { font-size: 13px; }
+    .act-booth-cta { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .act-booth-cta .btn-notch { width: 100%; justify-content: center; }
+
+    .portal-nav { padding: 0 14px; gap: 12px; }
+    .portal-nav-links { display: none; }
+    .role-chip .swap { display: none; }
+    .portal-foot { padding: 20px 16px 28px; flex-direction: column; gap: 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="act" data-screen-label="Actor — Casting Room">
+
+    <div class="raise-ticker">
+        <span class="lead"><span class="raise-pulse"></span><strong>Casting Room</strong></span>
+        <div class="stream">
+            <span>Build your profile to unlock submissions</span>
+            <span>Self-Tape Room · Marked sides + prompter</span>
+            <span><em>No agent required</em></span>
+        </div>
+    </div>
+
+    <!-- Shared nav, with role chip -->
+    <nav class="portal-nav">
+        <a class="portal-brand" href="/">
+            <div class="portal-brand-mark">E</div>
+            <div>
+                <div class="portal-brand-name">Evolum<span>.</span></div>
+                <div class="portal-brand-sub" data-i18n="sub.casting">Casting Room</div>
+            </div>
+        </a>
+        <div class="portal-nav-links">
+            <span class="portal-nav-link active">My Room</span>
+            <span class="portal-nav-link">Open Roles</span>
+            <span class="portal-nav-link">Submissions</span>
+            <a class="portal-nav-link" href="/catalog" data-i18n="nav.catalog">Catalog</a>
+        </div>
+        <div class="portal-nav-right">
+            <div data-lang-mount></div>
+            <a class="role-chip" href="/"><span class="dot" style="background:var(--olive)"></span><span data-i18n="role.actor">Actor</span><span class="swap">⇄ <span data-i18n="role.switch">switch door</span></span></a>
+        </div>
+    </nav>
+
+    <div class="act-wrap">
+
+        <!-- Header -->
+        <div class="act-head">
+            <div>
+                <div class="act-eyebrow" data-i18n="act.eyebrow">Your casting room · Empty</div>
+                <h1 data-i18n-html="act.h1">Let's get you <em>seen</em>.</h1>
+                <div class="sub" data-i18n="act.sub">No agent required · Free profile · Self-tape included</div>
+            </div>
+        </div>
+
+        <!-- Profile setup -->
+        <div class="act-profile">
+            <div class="act-headshot">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="9" r="3.4"/><path d="M5.5 19c1-3.4 4-5.2 6.5-5.2s5.5 1.8 6.5 5.2"/></svg>
+            </div>
+            <div class="act-profile-info">
+                <div class="t">Build your profile</div>
+                <div class="d">Headshots, reel, range, stats, union status. Casting directors see this first — it's how roles find you.</div>
+                <div class="act-profile-prog">
+                    <div class="act-prog-bar"><i></i></div>
+                    <div class="act-prog-row"><span>Profile 15% complete</span><span>Just the basics so far</span></div>
+                </div>
+            </div>
+            <button class="btn-notch" style="background:var(--olive);" data-action="profile">Complete profile →</button>
+        </div>
+
+        <!-- Stats (empty/zero) -->
+        <div class="act-stats">
+            <div class="act-stat"><div class="bar"></div><div class="k">Submissions</div><div class="v">0</div></div>
+            <div class="act-stat"><div class="bar"></div><div class="k">Self-tapes</div><div class="v">0</div></div>
+            <div class="act-stat"><div class="bar"></div><div class="k">Callbacks</div><div class="v">0</div></div>
+            <div class="act-stat"><div class="bar"></div><div class="k">Booked</div><div class="v">0 <em>· $0</em></div></div>
+        </div>
+
+        <!-- Open roles (empty state) -->
+        <div class="act-sec">
+            <div>
+                <div class="lbl">Roles matched to your profile</div>
+                <h2>Open <em>roles</em>.</h2>
+            </div>
+            <span class="link">Browse all casting →</span>
+        </div>
+        <div class="act-empty">
+            <div class="ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h18v12H3z"/><path d="M3 7l3-3h5l2 3"/><circle cx="9" cy="14" r="2"/></svg>
+            </div>
+            <div class="t">No open roles yet</div>
+            <div class="d">When filmmakers post breakdowns to casting, the ones that fit your range show up here. Complete your profile so we can match you.</div>
+            <div class="cta">
+                <button class="btn-notch" style="background:var(--olive);" data-action="profile">Complete profile</button>
+                <button class="btn-notch btn-notch-ghost" data-action="notify">Notify me of new roles</button>
+            </div>
+        </div>
+
+        <!-- Submissions (empty state) -->
+        <div class="act-sec">
+            <div>
+                <div class="lbl">Track everything you've sent</div>
+                <h2>My <em>submissions</em>.</h2>
+            </div>
+        </div>
+        <div class="act-empty">
+            <div class="ic">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 5h16v14H4z"/><path d="M4 9h16M9 13h6"/></svg>
+            </div>
+            <div class="t">Nothing submitted yet</div>
+            <div class="d">Your tapes, their status — under review, callback, booked — all tracked here once you send your first audition.</div>
+            <div class="cta">
+                <a class="btn-notch btn-notch-ghost" href="/self-tape-room">Record a practice tape →</a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="portal-foot" style="margin-top:56px;">
+        <div class="portal-foot-left">
+            <span class="portal-foot-engine" data-i18n="foot.powered">Powered by</span> <strong style="color:var(--gold);font-weight:500;">Developum AI Engine</strong>
+            <div class="portal-foot-links">
+                <span class="portal-foot-link">Catalog</span>
+                <span class="portal-foot-link">Festival</span>
+                <span class="portal-foot-link">House Rules</span>
+            </div>
+        </div>
+        <div class="portal-foot-links"><span class="portal-foot-link">© EVOLUM Studio</span></div>
+    </footer>
+
+</div>
+
+<script src="static/js/i18n-strings.js"></script>
+<script src="static/js/i18n.js"></script>
+
+
+{% include "_actor_actions.html" %}
+{% include "_compliance_bar.html" %}
+</body>
+</html>

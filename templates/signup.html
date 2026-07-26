@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}EVOLUM — Create Account{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); }
+.auth-stage {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px 24px;
+    position: relative; overflow: hidden;
+}
+.auth-stage::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background:
+        radial-gradient(ellipse 60% 45% at 50% 0%, rgba(197,86,42,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 90% 100%, rgba(154,94,114,0.05) 0%, transparent 60%);
+}
+.auth-shell {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 480px;
+    background: var(--bg-card);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-lg);
+    padding: 48px 40px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.35);
+}
+.auth-shell h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 32px;
+    color: var(--text);
+    margin: 0 0 8px;
+    letter-spacing: -0.01em;
+}
+.auth-shell .lede {
+    color: var(--text-muted);
+    margin: 0 0 28px;
+    font-size: 14px;
+}
+.auth-field { margin-bottom: 18px; }
+.auth-field label {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+.auth-field input {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    transition: border-color 0.15s;
+    box-sizing: border-box;
+}
+.auth-field input:focus {
+    outline: none;
+    border-color: var(--ember);
+}
+.auth-submit {
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px;
+    background: var(--ember);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.auth-submit:hover { background: var(--ember-deep, #b4501f); }
+.auth-fineprint {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+.auth-fineprint a { color: var(--ember); text-decoration: none; }
+.auth-fineprint a:hover { text-decoration: underline; }
+.flash { padding: 10px 14px; border-radius: 6px; margin-bottom: 16px; font-size: 13px; }
+.flash.error { background: rgba(200, 60, 40, 0.12); color: #d04a30; border: 1px solid rgba(200, 60, 40, 0.3); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-stage">
+  <div class="auth-shell">
+    <h1>Create your account</h1>
+    <p class="lede">Three days free. Cancel anytime. Your work is yours.</p>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, msg in messages %}
+        <div class="flash {{ category }}">{{ msg }}</div>
+      {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.signup') }}">
+      <div class="auth-field">
+        <label for="name">Your name</label>
+        <input id="name" name="name" type="text" placeholder="Maya" autocomplete="name">
+      </div>
+      <div class="auth-field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@example.com" autocomplete="email" required>
+      </div>
+      <div class="auth-field">
+        <label for="password">Password (8+ characters)</label>
+        <input id="password" name="password" type="password" placeholder="••••••••" autocomplete="new-password" minlength="8" required>
+      </div>
+      <button type="submit" class="auth-submit">Create account →</button>
+    </form>
+
+    <p class="auth-fineprint">
+      Already in? <a href="{{ url_for('index') }}">Sign in →</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

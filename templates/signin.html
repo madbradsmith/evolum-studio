@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+
+{% block title %}EVOLUM — Sign In{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ============================================================
+   SIGN IN — the door. Sign In / Join (4 roles) / Reset.
+   ============================================================ */
+body { background: var(--bg); }
+.auth-stage {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 32px 24px;
+    position: relative; overflow: hidden;
+}
+.auth-stage::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none;
+    background:
+        radial-gradient(ellipse 60% 45% at 50% 0%, rgba(197,86,42,0.08) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 60% at 90% 100%, rgba(154,94,114,0.05) 0%, transparent 60%);
+}
+.auth-shell {
+    position: relative; z-index: 1;
+    width: 100%; max-width: 940px;
+    background: var(--bg-card);
+    border: 1px solid var(--gold-border);
+    border-radius: var(--radius-lg);
+    display: grid; grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+    box-shadow: 0 40px 100px rgba(237, 233, 224,0.22);
+    min-height: 580px;
+}
+
+/* ── Left cinematic panel ── */
+.auth-poster {
+    background: #0c0805;
+    color: var(--bg-card);
+    padding: 40px 42px;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+}
+.auth-poster-bg {
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse 60% 50% at 50% 20%, rgba(255,200,140,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 120%, rgba(20,14,10,0.9) 0%, transparent 60%),
+        linear-gradient(170deg, #3a2414 0%, #160f08 60%, #0a0604 100%);
+}
+.auth-poster-grain {
+    position: absolute; inset: 0;
+    background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 2px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,0.015) 0 1px, transparent 1px 2px);
+    mix-blend-mode: overlay;
+}
+.auth-poster > * { position: relative; z-index: 2; }
+.auth-poster-brand { display: flex; align-items: center; gap: 10px; }
+.auth-poster-brand .portal-brand-mark { width: 30px; height: 30px; }
+.auth-poster-brand .nm { font-family: var(--serif); font-style: italic; font-size: 20px; font-weight: 700; color: var(--bg-card); letter-spacing: -0.02em; }
+.auth-poster-brand .nm span { color: var(--gold-bright); }
+.auth-poster-brand .sub { font-family: var(--mono); font-size: 8px; color: rgba(246,240,226,0.5); letter-spacing: 1.6px; text-transform: uppercase; margin-top: 2px; }
+
+.auth-poster-mid { margin-top: auto; }
+.auth-poster-rule { width: 40px; height: 2px; background: var(--gold-bright); margin-bottom: 20px; }
+.auth-poster h2 {
+    font-family: var(--serif); font-style: italic;
+    font-size: 40px; font-weight: 700; letter-spacing: -1.5px; line-height: 0.95;
+    color: var(--bg-card);
+}
+.auth-poster h2 em { font-style: normal; color: var(--gold-bright); }
+.auth-poster p { font-size: 13.5px; line-height: 1.65; color: rgba(246,240,226,0.7); margin-top: 16px; max-width: 320px; }
+.auth-poster-foot {
+    margin-top: 28px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(246,240,226,0.45);
+    display: flex; align-items: center; gap: 8px;
+}
+.auth-poster-foot .pulse { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: portalPulse 2s ease infinite; }
+
+/* ── Right form panel ── */
+.auth-form-panel { padding: 40px 42px; display: flex; flex-direction: column; }
+.auth-tabbar { display: flex; gap: 4px; border-bottom: 1px solid var(--border); margin-bottom: 26px; }
+.auth-tabbtn {
+    padding: 10px 4px; margin-right: 22px;
+    font-size: 14px; font-weight: 700; color: var(--text-mute);
+    border: none; background: none; cursor: pointer;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    transition: color 0.15s; letter-spacing: -0.2px;
+}
+.auth-tabbtn.active { color: var(--gold); border-bottom-color: var(--gold); }
+.auth-tabbtn:hover:not(.active) { color: var(--text); }
+
+.auth-view { display: none; flex-direction: column; gap: 14px; }
+.auth-view.active { display: flex; }
+
+.auth-view h1 { font-family: var(--serif); font-style: italic; font-size: 26px; font-weight: 700; letter-spacing: -0.6px; color: var(--text); line-height: 1; }
+.auth-view .lede { font-size: 13px; color: var(--text-dim); line-height: 1.55; margin-top: -4px; }
+
+.auth-field { display: flex; flex-direction: column; gap: 5px; }
+.auth-field label { font-size: 12px; color: var(--text-dim); margin: 0; }
+.auth-field .row { display: flex; align-items: center; justify-content: space-between; }
+.auth-forgot { font-family: var(--mono); font-size: 9px; letter-spacing: 0.8px; text-transform: uppercase; color: var(--gold); cursor: pointer; background: none; border: none; }
+.auth-forgot:hover { color: var(--gold-bright); text-decoration: underline; }
+
+.auth-submit {
+    margin-top: 6px;
+    background: var(--gold); color: var(--bg-card);
+    border: none; padding: 13px; font-size: 14px; font-weight: 700; cursor: pointer;
+    clip-path: polygon(9px 0, 100% 0, 100% 100%, 0 100%, 0 9px);
+    transition: background 0.15s;
+}
+.auth-submit:hover { background: var(--gold-bright); }
+.auth-divider { display: flex; align-items: center; gap: 12px; font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute); margin: 4px 0; }
+.auth-divider::before, .auth-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.auth-oauth { display: flex; gap: 8px; }
+.auth-oauth-btn {
+    flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px;
+    border: 1px solid var(--border-hi); background: var(--bg-card);
+    padding: 10px; font-size: 12px; font-weight: 600; color: var(--text-dim); cursor: pointer;
+    transition: all 0.15s;
+}
+.auth-oauth-btn:hover { border-color: var(--gold-border); color: var(--text); }
+.auth-fineprint { font-size: 11px; color: var(--text-mute); text-align: center; margin-top: 6px; line-height: 1.5; }
+.auth-fineprint a, .auth-switch-link { color: var(--gold); cursor: pointer; }
+
+/* ── Join: door picker ── */
+.auth-doorpick { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.auth-door {
+    --acc: var(--gold);
+    border: 1px solid var(--border-hi); background: var(--bg-card);
+    padding: 12px 13px; cursor: pointer; text-align: left;
+    display: flex; align-items: center; gap: 10px;
+    transition: all 0.15s; position: relative;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
+}
+.auth-door:hover { border-color: var(--acc); background: rgba(0,0,0,0.01); }
+.auth-door.sel { border-color: var(--acc); box-shadow: inset 0 0 0 1px var(--acc); }
+.auth-door .ic { width: 30px; height: 30px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--acc); border: 1px solid var(--acc); clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px); }
+.auth-door .nm { font-size: 13px; font-weight: 700; color: var(--text); }
+.auth-door .ti { font-family: var(--mono); font-size: 8px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-mute); margin-top: 1px; }
+.auth-door .chk { position: absolute; top: 8px; right: 9px; width: 14px; height: 14px; opacity: 0; color: var(--acc); }
+.auth-door.sel .chk { opacity: 1; }
+.dd-film { --acc: var(--gold); }
+.dd-actor { --acc: var(--olive); }
+.dd-inv { --acc: var(--mauve); }
+.dd-sup { --acc: var(--mustard); }
+
+/* Reset confirmation */
+.auth-sent {
+    display: none; flex-direction: column; align-items: center; text-align: center; gap: 12px;
+    padding: 18px 0;
+}
+.auth-sent.show { display: flex; }
+.auth-sent .seal {
+    width: 52px; height: 52px; background: var(--gold-dim); border: 1px solid var(--gold-border); color: var(--gold);
+    display: flex; align-items: center; justify-content: center;
+    clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+}
+.auth-sent h1 { font-family: var(--serif); font-style: italic; font-size: 24px; font-weight: 700; color: var(--text); }
+.auth-sent p { font-size: 13px; color: var(--text-dim); line-height: 1.6; max-width: 300px; }
+.auth-back-top { font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); cursor: pointer; background: none; border: none; display: inline-flex; align-items: center; gap: 6px; margin-bottom: 16px; align-self: flex-start; }
+.auth-back-top:hover { color: var(--gold); }
+
+@media (max-width: 760px) {
+    .auth-shell { grid-template-columns: 1fr; max-width: 460px; }
+    .auth-poster { display: none; }
+    .auth-form-panel { padding: 34px 28px; }
+}
+
+/* ── MOBILE ────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .auth-stage { padding: 16px 12px; align-items: flex-start; padding-top: 32px; }
+    .auth-shell { border-radius: 8px; min-height: auto; }
+    .auth-form-panel { padding: 28px 20px 32px; }
+    .auth-tabbar { margin-bottom: 20px; }
+    .auth-tabbtn { padding: 10px 16px; font-size: 13px; margin-right: 10px; }
+
+    .auth-view h1 { font-size: 22px; }
+    .auth-view .lede { font-size: 12px; }
+
+    .auth-doorpick { grid-template-columns: 1fr 1fr; gap: 6px; }
+    .auth-door { padding: 10px 10px; }
+    .auth-door .ic { width: 26px; height: 26px; }
+    .auth-door .nm { font-size: 12px; }
+    .auth-door .ti { font-size: 7px; }
+
+    .auth-submit { padding: 15px; font-size: 14px; min-height: 48px; }
+    input[type="email"], input[type="password"] { font-size: 16px; padding: 12px 14px; min-height: 48px; }
+    .auth-forgot { font-size: 10px; }
+    .auth-oauth-btn { padding: 13px; min-height: 44px; }
+}
+@media (max-width: 380px) {
+    .auth-doorpick { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-stage" data-screen-label="Sign In">
+    <div class="auth-shell">
+
+        <!-- ── Cinematic left ── -->
+        <div class="auth-poster">
+            <div class="auth-poster-bg"></div>
+            <div class="auth-poster-grain"></div>
+            <a class="auth-poster-brand" href="/" style="text-decoration:none;">
+                <div class="portal-brand-mark">E</div>
+                <div>
+                    <div class="nm">Evolum<span>.</span></div>
+                    <div class="sub">The Portal</div>
+                </div>
+            </a>
+            <div class="auth-poster-mid">
+                <div class="auth-poster-rule"></div>
+                <h2 data-i18n-html="home.h1">No <em>Hollywood</em> required.</h2>
+                <p>Develop it, fund it, cast it, back it. The whole pipeline lives in one house — and the door's right here.</p>
+                <div class="auth-poster-foot"><span class="pulse"></span>The portal is live</div>
+            </div>
+        </div>
+
+        <!-- ── Form right ── -->
+        <div class="auth-form-panel">
+
+            <!-- Tabs (hidden in reset view) -->
+            <div class="auth-tabbar" id="tabbar">
+                <button class="auth-tabbtn active" data-view="signin" data-i18n="auth.tab.signin">Sign In</button>
+                <button class="auth-tabbtn" data-view="join" data-i18n="auth.tab.join">Join</button>
+                <div data-lang-mount style="margin-left:auto;"></div>
+            </div>
+
+            <!-- SIGN IN -->
+            <form class="auth-view active" id="view-signin" method="POST" action="{{ url_for('auth.signin') }}">
+                <h1 data-i18n="auth.welcome">Welcome back.</h1>
+                <div class="auth-field">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                </div>
+                <div class="auth-field">
+                    <div class="row">
+                        <label>Password</label>
+                        <button type="button" class="auth-forgot" id="toReset" data-i18n="auth.forgot">Forgot password?</button>
+                    </div>
+                    <input type="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="auth-submit" data-i18n="auth.signin.btn">Sign In →</button>
+                <div class="auth-divider">or</div>
+                <div class="auth-oauth">
+                    <button type="button" class="auth-oauth-btn">Continue with Google</button>
+                    <button type="button" class="auth-oauth-btn">Apple</button>
+                </div>
+                <div class="auth-fineprint">New to EVOLUM? <span class="auth-switch-link" data-view="join">Pick your door →</span></div>
+            </form>
+
+            <!-- JOIN -->
+            <form class="auth-view" id="view-join" method="POST" action="{{ url_for('auth.signup') }}">
+                <h1 data-i18n="auth.pickdoor">Pick your door.</h1>
+                <p class="lede">One choice sets up the right room. You can add other roles later.</p>
+                <div class="auth-doorpick" style="grid-template-columns: repeat(3, 1fr);">
+                    <button type="button" class="auth-door dd-film sel" data-role="filmmaker" data-paid="1">
+                        <div class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 6h18v12H3z"/><path d="m3 10 4-4M9 10l4-4M15 10l4-4"/></svg></div>
+                        <div><div class="nm">Filmmaker</div><div class="ti">Build · Pitch · Fund</div></div>
+                        <svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 4 4 10-10"/></svg>
+                    </button>
+                    <button type="button" class="auth-door dd-prod" data-role="producer" data-paid="1">
+                        <div class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 6h16v12H4z"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/></svg></div>
+                        <div><div class="nm">Above the Line</div><div class="ti">Producer · DP · Director</div></div>
+                        <svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 4 4 10-10"/></svg>
+                    </button>
+                    <button type="button" class="auth-door dd-actor" data-role="actor" data-paid="0">
+                        <div class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><circle cx="12" cy="8" r="3.2"/><path d="M5.5 19c1-3.2 4-5 6.5-5s5.5 1.8 6.5 5"/></svg></div>
+                        <div><div class="nm">Actor</div><div class="ti">Audition · Self-tape · Book</div></div>
+                        <svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 4 4 10-10"/></svg>
+                    </button>
+                    <button type="button" class="auth-door dd-inv" data-role="investor" data-paid="0">
+                        <div class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19V9l8-5 8 5v10"/><path d="M4 19h16"/></svg></div>
+                        <div><div class="nm">Investor</div><div class="ti">Pledge · Deal room</div></div>
+                        <svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 4 4 10-10"/></svg>
+                    </button>
+                    <button type="button" class="auth-door dd-sup" data-role="supporter" data-paid="0">
+                        <div class="ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 20s-7-4.4-9.2-9C1.3 8 3 5 6 5c2 0 3.2 1.4 4 2.6C10.8 6.4 12 5 14 5c3 0 4.7 3 3.2 6-2.2 4.6-9.2 9-9.2 9z" transform="translate(2 0)"/></svg></div>
+                        <div><div class="nm">Supporter</div><div class="ti">Back a story · Free</div></div>
+                        <svg class="chk" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m5 12 4 4 10-10"/></svg>
+                    </button>
+                </div>
+                <input type="hidden" name="role" id="joinRole" value="filmmaker">
+                <input type="hidden" name="plan" id="joinPlan" value="solo">
+
+                <!-- Plan picker: only visible for filmmaker/producer (paid roles) -->
+                <div id="planPickerWrap" style="margin-top:10px;">
+                    <div style="font-family:var(--mono);font-size:9px;letter-spacing:1.4px;text-transform:uppercase;color:var(--text-mute);margin-bottom:8px;">Choose a plan</div>
+                    <div id="planGrid" style="display:grid;grid-template-columns:repeat(2,1fr);gap:6px;">
+                        <button type="button" class="su-plan sel" data-plan="solo" style="padding:10px 8px;border:1px solid var(--gold);background:rgba(197,86,42,0.07);cursor:pointer;clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);text-align:left;color:var(--text);">
+                            <div style="font-size:11px;font-weight:700;">Solo</div>
+                            <div style="font-family:var(--mono);font-size:9px;color:var(--gold);margin-top:2px;">$10/mo · 3-day trial</div>
+                        </button>
+                        <button type="button" class="su-plan" data-plan="writers_room" style="padding:10px 8px;border:1px solid var(--border-hi);background:transparent;cursor:pointer;clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);text-align:left;color:var(--text);">
+                            <div style="font-size:11px;font-weight:700;">Writer's Room</div>
+                            <div style="font-family:var(--mono);font-size:9px;color:var(--text-mute);margin-top:2px;">$25/mo · Most popular</div>
+                        </button>
+                        <button type="button" class="su-plan" data-plan="studio" style="padding:10px 8px;border:1px solid var(--border-hi);background:transparent;cursor:pointer;clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);text-align:left;color:var(--text);">
+                            <div style="font-size:11px;font-weight:700;">Studio</div>
+                            <div style="font-family:var(--mono);font-size:9px;color:var(--text-mute);margin-top:2px;">$150/mo · Unlimited projects</div>
+                        </button>
+                        <button type="button" class="su-plan" data-plan="prod_company" style="padding:10px 8px;border:1px solid var(--border-hi);background:transparent;cursor:pointer;clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);text-align:left;color:var(--text);">
+                            <div style="font-size:11px;font-weight:700;">Production Co.</div>
+                            <div style="font-family:var(--mono);font-size:9px;color:var(--text-mute);margin-top:2px;">$75/mo · Unlimited seats</div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Producer $49/mo Above the Line — single tier -->
+                <div id="producerPlan" style="display:none;margin-top:10px;">
+                    <div style="padding:12px 14px;border:1px solid var(--gold);background:rgba(197,86,42,0.07);clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);">
+                        <div style="font-size:12px;font-weight:700;color:var(--text);">Above the Line — $49/mo</div>
+                        <div style="font-family:var(--mono);font-size:8px;color:var(--text-mute);margin-top:3px;line-height:1.6;">Producer · DP · Director · Craft-picker workspace, project pipeline, deliverables.</div>
+                    </div>
+                </div>
+
+                <!-- Free-role card: shown for actor/investor/supporter -->
+                <div id="freeRoleCard" style="display:none;margin-top:10px;">
+                    <div style="padding:12px 14px;border:1px solid var(--border);background:var(--bg);clip-path:polygon(4px 0,100% 0,100% calc(100% - 4px),calc(100% - 4px) 100%,0 100%,0 4px);">
+                        <div id="freeTitle" style="font-size:12px;font-weight:700;color:var(--text);">Free to join</div>
+                        <div id="freeDesc" style="font-family:var(--mono);font-size:8px;color:var(--text-mute);margin-top:3px;">Create your profile and start exploring.</div>
+                    </div>
+                </div>
+
+                <div class="auth-field" style="margin-top:14px;">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="you@example.com" autocomplete="email" required>
+                </div>
+                <div class="auth-field">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="Choose a password (8+ chars)" autocomplete="new-password" minlength="8" required>
+                </div>
+                <button type="submit" class="auth-submit" id="joinBtn">Create account · Filmmaker →</button>
+                <div class="auth-fineprint">Already in? <span class="auth-switch-link" data-view="signin">Sign in →</span></div>
+            </form>
+
+            <!-- RESET -->
+            <div class="auth-view" id="view-reset">
+                <button class="auth-back-top" id="backFromReset">← Back to sign in</button>
+                <div id="resetForm" style="display:flex; flex-direction:column; gap:14px;">
+                    <h1 data-i18n="auth.reset.h">Reset your password.</h1>
+                    <p class="lede">Enter the email on your account and we'll send a secure reset link. It expires in 30 minutes.</p>
+                    <div class="auth-field">
+                        <label>Email</label>
+                        <input type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email">
+                    </div>
+                    <button class="auth-submit" id="sendReset" data-i18n="auth.reset.send">Send reset link →</button>
+                    <div class="auth-fineprint">Remembered it? <span class="auth-switch-link" data-view="signin">Sign in →</span></div>
+                </div>
+                <div class="auth-sent" id="resetSent">
+                    <div class="seal"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/></svg></div>
+                    <h1 data-i18n="auth.reset.sent">Check your inbox.</h1>
+                    <p>If an account exists for <strong id="sentEmail">that address</strong>, a reset link is on its way.</p>
+                    <button class="auth-submit" style="margin-top:8px;" id="backToSignin2">Back to sign in</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+(function(){
+    const views = { signin: 'view-signin', join: 'view-join', reset: 'view-reset' };
+    const tabbar = document.getElementById('tabbar');
+
+    function show(view){
+        Object.entries(views).forEach(([k, id]) => {
+            document.getElementById(id).classList.toggle('active', k === view);
+        });
+        // tabs only reflect signin/join; hide tabbar in reset
+        tabbar.style.display = (view === 'reset') ? 'none' : 'flex';
+        document.querySelectorAll('.auth-tabbtn').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+        // reset the reset-view sub-state
+        document.getElementById('resetForm').style.display = 'flex';
+        document.getElementById('resetSent').classList.remove('show');
+    }
+
+    // Tab + switch links
+    document.querySelectorAll('[data-view]').forEach(el => {
+        el.addEventListener('click', () => show(el.dataset.view));
+    });
+    document.getElementById('toReset').addEventListener('click', () => show('reset'));
+    document.getElementById('backFromReset').addEventListener('click', () => show('signin'));
+    document.getElementById('backToSignin2').addEventListener('click', () => show('signin'));
+
+    // Door picker — updates hidden 'role' input + toggles the plan surface
+    // (filmmaker paid tiers vs producer single tier vs free-role card).
+    const roleMap = {
+        filmmaker: { label: 'Filmmaker',      paid: true,  planLabel: 'Filmmaker' },
+        producer:  { label: 'Above the Line', paid: true,  planLabel: 'Producer'  },
+        actor:     { label: 'Actor',          paid: false, planLabel: 'Actor'     },
+        investor:  { label: 'Investor',       paid: false, planLabel: 'Investor'  },
+        supporter: { label: 'Supporter',      paid: false, planLabel: 'Supporter' },
+    };
+    const freeCopy = {
+        actor:     { t: 'Actor — Free to join',     d: 'Profile, browse open roles, self-tape.' },
+        investor:  { t: 'Investor — Free to join',  d: 'Vetted deal rooms with real numbers, sign, track your portfolio.' },
+        supporter: { t: 'Supporter — Free to join', d: 'Back projects with pledges. First to pledge earns the Cherry Breaker badge.' },
+    };
+
+    let role = 'filmmaker';
+    let plan = 'solo';
+
+    function refreshJoinUI() {
+        // role card highlight
+        document.querySelectorAll('.auth-door').forEach(x => x.classList.toggle('sel', x.dataset.role === role));
+        document.getElementById('joinRole').value = role;
+        const info = roleMap[role];
+        // Show correct plan surface
+        const filmmakerGrid = document.getElementById('planPickerWrap');
+        const producerCard = document.getElementById('producerPlan');
+        const freeCard = document.getElementById('freeRoleCard');
+        filmmakerGrid.style.display = (role === 'filmmaker') ? 'block' : 'none';
+        producerCard.style.display  = (role === 'producer')  ? 'block' : 'none';
+        freeCard.style.display      = (info.paid)            ? 'none'  : 'block';
+
+        if (!info.paid) {
+            document.getElementById('freeTitle').textContent = freeCopy[role].t;
+            document.getElementById('freeDesc').textContent  = freeCopy[role].d;
+            plan = role;  // free roles: plan matches role
+        } else if (role === 'producer') {
+            plan = 'producer';
+        } else {
+            // filmmaker: use whichever plan card is currently selected
+            const selPlan = document.querySelector('.su-plan.sel');
+            plan = selPlan ? selPlan.dataset.plan : 'solo';
+        }
+        document.getElementById('joinPlan').value = plan;
+        document.getElementById('joinBtn').textContent = 'Create account · ' + info.label + ' →';
+    }
+
+    document.querySelectorAll('.auth-door').forEach(d => {
+        d.addEventListener('click', () => { role = d.dataset.role; refreshJoinUI(); });
+    });
+
+    // Filmmaker plan-card picker
+    document.querySelectorAll('.su-plan').forEach(el => {
+        el.addEventListener('click', () => {
+            document.querySelectorAll('.su-plan').forEach(x => {
+                x.classList.remove('sel');
+                x.style.borderColor = 'var(--border-hi)';
+                x.style.background = 'transparent';
+            });
+            el.classList.add('sel');
+            el.style.borderColor = 'var(--gold)';
+            el.style.background = 'rgba(197,86,42,0.07)';
+            plan = el.dataset.plan;
+            document.getElementById('joinPlan').value = plan;
+        });
+    });
+
+    refreshJoinUI();
+
+    // Reset send — POSTs to /forgot-password, then shows the generic confirmation
+    document.getElementById('sendReset').addEventListener('click', async () => {
+        const btn = document.getElementById('sendReset');
+        const email = document.getElementById('resetEmail').value.trim();
+        if (!email) return;
+        btn.disabled = true;
+        const orig = btn.textContent;
+        btn.textContent = 'Sending…';
+        try {
+            await fetch('/forgot-password', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: 'email=' + encodeURIComponent(email),
+            });
+        } catch (e) { /* still show generic confirmation — don't leak */ }
+        document.getElementById('sentEmail').textContent = email;
+        document.getElementById('resetForm').style.display = 'none';
+        document.getElementById('resetSent').classList.add('show');
+        btn.disabled = false;
+        btn.textContent = orig;
+    });
+
+    // Show error message from query params if present
+    const params = new URLSearchParams(window.location.search);
+    const authError = params.get('auth_error');
+    if (authError) {
+        const viewSignin = document.getElementById('view-signin');
+        const errDiv = document.createElement('div');
+        errDiv.style.color = 'oklch(0.62 0.20 24)';
+        errDiv.style.fontSize = '12px';
+        errDiv.style.marginTop = '4px';
+        errDiv.style.fontFamily = 'var(--mono)';
+        errDiv.style.border = '1px solid oklch(0.62 0.20 24 / 0.3)';
+        errDiv.style.background = 'oklch(0.62 0.20 24 / 0.08)';
+        errDiv.style.padding = '8px 12px';
+        errDiv.textContent = authError;
+        viewSignin.insertBefore(errDiv, viewSignin.querySelector('.auth-field'));
+    }
+})();
+</script>
+{% endblock %}
+
+{% block extra_scripts %}
+
+{% endblock %}

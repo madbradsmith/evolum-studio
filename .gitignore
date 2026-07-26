@@ -1,0 +1,59 @@
+# Secrets — never commit
+.env
+*.env
+!.env.example
+*.key
+*.pem
+secrets/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Runtime / generated
+input.txt
+approved_brain_output.json
+slide_plan.json
+status.json
+user_upload_context.json
+pipeline_tokens.json
+current_session_id.txt
+output/
+uploads/
+generated_images/
+image_share/
+visuals/
+beta_access_logs/
+_edit_history/
+
+# Screenplays and media — keep your own IP out of the repo
+*.fdx
+*.pdf
+*.pptx
+*.mp3
+*.wav
+*.mp4
+*.mov
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+
+# Backups / temp
+*.bak
+*.bak.*
+*.pre_*
+*.tmp
+*.orig
+*~
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db

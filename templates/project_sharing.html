@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Sharing — {{ project.title }} — EVOLUM{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); min-height: 100vh; }
+.sh { max-width: 720px; margin: 0 auto; padding: 40px 32px 80px; }
+
+.sh-crumb { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.sh-crumb a { color: var(--text-mute); text-decoration: none; }
+.sh-crumb a:hover { color: var(--gold); }
+
+.sh-eyebrow { font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.sh-h1 { font-family: var(--serif); font-style: italic; font-size: clamp(34px, 5vw, 48px); font-weight: 700; letter-spacing: -1.4px; line-height: 1; color: var(--cream); margin-bottom: 10px; }
+.sh-h1 em { font-style: normal; color: var(--gold); }
+.sh-lede { color: var(--muted); font-size: 15px; line-height: 1.65; max-width: 560px; margin-bottom: 32px; }
+
+.sh-sec { background: var(--bg-card); border: 1px solid var(--border); padding: 24px 26px; margin-bottom: 18px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%); }
+.sh-sec-head { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 14px; }
+.sh-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
+.sh-field:last-child { margin-bottom: 0; }
+.sh-label { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); }
+.sh-hint { font-family: var(--serif); font-style: italic; font-size: 12px; color: var(--text-mute); margin-top: 2px; }
+.sh-input, .sh-textarea { background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 11px 14px; font-size: 14px; font-family: var(--serif); font-style: italic; transition: border-color 0.15s; }
+.sh-input:focus, .sh-textarea:focus { outline: none; border-color: var(--gold); }
+.sh-textarea { min-height: 90px; line-height: 1.5; resize: vertical; }
+
+.sh-toggle { display: flex; align-items: center; gap: 14px; padding: 16px 0; }
+.sh-toggle input { width: 40px; height: 24px; }
+.sh-toggle-label { font-size: 15px; color: var(--text); }
+.sh-toggle-note { font-size: 12px; color: var(--text-mute); font-family: var(--serif); font-style: italic; }
+
+.sh-actions { display: flex; align-items: center; gap: 14px; margin-top: 24px; }
+.sh-btn { font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1.4px; text-transform: uppercase; padding: 14px 26px; text-decoration: none; cursor: pointer; transition: all 0.15s; }
+.sh-btn.gold { background: var(--gold); color: var(--bg-card); border: none; clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px); }
+.sh-btn.gold:hover { background: var(--gold-bright); }
+.sh-btn.ghost { background: transparent; color: var(--text-mute); border: 1px solid var(--border); }
+.sh-btn.ghost:hover { color: var(--gold); border-color: var(--gold-border); }
+
+.sh-status { font-family: var(--mono); font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); }
+.sh-status.ok { color: var(--gold); }
+.sh-status.err { color: var(--red); }
+
+.sh-liveurl { background: var(--bg); border: 1px dashed var(--gold-border); padding: 12px 16px; font-family: var(--mono); font-size: 13px; color: var(--gold); word-break: break-all; margin-top: 8px; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_user_topbar.html" %}
+<div class="sh">
+    <div class="sh-crumb">
+        <a href="/filmmaker-workspace">← Workspace</a>
+        <span style="opacity:0.4;">/</span>
+        <a href="/project/{{ project.id }}">{{ project.title }}</a>
+        <span style="opacity:0.4;">/</span>
+        <span style="color:var(--text);">Sharing</span>
+    </div>
+
+    <div class="sh-eyebrow">EVOLUM · Public Sharing</div>
+    <h1 class="sh-h1">Share <em>{{ project.title }}</em>.</h1>
+    <p class="sh-lede">Flip this on and your project gets its own front door on the internet — logline, sizzle reel, pitch deck, and a pledge button that runs straight to your Stripe. EVOLUM doesn't touch a dime of what comes in. That's between you and the people betting on you.</p>
+
+    <form id="shareForm">
+        <div class="sh-sec">
+            <div class="sh-sec-head">Public visibility</div>
+            <div class="sh-toggle">
+                <input type="checkbox" id="publicEnabled" {% if project.public_page_enabled %}checked{% endif %}>
+                <div>
+                    <div class="sh-toggle-label">Show this project to the world</div>
+                    <div class="sh-toggle-note">Off = the door's locked. Anyone who tries the link gets bounced. Flip it on when you're ready to share.</div>
+                </div>
+            </div>
+            {% if project.slug %}
+            <div class="sh-liveurl" id="liveUrl">https://evolumstudio.com/p/{{ project.slug }}</div>
+            {% endif %}
+        </div>
+
+        <div class="sh-sec">
+            <div class="sh-sec-head">URL Slug</div>
+            <div class="sh-field">
+                <label class="sh-label" for="slug">Public URL slug</label>
+                <input class="sh-input" id="slug" name="slug" value="{{ project.slug or '' }}" placeholder="e.g. court-jester" maxlength="60">
+                <div class="sh-hint">Lowercase letters, numbers, and hyphens. This becomes evolumstudio.com/p/&lt;slug&gt;.</div>
+            </div>
+        </div>
+
+        <div class="sh-sec">
+            <div class="sh-sec-head">Public description</div>
+            <div class="sh-field">
+                <label class="sh-label" for="blurb">Blurb (optional — shows under the logline)</label>
+                <textarea class="sh-textarea" id="blurb" name="public_blurb" maxlength="600" placeholder="One line that makes a stranger want to click.">{{ project.public_blurb or '' }}</textarea>
+            </div>
+        </div>
+
+        <div class="sh-sec">
+            <div class="sh-sec-head">Pledge — Direct to your Stripe</div>
+            <div class="sh-field">
+                <label class="sh-label" for="stripe">Your Stripe payment link</label>
+                <input class="sh-input" id="stripe" name="supporter_stripe_link" value="{{ project.supporter_stripe_link or '' }}" placeholder="https://buy.stripe.com/…" maxlength="400" type="url">
+                <div class="sh-hint">Grab a Payment Link from your own Stripe dashboard and drop it here. Every dollar backers pledge lands in your account, not ours. (Pledges over $4,999 will run through Plaid before they clear — coming soon.)</div>
+            </div>
+        </div>
+
+        <div class="sh-actions">
+            <button class="sh-btn gold" type="button" onclick="saveSharing()">Save →</button>
+            {% if project.slug and project.public_page_enabled %}
+            <a class="sh-btn ghost" href="/p/{{ project.slug }}" target="_blank">Preview live page ↗</a>
+            {% endif %}
+            <span class="sh-status" id="saveStatus"></span>
+        </div>
+    </form>
+</div>
+
+<script>
+const PROJECT_ID = {{ project.id|tojson|safe }};
+
+async function saveSharing() {
+    const status = document.getElementById('saveStatus');
+    status.textContent = 'Saving…'; status.className = 'sh-status';
+    const payload = {
+        public_page_enabled: document.getElementById('publicEnabled').checked,
+        slug: document.getElementById('slug').value.trim(),
+        public_blurb: document.getElementById('blurb').value,
+        supporter_stripe_link: document.getElementById('stripe').value.trim(),
+    };
+    try {
+        const r = await fetch(`/api/projects/${PROJECT_ID}`, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'same-origin',
+            body: JSON.stringify(payload),
+        });
+        if (r.ok) {
+            const data = await r.json();
+            status.textContent = 'Saved ✓'; status.className = 'sh-status ok';
+            // Reload so the "Preview live page" button appears / updates
+            setTimeout(() => { window.location.reload(); }, 500);
+        } else {
+            const d = await r.json().catch(() => ({}));
+            status.textContent = d.error || 'Save failed'; status.className = 'sh-status err';
+        }
+    } catch (e) {
+        status.textContent = 'Network error'; status.className = 'sh-status err';
+    }
+}
+</script>
+{% endblock %}

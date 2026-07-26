@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<!-- FULL v1_0 BUILD 1.1  -- STABLE --->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>EVOLUM Beta Test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+{% if gate_locked %}
+<div style="display:flex;align-items:center;justify-content:center;height:100vh;">
+    <div style="background:#151515;padding:30px;border-radius:16px;border:1px solid rgba(255,255,255,0.12);text-align:center;max-width:400px;width:90%;">
+        <h2 style="margin-bottom:10px;">Beta Access</h2>
+        <p style="color:#cfcfcf;">Enter your access code to continue</p>
+        {% if gate_error %}
+        <div style="color:#ff8a8a;margin-bottom:10px;">{{ gate_error }}</div>
+        {% endif %}
+        <form method="POST" action="/beta-access">
+            <input type="password" name="access_code" placeholder="Access Code" required autofocus style="width:100%;padding:10px;margin-bottom:10px;">
+            <button class="primary-button" type="submit">Enter</button>
+        </form>
+    </div>
+</div>
+{% else %}
+
+
+<div class="top-nav-shell">
+    <button class="hamburger-button" type="button" onclick="toggleTopNavMenu()" aria-label="Open menu">
+        <div class="hamburger-lines">
+            <span></span><span></span><span></span>
+        </div>
+    </button>
+    <div class="top-nav-menu" id="topNavMenu">
+        <button class="top-nav-item" type="button" onclick="window.location.href='/'">Home</button>
+        <button class="top-nav-item" type="button" onclick="openFeedbackModal()">Feedback</button>
+        <button class="top-nav-item" type="button" onclick="openContactModal()">Contact</button>
+        <button class="top-nav-item" type="button" onclick="openPrivacyModal()">Privacy</button>
+    </div>
+</div>
+
+<div class="feedback-fab" onclick="openFeedbackModal()" role="button" tabindex="0">
+    <div class="feedback-fab-icon">💬</div>
+    <div class="feedback-fab-text">
+        <div class="feedback-fab-label">Feedback</div>
+        <div class="feedback-fab-sub">Tell us what’s working</div>
+    </div>
+</div>
+
+<div class="container">
+<div class="logo">
+    <img src="/static/logo.png" alt="EVOLUM Logo" class="logo-img">
+</div>
+
+<form action="/demo" method="POST" target="_blank" id="demoDeckCardForm" style="display:none;"></form>
+
+
+
+    <div class="shell">
+    <div class="card">
+    <div class="home-card-grid">
+    <div class="choices-row">
+
+    <!-- Script Analyzer -->
+   <div class="choice home-module-card" role="button" tabindex="0" onclick="startAnalyzeFlow()" onkeydown="if(event.key==='Enter'||event.key===' '){ event.preventDefault(); startAnalyzeFlow(); }">
+    <div class="choice-title">Script Analyzer</div>
+    <img src="/static/analyzer_thumb.jpg" class="home-thumb-img">
+    <div class="choice-copy">
+         Deep script insights in secconds!
+    </div>
+    
+    <div class="choice-link" onclick="event.stopPropagation(); window.open('/static/analysis_dark_v3.pdf','_blank')">
+        <button class="secondary-button" type="button">
+        View Sample</button>
+    </div>
+</div>
+
+<!-- Generate Pitch Deck -->
+<div class="choice home-module-card" onclick="startUploadFlow()">
+    <div class="choice-title">Deck Generator</div>
+    <img src="/static/deck_thumb.jpg" class="home-thumb-img">
+    <div class="choice-copy">
+        Create your pitch deck in minutes!
+    </div>
+    <div class="choice-link" onclick="event.stopPropagation(); document.getElementById('demoDeckCardForm').submit();">
+        <button class="secondary-button" type="button">
+        View Sample</button>
+    </div>
+</div>
+
+<!-- Actor Preparation -->
+<div class="choice home-module-card" onclick="startActorPrepFlow()">
+    <div class="choice-title">Audition Analyzer</div>
+    <img src="/static/audition_thumb.jpg" class="home-thumb-img">
+    <div class="choice-copy">
+        Let's get you booked using our complete sides analysis!
+    </div>
+    <div class="choice-link" onclick="event.stopPropagation(); window.open('/output/latest_actor_prep_report.pdf','_blank')">
+    <button class="secondary-button" type="button">
+        View Sample</button>
+    </div>
+</div>
+
+
+<!-- Booked -->
+<div class="choice home-module-card" onclick="startActorBookedFlow()">
+    <div class="choice-title">Booked Role Analyzer</div>
+    <img src="/static/booked_thumb.jpg" class="home-thumb-img">
+    <div class="choice-copy">
+         Get your full character analysis in seconds!
+    </div>
+    <div class="choice-link" onclick="event.stopPropagation(); window.open('/output/latest_actor_booked_report.pdf','_blank')">
+    <button class="secondary-button" type="button">
+        View Sample</button>
+    </div>
+</div>
+
+</div>
+</div>
+
+            <div class="workspace-panel" id="analyzerPanel">
+                <div class="workspace-title">Building Your Pitch Deck</div>
+                <div class="workspace-copy" id="buildCopy">Your deck is being generated. This takes 1–2 minutes.</div>
+
+                <div class="build-two-col">
+                    <div>
+                        <div class="terminal-log" id="liveProcessLog"><span class="terminal-prompt">[system]</span> waiting for deck generation...</div>
+                        <div class="progress-bar" id="buildProgressBar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <div class="build-meta bottom-build-meta" id="buildMeta">
+                            <div class="build-status-line" id="inlineStatusValue">IDLE • 00:00</div>
+                            <div class="build-stage-line" id="inlineStageValue">Awaiting input...</div>
+                        </div>
+                    </div>
+
+                    <div class="build-quote-card" id="buildQuoteCard">
+                        <div class="quote-label" id="quoteLabel">SCREENPLAY</div>
+                        <div class="quote-text" id="quoteText">"Here's looking at you, kid."</div>
+                        <div class="quote-attribution" id="quoteAttribution">— Casablanca</div>
+                    </div>
+                </div>
+
+                
+<div class="complete-panel" id="completePanel">
+    <div id="previewStage">
+        <div class="complete-title">Your deck is complete.</div>
+        <div class="complete-copy">
+            Preview your generated deck below. You can download it now or refine it before final export.
+        </div>
+
+        <div class="deck-preview-strip" id="deckPreviewStrip"></div>
+
+        <div class="complete-actions">
+            <button class="primary-button" type="button" onclick="downloadCurrentDeck()">Download PowerPoint</button>
+            <button class="primary-button" type="button" onclick="openRefinementStage()">Refine Deck</button>
+            <button class="primary-button" type="button" onclick="resetCreateProject()">Create New Deck</button>
+        </div>
+    </div>
+
+    <div id="refinementStage" style="display:none; max-width:1100px; margin:0 auto;">
+        <div class="workspace-title" style="text-align:center; margin-bottom:6px;">Refine Deck</div>
+        <div class="workspace-copy" style="text-align:center; margin-bottom:6px;"></div>
+
+        <div class="refine-meta">
+            <div class="meta-chip" id="slideCounter">Slide 1 of 5</div>
+            <div class="meta-chip" id="slideType">Title Slide</div>
+        </div>
+
+        <div class="refine-layout">
+            <div class="preview-panel">
+                <div class="panel-title">Slide Preview</div>
+                <div class="slide-preview-wrap">
+                    <img id="refineSlideImage" class="slide-preview-img" src="" alt="Slide preview">
+                    <div class="slide-caption" id="refineSlideCaption">Preview of the currently selected placeholder slide.</div>
+                    <div class="image-option-strip" id="imageOptionStrip"></div>
+                    <div class="image-option-empty" id="imageOptionEmpty" style="display:none;">No alternate images are available for this slide yet.</div>
+                </div>
+                <div class="slide-list" id="slideList"></div>
+            </div>
+
+            <div class="edit-panel">
+                <div class="panel-title">Edit Slide Content</div>
+
+                <div class="field-group">
+                    <label class="label" for="refineTitleInput">Headline</label>
+                    <input type="text" id="refineTitleInput" placeholder="Slide headline">
+                </div>
+
+                <div class="field-group">
+                    <label class="label" for="refineSubtitleInput">Subheading</label>
+                    <input type="text" id="refineSubtitleInput" placeholder="Slide subheading">
+                </div>
+
+                <div class="field-group">
+                    <label class="label" for="refineBodyInput">Body Copy</label>
+                    <textarea id="refineBodyInput" placeholder="Edit slide text here"></textarea>
+                </div>
+
+                <div class="field-group">
+                    <label class="label" for="refineImagePrompt">Image Direction <span class="label-optional">(optional)</span></label>
+                    <input type="text" id="refineImagePrompt" placeholder="e.g. animated style, night scene, wide epic shot…">
+                    <div class="field-help">Describe the look you want for this slide's image. Leave blank to use the script's tone automatically.</div>
+                </div>
+
+                <div class="upload-actions refine-actions-single">
+    <button class="primary-button" type="button" onclick="regenerateDeckPlaceholder()">Update &amp; Rebuild</button>
+    <button class="secondary-button" type="button" id="regenImageBtn" onclick="regenerateSlideImage()">Regenerate Image</button>
+</div>
+<div class="upload-actions refine-actions-single" style="margin-top:8px">
+    <button class="secondary-button full-width-btn" type="button" id="loadOptionsBtn" onclick="loadSlideImageOptions()">Load Image Options</button>
+</div>
+
+<div class="upload-actions refine-actions-pair">
+    <button class="secondary-button" id="refineBackBtn" type="button" onclick="goPrevRefineSlide()">Previous Slide</button>
+    <button class="secondary-button" id="refineNextBtn" type="button" onclick="goNextRefineSlide()">Next Slide</button>
+</div>
+
+<div class="upload-actions refine-actions-pair">
+    <button class="primary-button" type="button" onclick="returnToPreviewStage()">Back to Preview</button>
+    <button class="primary-button" type="button" onclick="regenerateDeckPlaceholder()">Regenerate Deck</button>
+</div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+        <div>
+            <div class="workspace-panel" id="uploadState">
+                <div class="workspace-title" style="text-align: center;">Almost There!</div>
+                <div class="workspace-copy" style="text-align: center;">Your deck is ready to build. If you have a poster or images you'd like to include, add them now — up to 10 images, 1 MB max each. Otherwise just hit Generate.</div>
+
+                <form action="/upload" method="POST" enctype="multipart/form-data" onsubmit="return validateUploadAndStart();">
+                     <input type="file" name="script" id="scriptInput" accept=".txt,text/plain,.pdf,application/pdf,.fdx,.docx,.doc" style="display:none;">
+
+                    <div class="field-group">
+                        <label class="label" for="posterInput" style="display: inline-block; margin-right: 10px;">Upload Poster</label>
+                        <input type="file" name="poster" id="posterInput" accept="image/png,image/jpeg,image/webp" style="display: inline-block;">
+                    </div>
+
+                    <div class="field-group">
+                        <label class="label" for="imagesInput">Upload Images - Optional: up to 10 images, 1 MB max each.</label>
+                        <input type="file" name="images" id="imagesInput" accept="image/png,image/jpeg,image/webp" multiple>
+                    </div>
+
+                    <div class="upload-actions">
+                        <button class="primary-button" type="submit">Generate Pitch Deck</button>
+                        <button class="primary-button" type="button" onclick="resetCreateProject()">Back</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="workspace-panel" id="ideaPanel">
+                <div class="workspace-title">Start From Idea</div>
+                <div class="workspace-copy">This feature is currently in development and will be available in a future update.</div>
+                <div class="upload-actions">
+                    <button class="primary-button" type="button" onclick="resetCreateProject()">Back</button>
+                </div>
+            </div>
+
+            <div class="footer-powered home-footer">Powered by Developum AI Engine -- Beta Version V2.0 - Build 1.1</div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="infoModal">
+    <div class="modal-content">
+        <div class="modal-close" onclick="closeModal('infoModal')">×</div>
+        <h3 id="infoTitle">Notice</h3>
+        <div class="info-copy" id="infoCopy">This feature is currently unavailable.</div>
+        <button class="primary-button" type="button" id="infoModalActionButton" onclick="handleInfoModalAction()">Continue</button>
+    </div>
+</div>
+
+<div class="modal" id="uploadModal">
+    <div class="modal-content">
+        <div class="modal-close" onclick="closeModal('uploadModal')">×</div>
+        <h3>Upload Script</h3>
+        <div class="info-copy">Select your script file so we can check it for proper formatting and input integrity.</div>
+        <input type="file" id="uploadAnalyzeFile" accept=".txt,text/plain,.pdf,application/pdf,.fdx,.docx,.doc">
+        <div class="upload-actions">
+            <button class="primary-button" type="button" onclick="analyzeSelectedScript()">Analyze Script</button>
+            <button class="primary-button" type="button" onclick="closeModal('uploadModal')">Back</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="uploadPassModal">
+    <div class="modal-content">
+        <div class="modal-close" onclick="closeModal('uploadPassModal')">×</div>
+        <h3>Success! <b>Script Upload Check Complete!</b></h3>
+
+        <div class="complete-copy" id="uploadSummaryCopy">
+            Your script passed the upload check and is ready to move forward.
+        </div>
+
+        <div class="complete-actions">
+            <button class="primary-button" type="button" onclick="continueToApprovedUpload()">Continue to Upload</button>
+            <button class="primary-button" type="button" onclick="closeModal('uploadPassModal')">Back</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="analyzePassModal">
+    <div class="modal-content" style="max-width:620px;">
+        <div class="modal-close" onclick="closeModal('analyzePassModal')">×</div>
+        <h3>Success! <b>Script Analysis Complete!</b></h3>
+
+        <div class="complete-copy" id="analysisSummaryCopy">
+            DIME puts Zena at the center of a high-pressure world where identity, ambition, and competition collide. There is strong emotional weight here, along with the kind of grounded sports drama energy that can connect with an audience.
+        </div>
+
+        <div class="complete-actions" style="flex-wrap:nowrap; gap:6px;">
+            <button class="primary-button" type="button" style="flex:1; font-size:12px; padding:12px 8px;"
+                onclick="window.open('/analysis-report/latest.pdf','_blank')">
+                View Report
+            </button>
+
+            <button class="primary-button" type="button" style="flex:1; font-size:12px; padding:12px 8px;"
+                onclick="window.location.href='/download/latest_analysis_report.pdf'">
+                Download PDF
+            </button>
+
+            <button class="primary-button" type="button" style="flex:1; font-size:12px; padding:12px 8px;" onclick="startAnalyzeFlow()">
+                Run Another
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ===== MODALS: ACTOR PREP FLOW START ================= -->
+
+<div class="modal" id="actorPrepModal">
+    <div class="modal-content">
+        <div class="modal-close" onclick="closeModal('actorPrepModal')">×</div>
+        <h3>Actor Preparation</h3>
+        <div class="info-copy">Enter the role you are preparing and choose the script you want analyzed.</div>
+        <input type="text" id="actorRoleInput" placeholder="Enter Role">
+        <input type="file" id="actorPrepFile" accept=".txt,text/plain,.pdf,application/pdf,.fdx,.docx,.doc">
+        <div class="upload-actions">
+            <button class="primary-button" type="button" onclick="submitActorPrep()">Analyze</button>
+            <button class="primary-button" type="button" onclick="closeModal('actorPrepModal')">Back</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="actorPrepPasteModal">
+    <div class="modal-content">
+        <div class="modal-close" onclick="closeModal('actorPrepPasteModal')">×</div>
+        <h3>Paste Script Text</h3>
+        <div class="info-copy">The uploaded file could not be read cleanly. Paste the script text below and continue.</div>
+        <textarea id="actorPrepPasteText" placeholder="Paste script text here"></textarea>
+        <div class="upload-actions">
+            <button class="primary-button" type="button" onclick="submitActorPrepPaste()">Continue</button>
+            <button class="primary-button" type="button" onclick="closeModal('actorPrepPasteModal')">Back</button>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal" id="actorPrepCompleteModal">
+   <div class="modal-content" style="max-width:620px;">
+    <div class="modal-close" onclick="closeModal('actorPrepCompleteModal')">×</div>
+    <h3>Success! <b>Audition Analysis Complete!</b></h3>
+
+    <div class="complete-copy" id="actorPrepSummaryCopy">
+        Your audition preparation packet is ready.
+    </div>
+
+    <div class="complete-actions" style="flex-wrap:nowrap; gap:6px;">
+        <button class="primary-button" type="button" style="flex:1; font-size:12px; padding:12px 8px;"
+            onclick="window.open('/output/latest_actor_prep_report.pdf','_blank')">
+            View Report
+        </button>
+
+        <button class="primary-button" type="button" style="flex:1; font-size:12px; padding:12px 8px;"
+            onclick="window.location.href='/download/latest_actor_prep_report.pdf'">
+            Download PDF
+        </button>
+
+        <button class="primary-button" type="button" style="flex:1; font-size:12px; padding:12px 8px;"
+            onclick="closeModal('actorPrepCompleteModal'); startActorPrepFlow();">
+            Run Another
+        </button>
+
+    </div>
+   </div>
+</div>
+
+<div class="modal" id="actorBookedModal">
+    <div class="modal-content">
+        <div class="modal-close" onclick="closeModal('actorBookedModal')">×</div>
+        <h3>Booked Role Analyzer</h3>
+        <div class="info-copy">Enter the role you booked and choose the full script you want analyzed.</div>
+        <input type="text" id="actorBookedRoleInput" placeholder="Enter Role">
+        <input type="file" id="actorBookedFile" accept=".txt,text/plain,.pdf,application/pdf,.fdx,.docx,.doc">
+        <div class="upload-actions">
+            <button class="primary-button" type="button" onclick="submitActorBooked()">Analyze</button>
+            <button class="primary-button" type="button" onclick="closeModal('actorBookedModal')">Back</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="actorBookedPasteModal">
+    <div class="modal-content">
+        <div class="modal-close" onclick="closeModal('actorBookedPasteModal')">×</div>
+        <h3>Paste Script Text</h3>
+        <div class="info-copy">The uploaded file could not be read cleanly. Paste the script text below and continue.</div>
+        <textarea id="actorBookedPasteText" placeholder="Paste script text here"></textarea>
+        <div class="upload-actions">
+            <button class="primary-button" type="button" onclick="submitActorBookedPaste()">Continue</button>
+            <button class="primary-button" type="button" onclick="closeModal('actorBookedPasteModal')">Back</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="actorBookedCompleteModal">
+   <div class="modal-content" style="max-width:620px;">
+    <div class="modal-close" onclick="closeModal('actorBookedCompleteModal')">×</div>
+    <h3>Success! <b>Booked Role Analysis Complete!</b></h3>
+
+    <div class="complete-copy" id="actorBookedSummaryCopy">
+        Your booked role preparation packet is ready.
+    </div>
+
+    <div class="complete-actions" style="flex-wrap:nowrap; gap:6px;">
+        <button class="primary-button" type="button" style="flex:1; font-size:12px; padding:12px 8px;"
+            onclick="window.open('/output/latest_actor_booked_report.pdf','_blank')">
+            View Report
+        </button>
+
+        <button class="primary-button" type="button" style="flex:1; font-size:12px; padding:12px 8px;"
+            onclick="window.location.href='/download/latest_actor_booked_report.pdf'">
+            Download PDF
+        </button>
+
+        <button class="primary-button" type="button" style="flex:1; font-size:12px; padding:12px 8px;" onclick="startActorBookedFlow()">
+            Run Another
+        </button>
+    </div>
+   </div>
+</div>
+
+<div class="modal" id="feedbackModal">
+
+    <div class="modal-content">
+        <div class="modal-close" onclick="closeModal('feedbackModal')">×</div>
+        <h3>Share Feedback</h3>
+        <div class="feedback-help-copy">This beta is still being refined. Tell us what worked, what felt off, or what you want next.</div>
+
+        <div class="feedback-quick-row">
+            <button class="feedback-chip" type="button" onclick="setFeedbackType('Bug Report', this)">Bug Report</button>
+            <button class="feedback-chip" type="button" onclick="setFeedbackType('Confusing UX', this)">Confusing UX</button>
+            <button class="feedback-chip" type="button" onclick="setFeedbackType('Great Result', this)">Great Result</button>
+            <button class="feedback-chip" type="button" onclick="setFeedbackType('Feature Request', this)">Feature Request</button>
+        </div>
+
+        <input type="text" id="feedbackName" placeholder="Name (optional)">
+        <input type="text" id="feedbackEmail" placeholder="Email (optional)">
+        <textarea id="feedbackMessage" maxlength="1000" placeholder="Tell us what happened, what you expected, or what you’d love to see next."></textarea>
+
+        <div class="upload-actions">
+            <button class="primary-button" type="button" onclick="submitFeedback()">Send Feedback</button>
+            <button class="primary-button" type="button" onclick="closeModal('feedbackModal')">Back</button>
+        </div>
+    </div>
+</div>
+    
+<div class="modal" id="contactModal">
+    <div class="modal-content">
+        <div class="modal-close" onclick="closeModal('contactModal')">×</div>
+        <h3>Contact Us</h3>
+        <div class="feedback-help-copy">Have a question, a problem, or just want to say something? We read everything.</div>
+        <input type="text" id="contactName" placeholder="Your name">
+        <input type="text" id="contactEmail" placeholder="Your email">
+        <textarea id="contactMessage" maxlength="1000" placeholder="What's on your mind?"></textarea>
+        <div class="upload-actions">
+            <button class="primary-button" type="button" onclick="submitContact()">Send Message</button>
+            <button class="primary-button" type="button" onclick="closeModal('contactModal')">Back</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="privacyModal">
+    <div class="modal-content privacy-modal-content">
+        <div class="modal-close" onclick="closeModal('privacyModal')">×</div>
+        <h3>Privacy &amp; Your Script</h3>
+
+        <div class="privacy-section">
+            <div class="privacy-heading">Your Script Is Yours</div>
+            <p>When you upload a script to EVOLUM, it belongs to you. We do not claim any rights to your work, your story, your characters, or your ideas. Full stop.</p>
+        </div>
+
+        <div class="privacy-section">
+            <div class="privacy-heading">What Happens to Your Script</div>
+            <p>Your script is uploaded, processed by the Developum AI Engine, and then <strong>deleted immediately</strong> from our servers. We do not store your script after analysis is complete. We do not read it. We do not archive it.</p>
+        </div>
+
+        <div class="privacy-section">
+            <div class="privacy-heading">AI Processing</div>
+            <p>Analysis is powered by the Anthropic Claude API. Your script content is sent to Anthropic's API for processing under their data usage policies. Anthropic does not use API-submitted content to train their models. You can review Anthropic's privacy policy at anthropic.com.</p>
+        </div>
+
+        <div class="privacy-section">
+            <div class="privacy-heading">What We Do Store</div>
+            <p>We store your generated pitch deck, analysis report, and any images you upload (poster, character art). These are kept on our servers so you can download them. We do not share these with anyone.</p>
+        </div>
+
+        <div class="privacy-section">
+            <div class="privacy-heading">No Selling. No Sharing.</div>
+            <p>We do not sell, license, share, or otherwise distribute your creative work or personal information to any third party. Ever.</p>
+        </div>
+
+        <div class="privacy-section">
+            <div class="privacy-heading">Beta Period</div>
+            <p>EVOLUM is currently in private beta. During this period, feedback and usage data may be reviewed by our team to improve the platform. No creative content is included in this review.</p>
+        </div>
+
+        <div class="privacy-section">
+            <div class="privacy-heading">Questions</div>
+            <p>If you have any privacy concerns, use the Contact form and we will respond directly.</p>
+        </div>
+
+        <div class="upload-actions">
+            <button class="primary-button" type="button" onclick="closeModal('privacyModal')">Got It</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="imageOptionModal">
+    <div class="modal-content image-modal-content">
+        <div class="modal-close" onclick="closeModal('imageOptionModal')">×</div>
+        <h3 id="imageOptionModalTitle">Preview Image Option</h3>
+        <div class="image-modal-preview-wrap">
+            <img id="imageOptionModalPreview" class="image-modal-preview" src="" alt="Image option preview">
+            <div class="image-modal-meta" id="imageOptionModalMeta"></div>
+        </div>
+        <div class="image-modal-nav">
+            <button class="secondary-button" type="button" onclick="shiftImageOptionModal(-1)">Previous</button>
+            <button class="secondary-button" type="button" onclick="shiftImageOptionModal(1)">Next</button>
+        </div>
+        <div class="image-modal-actions">
+            <button class="primary-button" type="button" onclick="selectCurrentImageOption()">Select Image</button>
+            <button class="primary-button" type="button" onclick="closeModal('imageOptionModal')">Continue</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="buildProgressModal">
+    <div class="modal-content regen-modal-content">
+        <h3 id="buildProgressTitle">Building Your Deck</h3>
+        <div class="complete-copy" id="buildProgressCopy">This takes about 30–60 seconds while we generate your images.</div>
+        <div class="regen-status-wrap" id="buildProgressWorking">
+            <div class="regen-pulse-text" id="buildProgressStage">Analyzing script&hellip;</div>
+            <div class="regen-progress-bar">
+                <div class="regen-progress-fill" id="buildProgressFill" style="width:10%"></div>
+            </div>
+        </div>
+        <div class="complete-actions" id="buildProgressActions" style="display:none;">
+            <button class="primary-button" type="button" onclick="closeBuildProgressModal()">View Deck</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="regenDeckModal">
+    <div class="modal-content regen-modal-content">
+        <h3 id="regenDeckModalTitle">Regenerating Deck</h3>
+        <div class="complete-copy" id="regenDeckModalCopy">
+            Please wait while your updated deck is rebuilt.
+        </div>
+
+        <div class="regen-status-wrap" id="regenDeckWorkingState">
+            <div class="regen-pulse-text">Generating your deck&hellip;</div>
+            <div class="regen-progress-bar">
+                <div class="regen-progress-fill"></div>
+            </div>
+        </div>
+
+        <div class="complete-actions" id="regenDeckModalActions" style="display:none;">
+            <button class="primary-button" type="button" onclick="finishRegenerateDeckFlow()">Continue</button>
+        </div>
+    </div>
+</div>
+
+  <script>window.BASE_PATH_PREFIX = "{{ base_path_prefix }}";</script>
+  <script src="{{ url_for('static', filename='main.js') }}"></script>
+{% endif %}
+
+{% include "_compliance_bar.html" %}
+</body>
+</html>

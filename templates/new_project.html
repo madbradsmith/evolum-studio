@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block title %}New Project — EVOLUM{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); min-height: 100vh; }
+.np-page { max-width: 720px; margin: 0 auto; padding: 64px 32px 80px; position: relative; }
+
+.np-eyebrow {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 16px;
+}
+.np-h1 {
+    font-family: var(--serif); font-style: italic; font-size: clamp(38px, 6vw, 64px);
+    font-weight: 700; letter-spacing: -1.6px; line-height: 0.95; color: var(--cream); margin-bottom: 14px;
+}
+.np-h1 em { font-style: normal; color: var(--gold); }
+.np-lede { color: var(--muted); font-size: 16px; line-height: 1.65; max-width: 540px; margin-bottom: 44px; }
+
+.np-form { display: flex; flex-direction: column; gap: 26px; max-width: 560px; }
+
+.np-field { display: flex; flex-direction: column; gap: 8px; }
+.np-label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--muted);
+}
+.np-input {
+    background: var(--bg-card); border: 1px solid var(--border); color: var(--text);
+    padding: 14px 16px; font-size: 16px; font-family: var(--serif); font-style: italic;
+    transition: border-color 0.15s;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+.np-input:focus { outline: none; border-color: var(--gold); }
+.np-input::placeholder { color: var(--text-mute); }
+
+.np-doors { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.np-door {
+    background: var(--bg-card); border: 1px solid var(--border);
+    padding: 18px 18px; cursor: pointer; transition: all 0.18s;
+    display: flex; flex-direction: column; gap: 6px; text-align: left;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+    color: inherit;
+}
+.np-door input[type="radio"] { display: none; }
+.np-door:hover { border-color: var(--gold-border); }
+.np-door.sel { border-color: var(--gold); background: linear-gradient(to bottom right, var(--bg-card), rgba(255, 192, 64, 0.04)); }
+.np-door .t { font-size: 14px; font-weight: 700; color: var(--text); }
+.np-door .d { font-size: 12px; color: var(--muted); line-height: 1.5; }
+
+.np-submit {
+    background: var(--gold); color: var(--bg-card); border: none;
+    padding: 16px 32px; font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 1.4px; text-transform: uppercase; cursor: pointer;
+    align-self: flex-start; transition: background 0.15s;
+    clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
+}
+.np-submit:hover { background: var(--gold-bright); }
+
+.np-back { margin-top: 36px; font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); text-decoration: none; }
+.np-back:hover { color: var(--gold); }
+
+.np-error { background: rgba(184,64,64,0.12); border-left: 3px solid var(--red); padding: 12px 16px; font-size: 13px; color: var(--text); margin-bottom: 20px; }
+
+.np-file-input {
+    background: var(--bg-card); border: 1px dashed var(--border); color: var(--text);
+    padding: 22px 18px; font-family: var(--mono); font-size: 12px;
+    cursor: pointer; transition: border-color 0.15s;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+.np-file-input:hover, .np-file-input:focus-within { border-color: var(--gold); }
+.np-file-input input[type="file"] { color: var(--text); width: 100%; font-family: inherit; font-size: inherit; }
+.np-file-hint { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; color: var(--text-mute); margin-top: 6px; text-transform: uppercase; }
+
+.np-divider { display: flex; align-items: center; gap: 12px; margin: 8px 0; }
+.np-divider::before, .np-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.np-divider span { font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; color: var(--text-mute); text-transform: uppercase; }
+
+.np-paste-toggle { background: transparent; border: none; color: var(--gold); font-family: var(--mono); font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; cursor: pointer; padding: 4px 0; text-decoration: underline; text-underline-offset: 4px; }
+.np-paste-toggle:hover { color: var(--gold-bright); }
+.np-paste-area { display: none; }
+.np-paste-area.open { display: flex; flex-direction: column; gap: 8px; }
+.np-textarea { background: var(--bg-card); border: 1px solid var(--border); color: var(--text); padding: 14px 16px; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.55; min-height: 220px; resize: vertical;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%); }
+.np-textarea:focus { outline: none; border-color: var(--gold); }
+.np-paste-help { background: var(--bg-card); border-left: 3px solid var(--gold-border); padding: 14px 18px; font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+.np-paste-help strong { color: var(--gold); font-style: normal; font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_user_topbar.html" %}
+<div class="np-page">
+    <div class="np-eyebrow">EVOLUM · {% if flow == 'script' %}Bring a script{% else %}New project{% endif %}</div>
+    <h1 class="np-h1">{% if flow == 'script' %}Upload your <em>script</em>.{% else %}Name your <em>project</em>.{% endif %}</h1>
+    <p class="np-lede">{% if flow == 'script' %}Drop in your screenplay — .txt, .pdf, .fdx, or .docx. The engine reads past watermarks, extracts characters and scene structure, and gives you an editable working copy. Title will be pulled from the script if you leave it blank.{% else %}A working title and which door you're coming through. You can change either later, and you can rename the project any time.{% endif %}</p>
+
+    {% if error %}<div class="np-error">{{ error }}</div>{% endif %}
+
+    <form method="POST" action="/new-project" class="np-form"{% if flow == 'script' %} enctype="multipart/form-data"{% endif %}>
+        {% if flow == 'script' %}
+        <input type="hidden" name="flow" value="script">
+        <div class="np-field">
+            <label class="np-label" for="script">Screenplay file</label>
+            <div class="np-file-input">
+                <input type="file" id="script" name="script" accept=".txt,.pdf,.fdx,.docx,.doc,.rtf,.fountain,.spmd,.highland">
+            </div>
+            <div class="np-file-hint">TXT · PDF · FDX · DOCX · RTF · FOUNTAIN · HIGHLAND supported</div>
+        </div>
+
+        <div class="np-divider"><span>or</span></div>
+
+        <div class="np-field">
+            <button type="button" class="np-paste-toggle" id="pasteToggle">
+                Paste script text directly →
+            </button>
+            <div class="np-paste-area {% if show_paste_fallback %}open{% endif %}" id="pasteArea">
+                <div class="np-paste-help">
+                    <strong>Copy from your writing tool</strong><br>
+                    <em>Final Draft:</em> Open the script → File → Print → Save as PDF, then paste the resulting text, or Select All (⌘A / Ctrl+A) → Copy → paste here.<br>
+                    <em>Highland / WriterDuet / Fade In:</em> Select all → Copy → paste here.<br>
+                    <em>Celtx / Google Docs / Word:</em> Select all → Copy → paste here.
+                </div>
+                <textarea class="np-textarea" name="script_paste" placeholder="Paste your full screenplay here…"></textarea>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="np-field">
+            <label class="np-label" for="title">Project title{% if flow == 'script' %} <span style="text-transform:none;letter-spacing:0;color:var(--text-mute);font-style:italic;font-family:var(--serif);">— optional, we'll extract from your script</span>{% endif %}</label>
+            <input class="np-input" type="text" id="title" name="title" placeholder="{% if flow == 'script' %}Leave blank to auto-extract from screenplay{% else %}e.g. Salt of the Stars{% endif %}" maxlength="200"{% if not flow == 'script' %} required{% endif %} autofocus>
+        </div>
+
+        <div style="font-family:var(--mono); font-size:10px; letter-spacing:1.4px; text-transform:uppercase; color:var(--gold); margin-bottom:4px;">
+            Working as {% if current_user.role == 'producer' %}Above the Line (Producer / DP / Director){% else %}Filmmaker{% endif %}
+        </div>
+
+        <button class="np-submit" type="submit">Create project →</button>
+    </form>
+
+    <a class="np-back" href="/filmmaker-workspace">← Back to workspace</a>
+</div>
+
+<script>
+(function(){
+    var toggle = document.getElementById('pasteToggle');
+    var area = document.getElementById('pasteArea');
+    if (!toggle || !area) return;
+    toggle.addEventListener('click', function(){
+        area.classList.toggle('open');
+        toggle.textContent = area.classList.contains('open')
+            ? 'Hide paste area ←'
+            : 'Paste script text directly →';
+    });
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+
+{% block title %}Script Editor — {{ project.title }} — EVOLUM{% endblock %}
+
+{% block extra_head %}
+<style>
+body { background: var(--bg); min-height: 100vh; overflow: hidden; }
+
+/* Outer shell: full viewport, sidebar + main + statusbar */
+.se {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: 1fr auto;
+    height: 100vh;
+}
+
+/* Sidebar */
+.se-side {
+    background: var(--bg-panel); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+}
+.se-side-head {
+    padding: 16px 18px; border-bottom: 1px solid var(--border);
+}
+.se-side-crumb {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-mute); margin-bottom: 8px;
+}
+.se-side-crumb a { color: var(--text-mute); text-decoration: none; }
+.se-side-crumb a:hover { color: var(--gold); }
+.se-side-title {
+    font-family: var(--serif); font-style: italic; font-size: 17px; color: var(--cream);
+    line-height: 1.2; word-break: break-word;
+}
+
+.se-side-sec {
+    padding: 14px 18px 6px;
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.4px; text-transform: uppercase;
+    color: var(--text-mute);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.se-side-sec .add {
+    cursor: pointer; color: var(--gold); font-size: 14px; font-weight: 700;
+    border: 1px solid var(--gold-border); padding: 0 7px; line-height: 18px;
+}
+.se-side-sec .add:hover { background: var(--gold); color: var(--bg-card); }
+
+.se-scenes { flex: 1; overflow-y: auto; padding-bottom: 14px; }
+.se-scene {
+    padding: 10px 18px; cursor: pointer; border-left: 3px solid transparent;
+    transition: background 0.12s;
+    display: flex; align-items: center; gap: 9px;
+}
+.se-scene:hover { background: var(--bg-hover); }
+.se-scene.active { background: var(--bg-elevated); border-left-color: var(--gold); }
+.se-scene .n {
+    font-family: var(--mono); font-size: 10px; color: var(--text-mute); flex-shrink: 0;
+}
+.se-scene .lbl {
+    font-size: 12px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1;
+}
+.se-scene.active .lbl { color: var(--cream); font-weight: 600; }
+.se-scene .del {
+    color: var(--text-mute); cursor: pointer; opacity: 0; transition: opacity 0.15s; padding: 0 4px;
+}
+.se-scene:hover .del { opacity: 1; }
+.se-scene .del:hover { color: var(--red); }
+
+.se-empty {
+    padding: 30px 18px; text-align: center;
+    font-family: var(--serif); font-style: italic; color: var(--text-mute); font-size: 13px;
+}
+
+/* Main editor */
+.se-main {
+    display: flex; flex-direction: column; overflow: hidden;
+    background: var(--bg);
+}
+.se-toolbar {
+    height: 52px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 10px; padding: 0 18px;
+    background: var(--bg-panel); border-bottom: 1px solid var(--border);
+}
+.se-tb-btn {
+    background: var(--bg-card); border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+    padding: 6px 11px; cursor: pointer; transition: all 0.12s;
+    clip-path: polygon(4px 0, 100% 0, 100% calc(100% - 4px), calc(100% - 4px) 100%, 0 100%, 0 4px);
+}
+.se-tb-btn:hover { border-color: var(--gold-border); color: var(--gold); }
+.se-tb-sep { width: 1px; height: 22px; background: var(--border); margin: 0 4px; }
+.se-tb-spacer { flex: 1; }
+.se-tb-status {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-mute);
+}
+.se-tb-status.ok { color: var(--gold); }
+.se-tb-status.err { color: var(--red); }
+
+/* Canvas */
+.se-canvas {
+    flex: 1; overflow-y: auto; padding: 36px 0 100px;
+    background: var(--bg);
+}
+.se-scene-card {
+    max-width: 760px; margin: 0 auto 24px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    padding: 28px 36px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+.se-scene-slug {
+    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1.6px;
+    text-transform: uppercase; color: var(--gold);
+    border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 18px;
+    outline: none;
+}
+.se-scene-slug:focus { color: var(--gold-bright); }
+
+.se-block { margin-bottom: 10px; min-height: 1.5em; outline: none; }
+.se-block[contenteditable="true"]:empty::before {
+    content: attr(data-placeholder);
+    color: var(--text-mute); font-style: italic; opacity: 0.6;
+}
+.se-block.action {
+    font-family: var(--serif); font-size: 14px; line-height: 1.6; color: var(--text);
+}
+.se-block.character {
+    font-family: var(--mono); font-size: 12px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--cream);
+    text-align: center; margin-top: 14px; margin-bottom: 4px;
+}
+.se-block.paren {
+    font-family: var(--serif); font-style: italic; font-size: 13px; color: var(--text-mute);
+    text-align: center; margin: 2px auto; max-width: 380px;
+}
+.se-block.dialogue {
+    font-family: var(--serif); font-size: 14px; line-height: 1.55; color: var(--text);
+    margin: 2px auto 14px; max-width: 480px; text-align: center;
+}
+.se-block.transition {
+    font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 1.5px;
+    text-transform: uppercase; color: var(--gold); text-align: right; margin-top: 14px;
+}
+.se-block-row { display: flex; align-items: flex-start; gap: 8px; }
+.se-block-row .type-pill {
+    font-family: var(--mono); font-size: 8px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-mute); padding: 2px 5px; border: 1px solid var(--border);
+    flex-shrink: 0; margin-top: 4px; cursor: pointer;
+}
+.se-block-row .type-pill:hover { color: var(--gold); border-color: var(--gold-border); }
+.se-block-row .block-del {
+    font-family: var(--mono); font-size: 12px; color: var(--text-mute); cursor: pointer;
+    padding: 0 5px; opacity: 0; transition: opacity 0.15s;
+}
+.se-block-row:hover .block-del { opacity: 1; }
+.se-block-row .block-del:hover { color: var(--red); }
+.se-block-row > .se-block { flex: 1; }
+
+.se-add-block-bar {
+    max-width: 760px; margin: 16px auto;
+    display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+    padding: 14px; border: 1px dashed var(--border);
+    background: var(--bg-panel);
+}
+.se-add-block-bar .label {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.2px; text-transform: uppercase;
+    color: var(--text-mute); margin-right: 10px; align-self: center;
+}
+.se-add-block-bar button {
+    background: var(--bg-card); border: 1px solid var(--border); color: var(--text-dim);
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.8px;
+    padding: 6px 11px; cursor: pointer; transition: all 0.12s;
+}
+.se-add-block-bar button:hover { border-color: var(--gold-border); color: var(--gold); }
+
+/* No scene state */
+.se-noscene {
+    max-width: 560px; margin: 80px auto; text-align: center; padding: 40px;
+    font-family: var(--serif); font-style: italic; color: var(--text-mute);
+    font-size: 15px; line-height: 1.7;
+}
+.se-noscene button {
+    display: inline-block; margin-top: 20px;
+    background: var(--gold); color: var(--bg-card); border: none;
+    padding: 12px 24px; font-family: var(--mono); font-size: 11px; font-weight: 700;
+    letter-spacing: 1.4px; text-transform: uppercase; cursor: pointer;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "_user_topbar.html" %}
+<div class="se">
+
+    <!-- Sidebar -->
+    <aside class="se-side">
+        <div class="se-side-head">
+            <div class="se-side-crumb">
+                <a href="/project/{{ project.id }}">← {{ project.title }}</a>
+            </div>
+            <div class="se-side-title">Script</div>
+        </div>
+
+        <div class="se-side-sec">
+            Scenes
+            <span class="add" title="Add scene" onclick="addScene()">+</span>
+        </div>
+        <div class="se-scenes" id="sceneList"></div>
+    </aside>
+
+    <!-- Main -->
+    <div class="se-main">
+        <div class="se-toolbar">
+            <button class="se-tb-btn" onclick="addBlock('action')">+ Action</button>
+            <button class="se-tb-btn" onclick="addBlock('character')">+ Character</button>
+            <button class="se-tb-btn" onclick="addBlock('paren')">+ Paren</button>
+            <button class="se-tb-btn" onclick="addBlock('dialogue')">+ Dialogue</button>
+            <button class="se-tb-btn" onclick="addBlock('transition')">+ Transition</button>
+            <span class="se-tb-sep"></span>
+            <button class="se-tb-btn" onclick="addScene()">+ Scene</button>
+            <span class="se-tb-spacer"></span>
+            <span class="se-tb-status" id="saveStatus">Draft</span>
+            <button class="se-tb-btn" onclick="saveScript()">Save</button>
+            <button class="se-tb-btn" onclick="generateDeck()" style="background:var(--gold);color:var(--bg-card);border-color:var(--gold);">Generate Deck →</button>
+        </div>
+
+        <div class="se-canvas" id="canvas">
+            <div class="se-noscene" id="noScene">
+                The page is blank. Start with a scene heading — INT./EXT. LOCATION — TIME — and build out from there.
+                <br>
+                <button onclick="addScene()">+ Add first scene</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const PROJECT_ID = {{ project.id|tojson|safe }};
+
+// Load existing scenes from project.script_text (JSON)
+let scenes = [];
+let activeSceneIdx = 0;
+let dirty = false;
+
+try {
+    const raw = {{ project.script_text|tojson|safe }} || "";
+    if (raw && raw.startsWith("[")) {
+        scenes = JSON.parse(raw);
+        if (!Array.isArray(scenes)) scenes = [];
+    } else if (raw && raw.startsWith("{")) {
+        const obj = JSON.parse(raw);
+        scenes = obj.scenes || [];
+    }
+} catch (e) { scenes = []; }
+
+function escHtml(s) { return String(s || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function genId() { return "s_" + Math.random().toString(36).slice(2, 10); }
+
+function ensureSceneShape(s) {
+    if (!s.id) s.id = genId();
+    if (!s.slug) s.slug = "INT. LOCATION — DAY";
+    if (!Array.isArray(s.blocks)) s.blocks = [];
+    return s;
+}
+
+function renderSceneList() {
+    const list = document.getElementById("sceneList");
+    if (scenes.length === 0) {
+        list.innerHTML = '<div class="se-empty">No scenes yet</div>';
+        return;
+    }
+    list.innerHTML = "";
+    scenes.forEach((s, i) => {
+        ensureSceneShape(s);
+        const el = document.createElement("div");
+        el.className = "se-scene" + (i === activeSceneIdx ? " active" : "");
+        el.innerHTML = `<span class="n">${String(i + 1).padStart(2, "0")}</span><span class="lbl">${escHtml(s.slug.slice(0, 60))}</span><span class="del" onclick="deleteScene(${i}, event)" title="Delete">×</span>`;
+        el.onclick = (e) => { if (!e.target.classList.contains("del")) switchScene(i); };
+        list.appendChild(el);
+    });
+}
+
+function switchScene(i) {
+    activeSceneIdx = i;
+    renderSceneList();
+    renderCanvas();
+}
+
+function addScene() {
+    const s = ensureSceneShape({
+        slug: "INT. NEW LOCATION — DAY",
+        blocks: [{ type: "action", text: "" }],
+    });
+    scenes.push(s);
+    activeSceneIdx = scenes.length - 1;
+    markDirty();
+    renderSceneList();
+    renderCanvas();
+}
+
+function deleteScene(i, event) {
+    if (event) event.stopPropagation();
+    if (!confirm("Delete this scene?")) return;
+    scenes.splice(i, 1);
+    if (activeSceneIdx >= scenes.length) activeSceneIdx = Math.max(0, scenes.length - 1);
+    markDirty();
+    renderSceneList();
+    renderCanvas();
+}
+
+function addBlock(type) {
+    if (scenes.length === 0) { addScene(); return; }
+    const s = scenes[activeSceneIdx];
+    const block = { type };
+    if (type === "character") block.name = "";
+    else block.text = "";
+    s.blocks.push(block);
+    markDirty();
+    renderCanvas(true);
+}
+
+function deleteBlock(idx) {
+    const s = scenes[activeSceneIdx];
+    s.blocks.splice(idx, 1);
+    markDirty();
+    renderCanvas();
+}
+
+function renderCanvas(focusLast) {
+    const canvas = document.getElementById("canvas");
+    const noScene = document.getElementById("noScene");
+
+    if (scenes.length === 0) {
+        canvas.innerHTML = '';
+        canvas.appendChild(noScene);
+        return;
+    }
+    if (noScene && noScene.parentNode === canvas) canvas.removeChild(noScene);
+
+    const s = ensureSceneShape(scenes[activeSceneIdx]);
+    canvas.innerHTML = "";
+
+    const card = document.createElement("div");
+    card.className = "se-scene-card";
+
+    // Scene slug (editable)
+    const slug = document.createElement("div");
+    slug.className = "se-scene-slug";
+    slug.contentEditable = "true";
+    slug.spellcheck = false;
+    slug.textContent = s.slug;
+    slug.addEventListener("input", () => {
+        s.slug = slug.textContent.trim() || "INT. LOCATION — DAY";
+        markDirty();
+        // Update the sidebar label without losing focus
+        const sceneEls = document.querySelectorAll(".se-scene .lbl");
+        if (sceneEls[activeSceneIdx]) sceneEls[activeSceneIdx].textContent = s.slug.slice(0, 60);
+    });
+    card.appendChild(slug);
+
+    s.blocks.forEach((b, idx) => {
+        const row = document.createElement("div");
+        row.className = "se-block-row";
+
+        const typeBtn = document.createElement("span");
+        typeBtn.className = "type-pill";
+        typeBtn.textContent = b.type;
+        typeBtn.title = "Click to change type";
+        typeBtn.onclick = () => cycleBlockType(idx);
+        row.appendChild(typeBtn);
+
+        const block = document.createElement("div");
+        block.className = "se-block " + b.type;
+        block.contentEditable = "true";
+        block.spellcheck = true;
+        if (b.type === "character") {
+            block.textContent = b.name || "";
+            block.dataset.placeholder = "CHARACTER NAME";
+        } else if (b.type === "transition") {
+            block.textContent = b.text || "";
+            block.dataset.placeholder = "CUT TO:";
+        } else if (b.type === "paren") {
+            block.textContent = b.text || "";
+            block.dataset.placeholder = "(beat)";
+        } else if (b.type === "dialogue") {
+            block.textContent = b.text || "";
+            block.dataset.placeholder = "Spoken line...";
+        } else {
+            block.textContent = b.text || "";
+            block.dataset.placeholder = "Action or description...";
+        }
+        block.addEventListener("input", () => {
+            if (b.type === "character") b.name = block.textContent.trim();
+            else b.text = block.textContent;
+            markDirty();
+        });
+        row.appendChild(block);
+
+        const del = document.createElement("span");
+        del.className = "block-del";
+        del.textContent = "×";
+        del.title = "Delete block";
+        del.onclick = () => deleteBlock(idx);
+        row.appendChild(del);
+
+        card.appendChild(row);
+    });
+
+    canvas.appendChild(card);
+
+    // "Add block" bar
+    const bar = document.createElement("div");
+    bar.className = "se-add-block-bar";
+    bar.innerHTML = `
+        <span class="label">Add to scene:</span>
+        <button onclick="addBlock('action')">Action</button>
+        <button onclick="addBlock('character')">Character</button>
+        <button onclick="addBlock('paren')">Paren</button>
+        <button onclick="addBlock('dialogue')">Dialogue</button>
+        <button onclick="addBlock('transition')">Transition</button>
+    `;
+    canvas.appendChild(bar);
+
+    if (focusLast) {
+        const blocks = card.querySelectorAll(".se-block[contenteditable='true']");
+        if (blocks.length) blocks[blocks.length - 1].focus();
+    }
+}
+
+const TYPE_CYCLE = ["action", "character", "paren", "dialogue", "transition"];
+function cycleBlockType(idx) {
+    const s = scenes[activeSceneIdx];
+    const b = s.blocks[idx];
+    const cur = TYPE_CYCLE.indexOf(b.type);
+    const next = TYPE_CYCLE[(cur + 1) % TYPE_CYCLE.length];
+    // Normalize text fields
+    const content = (b.type === "character" ? (b.name || "") : (b.text || ""));
+    b.type = next;
+    if (next === "character") { b.name = content; delete b.text; }
+    else { b.text = content; delete b.name; }
+    markDirty();
+    renderCanvas();
+}
+
+function markDirty() {
+    dirty = true;
+    const st = document.getElementById("saveStatus");
+    st.textContent = "Unsaved";
+    st.className = "se-tb-status";
+}
+
+async function saveScript() {
+    const st = document.getElementById("saveStatus");
+    st.textContent = "Saving…";
+    st.className = "se-tb-status";
+    const payload = {
+        script_text: JSON.stringify(scenes),
+        status: "scripting",
+    };
+    try {
+        const r = await fetch(`/api/projects/${PROJECT_ID}`, {
+            method: "PATCH",
+            headers: {"Content-Type": "application/json"},
+            credentials: "same-origin",
+            body: JSON.stringify(payload),
+        });
+        if (r.ok) {
+            dirty = false;
+            st.textContent = "Saved ✓";
+            st.className = "se-tb-status ok";
+        } else {
+            st.textContent = "Save failed";
+            st.className = "se-tb-status err";
+        }
+    } catch (e) {
+        st.textContent = "Network error";
+        st.className = "se-tb-status err";
+    }
+}
+
+async function generateDeck() {
+    if (dirty) await saveScript();
+    if (scenes.length === 0) {
+        alert("Add at least one scene before generating the deck.");
+        return;
+    }
+    window.location.href = `/pitch-deck?project=${PROJECT_ID}`;
+}
+
+// Autosave every 12 seconds if dirty
+setInterval(() => { if (dirty) saveScript(); }, 12000);
+
+// Warn on leave with unsaved changes
+window.addEventListener("beforeunload", (e) => {
+    if (dirty) { e.preventDefault(); e.returnValue = ""; }
+});
+
+// Initial render
+renderSceneList();
+renderCanvas();
+</script>
+{% endblock %}

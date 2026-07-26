@@ -1,0 +1,53 @@
+{% extends "_legal_layout.html" %}
+
+{% block title %}Privacy Policy — EVOLUM{% endblock %}
+{% block eyebrow %}EVOLUM · Privacy Policy{% endblock %}
+{% block heading %}Privacy <em>Policy</em>{% endblock %}
+{% block effective_date %}Effective Date: June 2026 · evolumstudio.com{% endblock %}
+
+{% block content %}
+
+<h2>[01] Introduction</h2>
+<p>We operate the platform at <strong>evolumstudio.com</strong>, a service owned and run by <strong>Developum AI Engine</strong> ("we," "us," or "our"). EVOLUM is the workshop where independent filmmakers develop projects, actors prepare auditions, investors review deals, and supporters back work they believe in. This Privacy Policy outlines what we collect from you while you use the platform, how it's processed, and how we safeguard it. By accessing EVOLUM, you consent to the data principles outlined here.</p>
+
+<h2>[02] Information Collection &amp; Storage</h2>
+<p>We prioritize minimal data collection. We collect:</p>
+<ul>
+  <li><strong>Account Identifiers:</strong> Email address, display name, and the door you chose (Filmmaker, Above the Line, Actor, Investor, Supporter).</li>
+  <li><strong>Project Inputs:</strong> Screenplays, treatments, cast lists, sides, reference material, and other creative content you upload to drive a tool. These are stored only as long as needed to run your tools and produce your outputs.</li>
+  <li><strong>Generated Outputs:</strong> Pitch decks, analyses, prep reports, audition recordings, and the JSON state behind them. These remain in your workspace until you delete them or close your account.</li>
+  <li><strong>Session Telemetry:</strong> Pages visited, tool actions taken, and timing metrics used for billing fairness and product improvement.</li>
+  <li><strong>Transactional Records:</strong> Subscription and payment events managed by Stripe. We never see or store full card numbers — Stripe handles all payment data directly under PCI-DSS scope.</li>
+</ul>
+
+<h2>[03] How Your Data Is Processed</h2>
+<p>Your inputs are used strictly to power the tools you ran them through — script analysis, deck generation, audition prep, deal-room packets. We do <strong>not</strong> sell, license, or share your data with advertising entities. We do not train third-party models on your screenplays or treatments. Your work stays your work.</p>
+
+<h2>[04] Third-Party Service Providers</h2>
+<p>To operate the platform and process subscriptions, we rely on these infrastructure providers:</p>
+<ul>
+  <li><strong>Stripe</strong> — Subscription billing and payment processing.</li>
+  
+  <li><strong>Hetzner</strong> — Server infrastructure (EU-based, GDPR-aligned).</li>
+  <li><strong>Let's Encrypt</strong> — TLS certificate authority for transport security.</li>
+</ul>
+<p>Each provider has its own privacy practices; we use them in ways consistent with our commitments to you.</p>
+
+<h2>[05] Data Rights &amp; Purging</h2>
+<p>You retain full ownership of every input you upload and every output the platform generates for you. If you wish to delete your account or wipe all associated records, email <a href="mailto:madbradsmith@gmail.com">madbradsmith@gmail.com</a>. We complete the data purge within <strong>30 days</strong>, including project files, generated outputs, and account metadata. Stripe billing history is retained only as required by financial-record regulations.</p>
+
+<h2>[06] Security</h2>
+<p>All traffic to and from EVOLUM is encrypted in transit (TLS 1.2+). Account passwords are stored only as salted hashes — we cannot recover your password, only reset it. We employ defense-in-depth on our infrastructure, including process isolation, principle-of-least-privilege access controls, and ongoing development of <strong>Moving Target Defense (MTD)</strong> for IP-sensitive assets like uploaded screenplays.</p>
+
+<h2>[07] Children's Privacy</h2>
+<p>EVOLUM is not directed at users under 18. We do not knowingly collect personal data from minors. If you believe a minor has provided us data, contact <a href="mailto:madbradsmith@gmail.com">madbradsmith@gmail.com</a> and we will purge the record promptly.</p>
+
+<h2>[08] Updates to This Policy</h2>
+<p>This Privacy Policy will evolve as our services and the regulatory landscape do. Material changes will be communicated to account-holders by email. Continued use of EVOLUM after a change constitutes acceptance.</p>
+
+<h2>[09] Contact</h2>
+<p>Questions, requests, or concerns about this policy go to <a href="mailto:madbradsmith@gmail.com">madbradsmith@gmail.com</a>.</p>
+
+<p style="margin-top:48px;font-family:'Space Mono',monospace;font-size:10px;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)">© 2026 EVOLUM · A division of Developum AI Engine</p>
+
+{% endblock %}

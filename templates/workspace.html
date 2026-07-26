@@ -1,0 +1,496 @@
+{% extends "base.html" %}
+
+{% block title %}EVOLUM — Workspace{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ============================================================
+   FILMMAKER WORKSPACE
+   One page. Evie (persistent) + project room + 2 tool buttons.
+   Producer = same surface, broader access.
+   ============================================================ */
+html, body { height: 100%; overflow: hidden; }
+
+.ws {
+    display: grid;
+    grid-template-columns: 248px 1fr;
+    height: 100vh;
+    background: var(--bg);
+}
+
+/* ── SIDEBAR ── */
+.ws-side {
+    background: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.ws-side-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 16px 16px 14px;
+    border-bottom: 1px solid var(--border);
+}
+.ws-side-brand .portal-brand-mark { width: 30px; height: 30px; }
+.ws-side-brand .nm { font-family: var(--serif); font-style: italic; font-size: 18px; font-weight: 700; color: var(--text); line-height: 1; letter-spacing: -0.02em; }
+.ws-side-brand .nm span { color: var(--gold); }
+.ws-side-brand .sub { font-family: var(--mono); font-size: 8px; color: var(--text-mute); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 2px; }
+
+.ws-side-sec {
+    padding: 14px 14px 6px;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-mute);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.ws-side-sec .add {
+    color: var(--gold);
+    cursor: pointer;
+    font-size: 13px;
+    line-height: 1;
+}
+
+/* Projects list (empty state) */
+.ws-projects { padding: 0 12px; flex: 1; overflow-y: auto; }
+.ws-proj-empty {
+    border: 1px dashed var(--border-hi);
+    padding: 18px 14px;
+    text-align: center;
+    margin-top: 4px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);
+}
+.ws-proj-empty .ic {
+    width: 34px; height: 34px; margin: 0 auto 10px;
+    background: var(--gold-dim); border: 1px solid var(--gold-border);
+    display: flex; align-items: center; justify-content: center; color: var(--gold);
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.ws-proj-empty .t { font-size: 12px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
+.ws-proj-empty .d { font-size: 11px; color: var(--text-mute); line-height: 1.5; }
+
+.ws-new-btn {
+    display: flex; align-items: center; justify-content: center; gap: 7px;
+    margin: 12px;
+    padding: 11px;
+    background: var(--gold);
+    color: var(--bg-card);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    border: none;
+    clip-path: polygon(8px 0, 100% 0, 100% 100%, 0 100%, 0 8px);
+    transition: background 0.15s;
+}
+.ws-new-btn:hover { background: var(--gold-bright); }
+
+/* Tools section */
+.ws-tools { padding: 6px 12px 12px; border-top: 1px solid var(--border); }
+.ws-tool {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.15s;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%);
+}
+.ws-tool:hover { border-color: var(--gold-border); }
+.ws-tool .ic {
+    width: 28px; height: 28px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--bg-card);
+    clip-path: polygon(5px 0, 100% 0, 100% calc(100% - 5px), calc(100% - 5px) 100%, 0 100%, 0 5px);
+}
+.ws-tool.deck .ic { background: var(--mauve); }
+.ws-tool.sizzle .ic { background: var(--olive); }
+.ws-tool .nm { font-size: 12px; font-weight: 700; color: var(--text); }
+.ws-tool .meta { font-family: var(--mono); font-size: 8px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); margin-top: 1px; }
+.ws-tool .badge {
+    margin-left: auto;
+    font-family: var(--mono); font-size: 8px; letter-spacing: 1px; text-transform: uppercase;
+    color: var(--text-mute); border: 1px solid var(--border); padding: 2px 6px;
+}
+
+/* Sidebar footer — role switch */
+.ws-side-foot { border-top: 1px solid var(--border); padding: 10px 12px; }
+.ws-role-switch {
+    display: flex; align-items: center; gap: 9px;
+    padding: 9px 10px;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.ws-role-switch:hover { background: var(--bg-hover); }
+.ws-role-switch .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gold); flex-shrink: 0; }
+.ws-role-switch .nm { font-size: 12px; font-weight: 700; color: var(--text); }
+.ws-role-switch .sub { font-family: var(--mono); font-size: 8px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); margin-top: 1px; }
+.ws-role-switch .swap { margin-left: auto; font-family: var(--mono); font-size: 9px; color: var(--text-mute); letter-spacing: 1px; }
+
+/* ── MAIN ── */
+.ws-main { display: flex; flex-direction: column; overflow: hidden; background: var(--bg); }
+.ws-topbar {
+    height: 52px; flex-shrink: 0;
+    display: flex; align-items: center; gap: 14px;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-panel);
+}
+.ws-topbar .crumb {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase; color: var(--text-mute);
+    display: flex; align-items: center; gap: 8px;
+}
+.ws-topbar .crumb .here { color: var(--text); }
+.ws-topbar-right { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.ws-credit {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.6px; color: var(--text-mute);
+    border: 1px solid var(--border); padding: 5px 11px;
+}
+
+/* Project room — empty state hero */
+.ws-room { flex: 1; overflow-y: auto; padding: 0; position: relative; }
+.ws-room::before {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(197,86,42,0.06) 0%, transparent 70%);
+}
+.ws-empty {
+    position: relative;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 64px 32px 48px;
+    text-align: center;
+}
+.ws-empty-eyebrow {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 1.8px; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 18px;
+}
+.ws-empty h1 {
+    font-family: var(--serif); font-style: italic; font-size: clamp(34px, 5vw, 56px);
+    font-weight: 700; letter-spacing: -1.6px; line-height: 0.95; color: var(--text);
+}
+.ws-empty h1 em { font-style: normal; color: var(--gold); }
+.ws-empty p { font-size: 15px; color: var(--text-dim); line-height: 1.65; max-width: 480px; margin: 18px auto 0; }
+
+/* Start row — talk to Evie / upload */
+.ws-start {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin: 34px auto 0; max-width: 560px;
+}
+.ws-start-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    padding: 22px 20px; text-align: left; cursor: pointer; transition: all 0.18s;
+    display: flex; flex-direction: column; gap: 8px;
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%);
+}
+.ws-start-card:hover { border-color: var(--gold-border); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(237, 233, 224,0.1); }
+.ws-start-card .ic {
+    width: 38px; height: 38px;
+    background: var(--gold-dim); border: 1px solid var(--gold-border); color: var(--gold);
+    display: flex; align-items: center; justify-content: center; margin-bottom: 4px;
+    clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.ws-start-card .t { font-size: 14px; font-weight: 700; color: var(--text); }
+.ws-start-card .d { font-size: 12px; color: var(--text-mute); line-height: 1.5; }
+
+/* What Evie does — capability ribbon */
+.ws-caps { max-width: 680px; margin: 44px auto 0; }
+.ws-caps-head {
+    font-family: var(--mono); font-size: 9px; letter-spacing: 1.6px; text-transform: uppercase;
+    color: var(--text-mute); text-align: center; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px; justify-content: center;
+}
+.ws-caps-head::before, .ws-caps-head::after { content: ''; width: 24px; height: 1px; background: var(--border-hi); }
+.ws-caps-grid {
+    display: flex; flex-wrap: wrap; gap: 7px; justify-content: center;
+}
+.ws-cap {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.6px;
+    color: var(--text-dim);
+    background: var(--bg-card); border: 1px solid var(--border);
+    padding: 6px 11px;
+}
+.ws-cap.tool { border-color: var(--gold-border); color: var(--gold); }
+
+/* Tool launch cards (big, in room) */
+.ws-tool-launch { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 560px; margin: 22px auto 0; }
+.ws-tl {
+    text-align: left; padding: 18px 18px; cursor: pointer; transition: all 0.18s;
+    display: flex; align-items: center; gap: 14px;
+    background: var(--bg-card); border: 1px solid var(--border);
+    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 9px), calc(100% - 9px) 100%, 0 100%);
+}
+.ws-tl:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(237, 233, 224,0.1); }
+.ws-tl .ic { width: 40px; height: 40px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--bg-card); clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px); }
+.ws-tl.deck .ic { background: var(--mauve); }
+.ws-tl.sizzle .ic { background: var(--olive); }
+.ws-tl .t { font-size: 13px; font-weight: 700; color: var(--text); }
+.ws-tl .d { font-size: 11px; color: var(--text-mute); margin-top: 2px; line-height: 1.45; }
+.ws-tl .arr { margin-left: auto; color: var(--text-mute); }
+
+/* ── EVIE PANEL ── */
+.ws-evie {
+    background: var(--bg-panel);
+    border-left: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+}
+.ws-evie-head {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+}
+.ws-evie-avatar {
+    width: 36px; height: 36px; flex-shrink: 0;
+    background: var(--gold); color: var(--bg-card);
+    display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 900;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 7px 100%, 0 calc(100% - 7px));
+    position: relative;
+}
+.ws-evie-avatar::after { content: ''; position: absolute; bottom: -2px; right: -2px; width: 9px; height: 9px; border-radius: 50%; background: var(--green); border: 2px solid var(--bg-panel); }
+.ws-evie-name { font-size: 14px; font-weight: 700; color: var(--text); letter-spacing: -0.2px; }
+.ws-evie-status { font-family: var(--mono); font-size: 9px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--text-mute); margin-top: 1px; }
+.ws-evie-body { flex: 1; overflow-y: auto; padding: 18px 16px; display: flex; flex-direction: column; gap: 14px; }
+.ev-msg { padding-left: 12px; border-left: 2px solid var(--gold); }
+.ev-msg .meta { font-family: var(--mono); font-size: 8px; letter-spacing: 1.3px; text-transform: uppercase; color: var(--text-mute); margin-bottom: 4px; }
+.ev-msg .txt { font-size: 13px; color: var(--text-dim); line-height: 1.6; }
+.ev-msg .txt strong { color: var(--gold); font-weight: 600; }
+.ev-suggest { display: flex; flex-direction: column; gap: 7px; margin-top: 4px; }
+.ev-chip {
+    text-align: left;
+    font-size: 12px; color: var(--text); background: var(--bg-card);
+    border: 1px solid var(--border); padding: 9px 12px; cursor: pointer; transition: all 0.13s;
+    display: flex; align-items: center; gap: 9px;
+}
+.ev-chip:hover { border-color: var(--gold-border); color: var(--gold); }
+.ev-chip .k { font-family: var(--mono); font-size: 8px; letter-spacing: 1px; text-transform: uppercase; color: var(--text-mute); }
+.ev-chip.tool { border-left: 3px solid var(--mauve); }
+.ev-chip.tool.sizzle { border-left-color: var(--olive); }
+.ws-evie-foot { padding: 12px 14px; border-top: 1px solid var(--border); }
+.ws-evie-inrow { display: flex; gap: 8px; align-items: center; }
+.ws-evie-input {
+    flex: 1; background: var(--bg-card); border: 1px solid var(--border-hi);
+    padding: 9px 12px; font-size: 13px; color: var(--text); font-family: var(--font); border-radius: 0;
+}
+.ws-evie-input::placeholder { color: var(--text-mute); }
+.ws-evie-mic, .ws-evie-send {
+    width: 36px; height: 36px; flex-shrink: 0; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+}
+.ws-evie-mic { background: transparent; color: var(--text-mute); border: 1px solid var(--border-hi); }
+.ws-evie-mic:hover { color: var(--gold); border-color: var(--gold-border); }
+.ws-evie-send { background: var(--gold); color: var(--bg-card); font-size: 14px; clip-path: polygon(6px 0, 100% 0, 100% 100%, 0 100%, 0 6px); }
+
+.ev-wave { display: inline-flex; align-items: center; gap: 2px; height: 9px; color: var(--gold); }
+.ev-wave .b { width: 2px; height: 9px; background: currentColor; display: inline-block; }
+.ev-wave .b1 { animation: w1 0.9s ease-in-out infinite; }
+.ev-wave .b2 { animation: w2 0.85s ease-in-out infinite 0.1s; }
+.ev-wave .b3 { animation: w3 0.95s ease-in-out infinite 0.05s; }
+@keyframes w1 { 0%,100% { transform: scaleY(0.3) } 50% { transform: scaleY(1) } }
+@keyframes w2 { 0%,100% { transform: scaleY(0.6) } 50% { transform: scaleY(0.2) } }
+@keyframes w3 { 0%,100% { transform: scaleY(0.4) } 50% { transform: scaleY(0.9) } }
+
+@media (max-width: 1100px) {
+    .ws { grid-template-columns: 220px 1fr; }
+    .ws-evie { display: none; }
+}
+@media (max-width: 760px) {
+    .ws { grid-template-columns: 1fr; }
+    .ws-side { display: none; }
+    .ws-start, .ws-tool-launch { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="ws" data-screen-label="Filmmaker Workspace">
+
+    <!-- ════════ SIDEBAR ════════ -->
+    <aside class="ws-side">
+        <a class="ws-side-brand" href="/" style="text-decoration:none;">
+            <div class="portal-brand-mark">E</div>
+            <div>
+                <div class="nm">Evolum<span>.</span></div>
+                <div class="sub" data-i18n="sub.workspace">Workspace</div>
+            </div>
+        </a>
+
+        <div class="ws-side-sec">Projects <a href="/new-project" class="add" title="New project" style="text-decoration:none;color:inherit;">+</a></div>
+        <div class="ws-projects">
+            {% if projects %}
+                {% for p in projects %}
+                <a class="ws-proj" href="/project/{{ p.id }}" style="display:block;padding:11px 14px;border-bottom:1px solid var(--border);text-decoration:none;color:var(--text);transition:background 0.15s;">
+                    <div style="font-size:12px;font-weight:700;color:var(--text);line-height:1.3;">{{ p.title }}</div>
+                    <div style="font-family:var(--mono);font-size:8px;letter-spacing:1.2px;text-transform:uppercase;color:var(--text-mute);margin-top:3px;">
+                        {{ p.status }}
+                        {% if p.has_deck %}· deck ✓{% endif %}
+                        {% if p.has_script %}· script ✓{% endif %}
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+            <div class="ws-proj-empty">
+                <div class="ic">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7h18v12H3z"/><path d="M3 7l3-3h5l2 3"/></svg>
+                </div>
+                <div class="t">The shelf is empty.</div>
+                <div class="d">Start your first project — it'll show up right here.</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <a href="/new-project" class="ws-new-btn" data-i18n="ws.newproject" style="text-decoration:none;color:var(--bg-card);">+ New Project</a>
+
+        <div class="ws-side-sec" data-i18n="ws.tools">Specialty Tools</div>
+        <div class="ws-tools">
+            <div class="ws-tool deck" onclick="location.href='/pitch-deck'">
+                <div class="ic">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="13" rx="1"/><path d="M8 21h8M12 17v4"/></svg>
+                </div>
+                <div>
+                    <div class="nm">Pitch Deck</div>
+                    <div class="meta">Its own room</div>
+                </div>
+                <span class="badge">Open</span>
+            </div>
+            <div class="ws-tool sizzle" onclick="location.href='/sizzle-reel'">
+                <div class="ic">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4v16l14-8z"/></svg>
+                </div>
+                <div>
+                    <div class="nm">Sizzle Reel</div>
+                    <div class="meta">Its own room</div>
+                </div>
+                <span class="badge">Open</span>
+            </div>
+            <div class="ws-tool" onclick="location.href='/rewards'" style="cursor:pointer;">
+                <div class="ic" style="background:var(--gold);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2L15 8L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8L12 2Z"/></svg>
+                </div>
+                <div>
+                    <div class="nm">Rewards</div>
+                    <div class="meta">Bring your people</div>
+                </div>
+                <span class="badge">New</span>
+            </div>
+        </div>
+
+        <a href="/rewards" style="display:flex; align-items:center; gap:9px; margin:8px 12px 0; padding:9px 11px; text-decoration:none; border:1px dashed var(--gold-border); transition:all 0.15s;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.8" style="flex-shrink:0;"><path d="M12 2L15 8L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8L12 2Z"/></svg>
+            <div style="flex:1; min-width:0;">
+                <div style="font-size:11px; font-weight:700; color:var(--text); letter-spacing:-0.1px;">Get your weeks up</div>
+                <div style="font-family:var(--mono); font-size:8px; letter-spacing:1.1px; text-transform:uppercase; color:var(--text-mute); margin-top:1px;">1 week free per stuck referral</div>
+            </div>
+        </a>
+
+        <div class="ws-side-foot">
+            <div class="ws-role-switch">
+                <span class="dot"></span>
+                <div>
+                    <div class="nm">Filmmaker</div>
+                    <div class="sub">Solo tier</div>
+                </div>
+                <span class="swap">Switch ⇄</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ════════ MAIN ════════ -->
+    <main class="ws-main">
+        <div class="ws-topbar">
+            <div class="crumb">
+                <span>Workspace</span>
+                <span style="opacity:0.4;">/</span>
+                <span class="here">Getting started</span>
+            </div>
+            <div class="ws-topbar-right">
+                <div data-lang-mount></div>
+                <a class="role-chip" href="/"><span class="dot" style="background:var(--gold)"></span><span data-i18n="role.filmmaker">Filmmaker</span><span class="swap">⇄</span></a>
+            </div>
+        </div>
+
+        <div class="ws-room">
+            <div class="ws-empty">
+                <div class="ws-empty-eyebrow" data-i18n="ws.empty.eyebrow">Your workspace · Nothing here yet</div>
+                <h1 data-i18n-html="ws.empty.h1">Start with a <em>spark</em>.</h1>
+                <p data-i18n="ws.empty.p">This is the whole workshop. Bring in what you've got — a napkin idea, a first draft, a finished script — and walk out with the whole package. Analysis, pitch deck, sizzle reel, investor room. Nothing calls out to a black-box AI in the cloud. It all lives here, and it all belongs to you.</p>
+
+                <div class="ws-start">
+                    <div class="ws-start-card" onclick="location.href='/idea'">
+                        <div class="ic">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3a6 6 0 0 0-4 10.5V17h8v-3.5A6 6 0 0 0 12 3z"/><path d="M9 21h6M10 17v4M14 17v4"/></svg>
+                        </div>
+                        <div class="t">Start from an idea</div>
+                        <div class="d">A logline, a what-if, a feeling. Develop it in the editor, then ship.</div>
+                    </div>
+                    <div class="ws-start-card" onclick="location.href='/new-project?flow=script'">
+                        <div class="ic">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M7 3h7l5 5v13H7z"/><path d="M14 3v5h5"/></svg>
+                        </div>
+                        <div class="t">Bring a script</div>
+                        <div class="d">Upload it — the engine reads, analyzes, and breaks it down.</div>
+                    </div>
+                </div>
+
+                <div class="ws-caps">
+                    <div class="ws-caps-head" data-i18n="ws.caps.head">What lands on your desk — every single project</div>
+                    <div class="ws-caps-grid">
+                        <span class="ws-cap">Idea &amp; refinement</span>
+                        <span class="ws-cap">Story development</span>
+                        <span class="ws-cap">Outline / treatment</span>
+                        <span class="ws-cap">Script</span>
+                        <span class="ws-cap">Coverage &amp; analysis</span>
+                        <span class="ws-cap">World breakdown</span>
+                        <span class="ws-cap">Logline &amp; synopsis</span>
+                        <span class="ws-cap">Beat sheet</span>
+                        <span class="ws-cap">Investor brief</span>
+                        <span class="ws-cap">Project room copy</span>
+                        <span class="ws-cap">Casting breakdown</span>
+                        <span class="ws-cap">Production notes</span>
+                        <span class="ws-cap tool">→ Pitch Deck tool</span>
+                        <span class="ws-cap tool">→ Sizzle Reel tool</span>
+                    </div>
+                </div>
+
+                <div class="ws-tool-launch">
+                    <div class="ws-tl deck" onclick="location.href='/pitch-deck'">
+                        <div class="ic">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="4" width="18" height="13" rx="1"/><path d="M8 21h8M12 17v4"/></svg>
+                        </div>
+                        <div>
+                            <div class="t">Pitch Deck tool</div>
+                            <div class="d">Ready when your materials are.</div>
+                        </div>
+                        <span class="arr">→</span>
+                    </div>
+                    <div class="ws-tl sizzle" onclick="location.href='/sizzle-reel'">
+                        <div class="ic">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4v16l14-8z"/></svg>
+                        </div>
+                        <div>
+                            <div class="t">Sizzle Reel tool</div>
+                            <div class="d">Hand it a script or a deck.</div>
+                        </div>
+                        <span class="arr">→</span>
+                    </div>
+                </div>
+
+                {# ── Quiet referral nudge — one line, no dialog, no popup ── #}
+                <a href="/rewards" style="display:flex; align-items:center; gap:14px; max-width:560px; margin:32px auto 0; padding:14px 20px; background:var(--bg-card); border:1px solid var(--gold-border); text-decoration:none; transition:all 0.15s;
+                    clip-path: polygon(0 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6" style="flex-shrink:0;"><path d="M12 2L15 8L22 9L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9L9 8L12 2Z"/></svg>
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-family:var(--serif); font-style:italic; font-size:15px; color:var(--text);">Bring a friend into the workshop.</div>
+                        <div style="font-family:var(--mono); font-size:10px; letter-spacing:1.2px; color:var(--text-mute); text-transform:uppercase; margin-top:3px;">1 free week for you · 1 free week for them</div>
+                    </div>
+                    <span style="font-family:var(--mono); font-size:10px; letter-spacing:1.2px; text-transform:uppercase; color:var(--gold); white-space:nowrap;">Grab your link →</span>
+                </a>
+            </div>
+        </div>
+    </main>
+
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+{% endblock %}

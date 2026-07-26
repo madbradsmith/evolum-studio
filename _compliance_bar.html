@@ -1,0 +1,62 @@
+{# Shared SOC-2 compliance bar — must appear on EVERY page.
+   Included at the bottom of every template (before </body>). #}
+<div class="evolum-compliance-bar" role="contentinfo" aria-label="Legal and compliance">
+  <div class="ecb-inner">
+    <div class="ecb-brand">© 2026 EVOLUM · A division of <a href="https://developumaiengine.com">Developum AI Engine</a></div>
+    <nav class="ecb-links" aria-label="Compliance links">
+      <a href="/privacy">Privacy Policy</a>
+      <span class="ecb-sep">·</span>
+      <a href="/terms">Terms of Service</a>
+      <span class="ecb-sep">·</span>
+      <a href="/acceptable-use">Acceptable Use Policy</a>
+    </nav>
+  </div>
+</div>
+<style>
+.evolum-compliance-bar {
+  position: relative;
+  z-index: 50;
+  background: #07070f;
+  border-top: 1px solid #1e1e2e;
+  padding: 14px 24px;
+  font-family: 'Space Mono', monospace;
+}
+.ecb-inner {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.ecb-brand {
+  font-size: 9px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6a6778;
+}
+.ecb-brand a {
+  color: #6a6778;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s, color 0.15s;
+}
+.ecb-brand a:hover { color: oklch(0.78 0.16 75); border-bottom-color: oklch(0.78 0.16 75 / 0.4); }
+.ecb-links {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.ecb-links a {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #6a6778;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.ecb-links a:hover { color: oklch(0.78 0.16 75); }
+.ecb-sep { color: #2e2e48; font-size: 9px; }
+</style>
